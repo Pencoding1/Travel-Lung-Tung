@@ -1,0 +1,17 @@
+[project]
+name = "tvlt-2026"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+package = false
+dependencies = [
+    "annotated-types==0.7.0",
+    "greenlet==3.3.0",
+    "pydantic==2.12.5",
+    "pydantic-core==2.41.5",
+    "sqlalchemy==2.0.45",
+    "sqlmodel==0.0.31",
+    "typing-extensions==4.15.0",
+    "typing-inspection==0.4.2",
+]
