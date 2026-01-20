@@ -14,11 +14,11 @@ class Neo4jConnector:
 
     def _connect_neo4j(self):
         uri = os.getenv("NEO4J_URI")
-        user = os.getenv("NEO4J_USER")
+        user = os.getenv("NEO4J_USERNAME")
         password = os.getenv("NEO4J_PASSWORD")
 
         if not (uri and user and password):
-            raise ValueError("NEO4J Authentication environment variable is not set")
+            raise ValueError(f"NEO4J Authentication environment variable is not set: {uri, user, password}")
         try:
             driver = AsyncGraphDatabase.driver(uri, auth=(user, password))
             logger.info("Neo4j Driver Initialized (Lazy Connection)")

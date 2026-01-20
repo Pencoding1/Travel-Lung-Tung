@@ -1,0 +1,14 @@
+2026-01-21 01:01:58,239 - INFO - [db.database.Neo4jConnector] - Neo4j Driver Initialized (Lazy Connection)
+2026-01-21 01:01:58,239 - ERROR - [db.database.FirebaseConnector] - ERROR EXIST DURING CONNECTING TO FIREBASE: [Errno 2] No such file or directory: 'E:/secrets/serviceAccountKey.json'
+2026-01-21 01:02:23,746 - INFO - [db.database.Neo4jConnector] - Neo4j Driver Initialized (Lazy Connection)
+2026-01-21 01:02:23,746 - ERROR - [db.database.FirebaseConnector] - ERROR EXIST DURING CONNECTING TO FIREBASE: [Errno 2] No such file or directory: 'E:/secrets/serviceAccountKey.json'
+2026-01-21 01:02:34,379 - INFO - [db.database.Neo4jConnector] - Neo4j Driver Initialized (Lazy Connection)
+2026-01-21 01:02:34,379 - ERROR - [db.database.FirebaseConnector] - ERROR EXIST DURING CONNECTING TO FIREBASE: [Errno 2] No such file or directory: 'E:/secrets/serviceAccountKey.json'
+2026-01-21 01:03:22,380 - INFO - [db.database.Neo4jConnector] - Neo4j Driver Initialized (Lazy Connection)
+2026-01-21 01:03:22,380 - ERROR - [db.database.FirebaseConnector] - ERROR EXIST DURING CONNECTING TO FIREBASE: [Errno 2] No such file or directory: '/secrets/serviceAccountKey.json'
+2026-01-21 01:03:30,825 - INFO - [db.database.Neo4jConnector] - Neo4j Driver Initialized (Lazy Connection)
+2026-01-21 01:03:30,873 - INFO - [db.database.FirebaseConnector] - FIREBASE CONNECTED!
+2026-01-21 01:03:30,873 - INFO - [db.database.FirebaseConnector] - FIREBASE CONNECTED!
+2026-01-21 01:03:47,002 - INFO - [db.database.Neo4jConnector] - Neo4j Driver Initialized (Lazy Connection)
+2026-01-21 01:03:47,044 - INFO - [db.database.FirebaseConnector] - FIREBASE CONNECTED!
+2026-01-21 01:03:47,044 - INFO - [db.database.FirebaseConnector] - FIREBASE CONNECTED!

@@ -2,8 +2,6 @@ import os
 import firebase_admin
 
 from firebase_admin import credentials, firestore
-
-from dotenv import load_dotenv
 from logging import getLogger
 
 base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -13,6 +11,13 @@ logger = getLogger(__name__)
 class FireStoreConnector:
     _instance = None
 
+    def __new__(cls):
+        if cls._instance is None:
+            cls._instance = super(FireStoreConnector, cls).__new__(cls)
+            cls._instance.firestore_db = cls._instance._connect_firestore()
+        
+        return cls._instance
+    
     def __init__(self):
         self.firestore_db = self._connect_firestore()
 
@@ -21,8 +26,7 @@ class FireStoreConnector:
         if not key_path_env:
             raise ValueError("FIREBASE_KEY_PATH environment variable is not set")
         
-        base_dir = os.path.dirname(os.path.abspath(__file__))
-        KEY_PATH = os.path.join(base_dir, "../../", key_path_env)
+        KEY_PATH = key_path_env
 
         try:
             if not firebase_admin._apps:
