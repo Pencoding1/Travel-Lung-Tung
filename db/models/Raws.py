@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import List, Optional, Literal, Dict, Any
 from pydantic import BaseModel, Field, HttpUrl, field_validator
-from ...utils.datachef import ImageProcessor
+from utils.datachef import ImageProcessor
 from datetime import datetime
 
 class RawTripInfo(BaseModel):

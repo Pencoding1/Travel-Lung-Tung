@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import List, Any
-from ....db.models.Raws import RawTripInfo
+from db.models.Raws import RawTripInfo
 
 class BaseCrawler(ABC):
     

@@ -7,9 +7,11 @@ requires-python = ">=3.11"
 package = false
 dependencies = [
     "annotated-types==0.7.0",
+    "beautifulsoup4>=4.14.3",
     "greenlet==3.3.0",
     "pydantic==2.12.5",
     "pydantic-core==2.41.5",
+    "requests>=2.32.5",
     "sqlalchemy==2.0.45",
     "sqlmodel==0.0.31",
     "typing-extensions==4.15.0",
