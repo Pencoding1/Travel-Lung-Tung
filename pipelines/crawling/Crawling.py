@@ -3,236 +3,357 @@ import json
 import uuid
 import re
 import requests
-from typing import List, Dict, Any, Union
+import asyncio
+from typing import List, Dict, Any, Union, Optional, Tuple, Literal
 from datetime import datetime
-
-from db.models.Raws import RawTripInfo 
+from playwright.async_api import async_playwright
+from readability import Document
+from bs4 import BeautifulSoup
+from pydantic import BaseModel, Field, HttpUrl
+from dateutil import parser
+from openai import AsyncOpenAI
+from db.models.Raws import RawTripInfo
 from pipelines.crawling.base.PipelineBase import BaseCrawler
-from anthropic import Anthropic
+
+
+
+# ==============================================================================
+# CÁC CLASS HỖ TRỢ (TỪ MAIN.PY)
+# ==============================================================================
+
+
+class ContentProcessor:
+    @staticmethod
+    def extract_main_content(html_content: str) -> Tuple[str, str]:
+        soup = BeautifulSoup(html_content, 'lxml')
+        title = "No title"
+        if soup.title and soup.title.string:
+            title = soup.title.string
+        elif soup.find('h1'):
+            title = soup.find('h1').get_text()
+        try:
+            doc = Document(html_content)
+            readability_content = doc.summary()
+            if len(readability_content) > 200:
+                return title, readability_content
+        except Exception as e:
+            print(f"Lỗi extract main content: {e}")
+
+        for element in soup(["script", "style", "iframe", "noscript", "aside", "nav", "footer", "header"]):
+            element.decompose()
+
+        content_candidates = [
+            'article', 'main',
+            {'class_': 'post-content'}, {'class_': 'entry-content'},
+            {'id': 'content'}, {'id': 'main'}
+        ]
+
+        main_tag = None
+        for selector in content_candidates:
+            if isinstance(selector, str):
+                main_tag = soup.find(selector)
+            else:
+                main_tag = soup.find('div', **selector)
+            if main_tag: break
+        raw_html = str(main_tag) if main_tag else str(soup.body) if soup.body else html_content
+        return title, raw_html
+
+    @staticmethod
+    def extract_images(html_snippet: str, limit: int = 10) -> List[bytes]:
+        soup = BeautifulSoup(html_snippet, 'lxml')
+        img_tags = soup.find_all('img')
+        valid_images = []
+        for img in img_tags:
+            if len(valid_images) >= limit: break
+            src = img.get('data-src') or img.get('src')
+            if not src: continue
+            if src.startswith('//'): src = 'https:' + src
+            if src.startswith('http'):
+                try:
+                    resp = requests.get(src, timeout=3)
+                    if resp.status_code == 200:
+                        valid_images.append(resp.content)
+                except Exception as e:
+                    print(f"Lỗi tải ảnh {src}: {e}")
+        return valid_images
+
+    @staticmethod
+    def extract_published_date(html_content: str) -> Optional[datetime]:
+        if not html_content: return None
+        soup = BeautifulSoup(html_content, 'lxml')
+        scripts = soup.find_all('script', type='application/ld+json')
+        for script in scripts:
+            try:
+                data = json.loads(script.string)
+                candidates = data if isinstance(data, list) else [data]
+                for item in candidates:
+                    date_str = item.get('datePublished') or item.get('dateCreated') or item.get('uploadDate')
+                    if date_str: return parser.parse(str(date_str).strip())
+            except Exception as e:
+                print(f"Lỗi parse date JSON-LD: {e}")
+
+        meta_selector = "meta[property='article:published_time'], meta[property='og:published_time'], meta[itemprop='datePublished']"
+        meta_tag = soup.select_one(meta_selector)
+        if meta_tag and meta_tag.get("content"):
+            try:
+                return parser.parse(str(meta_tag["content"]).strip())
+            except Exception as e:
+                print(f"Lỗi parse date Meta tag: {e}")
+
+        time_tag = soup.find("time")
+        if time_tag:
+            val = time_tag.get("datetime") or time_tag.get_text()
+            try:
+                return parser.parse(str(val).strip())
+            except Exception as e:
+                print(f"Lỗi parse date Time tag: {e}")
+
+        class_tag = soup.select_one(".date, .post-date, .published")
+        if class_tag:
+            try:
+                return parser.parse(class_tag.get_text().strip(), fuzzy=True)
+            except Exception as e:
+                print(f"Lỗi parse date Class tag: {e}")
+
+        return None
+
+
+# ==============================================================================
+# CLASS AGENTIC CRAWLER
+# ==============================================================================
 
 class AgenticCrawler(BaseCrawler):
     def __init__(self):
         super().__init__(source_name="Deep Research")
-    
+        # Khởi tạo OpenAI Client cho các hàm nội bộ dùng
+        self.ai_client = AsyncOpenAI(
+            base_url="http://localhost:1234/v1",
+            api_key="lm-studio"
+        )
+
+    # --- CÁC PHƯƠNG THỨC HỖ TRỢ LOGIC TỪ MAIN.PY ---
+
+    async def _scrape_url_corrected(self, url: str) -> Optional[RawTripInfo]:
+        """Logic scrape từ main.py"""
+        print(f"Cào ở trang web sau: {url}")
+        async with async_playwright() as p:
+            browser = await p.chromium.launch(headless=True)
+            context = await browser.new_context(
+                user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+            )
+            page = await context.new_page()
+            try:
+                await page.goto(url, wait_until="domcontentloaded", timeout=60000)
+                await page.evaluate("window.scrollTo(0, document.body.scrollHeight / 2)")
+                await page.wait_for_timeout(2000)
+                full_page_html = await page.content()
+
+                title, raw_text_html = ContentProcessor.extract_main_content(full_page_html)
+                published_at = ContentProcessor.extract_published_date(full_page_html)
+                raw_image_bytes = ContentProcessor.extract_images(raw_text_html)
+                print(f"Title: {title}")
+                print(f"Published: {published_at}")
+
+                trip_info = RawTripInfo(
+                    ID=str(uuid.uuid4()),
+                    title=title,
+                    summary="",
+                    raw_text=raw_text_html,
+                    doc_type="html",
+                    sourceUrl=url,
+                    crawled_at=datetime.now(),
+                    source_published_at=published_at,
+                    metadata={}
+                )
+
+                # --- GỌI HÀM CỦA CLASS RawTripInfo ---
+                for img_bytes in raw_image_bytes:
+                    trip_info.add_images(img_bytes)
+
+                return trip_info
+            except Exception as e:
+                print(f"Lỗi scrape: {e}")
+                return None
+            finally:
+                await browser.close()
+
+    async def _analyze_with_ai(self, raw_data: RawTripInfo) -> dict:
+        """Logic phân tích AI từ main.py"""
+        if not raw_data: return {}
+        print(f"\nĐANG GỌI AI PHÂN TÍCH: {raw_data.title}...")
+
+        prompt = """
+        Bạn là một chuyên gia về du lịch. Hãy phân tích văn bản và trả về JSON:
+        {
+            "summary": "Tóm tắt ngắn gọn, gồm khoảng 4 câu, tóm lược toàn bộ nội dung chính, điểm nổi bật và trải nghiệm đặc sắc nhất trong bài viết.",
+            "metadata": {
+                "location": "Địa điểm",
+                "price": "Trích xuất TẤT CẢ thông tin liên quan đến chi phí. Hãy tìm kỹ các con số như giá vé tham quan, giá phòng, chi phí ăn uống hoặc tổng chi phí chuyến đi. Nếu có nhiều loại giá, hãy tóm tắt lại (Ví dụ: 'Vé vào cửa: 950k, Ăn uống: 500k')."
+            }
+        }
+        """
+        try:
+            input_text = raw_data.raw_text[:8000]
+            response = await self.ai_client.chat.completions.create(
+                model="local-model",
+                messages=[
+                    {"role": "system", "content": prompt},
+                    {"role": "user", "content": f"Bài viết:\n{input_text}"}
+                ],
+                temperature=0.3
+            )
+
+            content = response.choices[0].message.content.strip()
+            if "```" in content:
+                match = re.search(r"```(?:json)?(.*?)```", content, re.DOTALL)
+                content = match.group(1).strip() if match else content.replace("```json", "").replace("```", "").strip()
+
+            ai_result = json.loads(content)
+
+            # Gộp dữ liệu
+            combined_data = raw_data.model_dump(by_alias=True)
+
+            new_summary = ai_result.get("summary", "")
+            if new_summary:
+                print(f"Đã cập nhật Summary mới từ AI.")
+                combined_data["summary"] = new_summary
+
+            if "metadata" in ai_result:
+                current_meta = combined_data.get("metadata", {})
+                current_meta.update(ai_result["metadata"])
+                combined_data["metadata"] = current_meta
+
+            # In kết quả
+            print("\n" + "=" * 40)
+            print("KẾT QUẢ AI PHÂN TÍCH")
+            print("=" * 40)
+            print(f"Summary  : {ai_result.get('summary', 'Không có')}")
+            print(f"Chi phí  : {ai_result.get('metadata', {}).get('price', 'Không rõ')}")
+            print("=" * 40)
+
+            return combined_data
+
+        except Exception as e:
+            print(f"Lỗi AI: {e}")
+            return raw_data.model_dump(by_alias=True)
+
+    def _save_to_file(self, data: List[RawTripInfo], filename: str = None):
+        """Hàm lưu file vào folder data(json) với tên động"""
+        try:
+            if not data:
+                return
+
+            # --- 1. CẤU HÌNH ĐƯỜNG DẪN FOLDER ---
+            output_folder = os.path.join("data(json)")
+            # Tạo folder nếu chưa tồn tại (quan trọng để không bị lỗi)
+            os.makedirs(output_folder, exist_ok=True)
+
+            # --- 2. TẠO TÊN FILE TỪ TITLE ---
+            original_title = data[0].title if data and data[0].title else "unknown_title"
+            safe_title = re.sub(r'[\\/*?:"<>|]', "", original_title)  # Loại bỏ ký tự cấm
+            safe_title = safe_title.strip().replace(" ", "_")[:50]  # Làm gọn tên
+
+            filename = f"ket_qua_{safe_title}.json"
+
+            # --- 3. GHÉP ĐƯỜNG DẪN HOÀN CHỈNH ---
+            # Kết quả sẽ là: data/json/ket_qua_title.json
+            full_path = os.path.join(output_folder, filename)
+            # Lưu file
+            json_data = [item.model_dump(mode='json', by_alias=True) for item in data]
+
+            with open(full_path, 'w', encoding='utf-8') as f:
+                json.dump(json_data, f, ensure_ascii=False, indent=4)
+            abs_path = os.path.abspath(full_path)
+            print(f"\nĐã lưu thành công vào: {abs_path}")
+
+        except Exception as e:
+            print(f"Lỗi khi lưu file: {e}")
+
+    async def _process_workflow(self, targets: List[str]):
+        """Hàm điều phối luồng chạy"""
+        for url in targets:
+            # 1. Cào dữ liệu
+            result = await self._scrape_url_corrected(url)
+
+            if result:
+                # 2. Phân tích & Gộp dữ liệu
+                merged_dict = await self._analyze_with_ai(result)
+
+                # 3. Parse (Gọi hàm parse của class này)
+                final_objects = self.parse(merged_dict)
+
+                # 4. Lưu file
+                self._save_to_file(final_objects)
+
+    # PUBLIC METHODS
+
     def crawl(self, targets: List[str] | str) -> None:
-        # TODO: Hoàn thành code cào dữ liệu ở đây
-        pass
+        if isinstance(targets, str):
+            targets = [targets]
+
+        print(f"Bắt đầu Crawl cho {len(targets)} URL...")
+        # Chạy luồng async trong hàm sync
+        asyncio.run(self._process_workflow(targets))
 
     def parse(self, agent_output: dict) -> List[RawTripInfo]:
-        results: List[RawTripInfo] = None
-        # TODO: Thực hiện parse dữ liệu ở đây
-        return results
-
-class ManualCrawler(BaseCrawler):
-    def __init__(self):
-        super().__init__(source_name="Manual")
-        
-        # Load API Keys
-        self.anthropic_key = os.getenv("ANTHROPIC_API_KEY")
-        self.firecrawl_key = os.getenv("FIRECRAWL_API_KEY")
-        
-        if self.anthropic_key:
-            self.ai_client = Anthropic(api_key=self.anthropic_key)
-        
-        # Kho chứa dữ liệu: Map URL -> Markdown Content
-        self.crawled_contents: Dict[str, str] = {}
-
-    def _fetch_markdown(self, target_url: str) -> str:
-        """
-        Hàm helper: Gửi URL tới Firecrawl để lấy Markdown sạch.
-        Thay thế cho requests.get() thông thường để tránh bị chặn và lọc rác HTML.
-        """
-        if not self.firecrawl_key:
-            print(" Thiếu FIRECRAWL_API_KEY")
-            return ""
-            
-        try:
-            print(f" Firecrawl: Đang xử lý {target_url}...")
-            headers = {
-                "Authorization": f"Bearer {self.firecrawl_key}",
-                "Content-Type": "application/json"
-            }
-            # Cấu hình lấy Markdown và lọc tag rác
-            payload = {
-                "url": target_url,
-                "formats": ["markdown"],
-                "onlyMainContent": True,
-                "excludeTags": ["nav", "footer", "script", "style"]
-            }
-            # Gọi API trực tiếp (đảm bảo ổn định hơn thư viện)
-            response = requests.post(
-                "https://api.firecrawl.dev/v1/scrape", 
-                headers=headers, json=payload, timeout=60
-            )
-            
-            if response.status_code == 200:
-                data = response.json()
-                md = data.get('data', {}).get('markdown', '') or data.get('markdown', '')
-                print(f" Thành công: {len(md)} ký tự.")
-                return md
-            else:
-                print(f" Thất bại ({response.status_code}): {response.text}")
-                return ""
-        except Exception as e:
-            print(f" Lỗi kết nối: {e}")
-            return ""
-
-    def crawl(self, url: str | List[str]) -> None:
-        """
-        Thực hiện cào dữ liệu. Giữ nguyên cấu trúc xử lý List/String theo yêu cầu.
-        """
-        # --- CODE GIỮ NGUYÊN CẤU TRÚC LOGIC CỦA BẠN ---
-        if isinstance(url, list):
-            # Duyệt qua từng URL và lấy content
-            for u in url:
-                # Sử dụng hàm helper _fetch_markdown thay vì requests.get(u).text
-                # Lý do: Để lấy Markdown sạch cho AI thay vì HTML thô nhiều rác
-                content = self._fetch_markdown(u)
-                if content:
-                    self.crawled_contents[u] = content
-                    
-        elif isinstance(url, str):
-            # Xử lý URL đơn
-            content = self._fetch_markdown(url)
-            if content:
-                self.crawled_contents[url] = content
-                
-        else: 
-            raise TypeError(f"The url should be a list of url or a single url. Not {type(url)}")
-        # ------------------------------------------------
-
-    def parse(self, html: str) -> List[RawTripInfo]:
-        """
-        Tham số 'html' ở đây sẽ nhận vào Markdown content từ bước crawl.
-        """
         results: List[RawTripInfo] = []
-        
-        if not html or not self.ai_client:
-            return results
-
-        print(f"🧠 Claude đang phân tích dữ liệu...")
-
-        # Prompt: Yêu cầu trích xuất JSON và link ảnh
-        system_prompt = """
-        You are a data extraction expert. Task: Extract tour information into a JSON object.
-        RULES:
-        1. Output MUST be valid JSON with a root key "tours" containing a list.
-        2. Fields: title, price (keep formatting like '4.990.000 đ'), duration, summary (generate from title), sourceUrl.
-        3. IMAGE EXTRACTION: Find image URLs in markdown `![alt](url)` and put them into `metadata['detected_image_urls']` (List[str]).
-        4. Leave 'images' list empty (root level) because we will fill it with base64 later.
-        5. Return ONLY JSON.
-        """
-
         try:
-            # Gọi API Claude 3.5 Sonnet
-            message = self.ai_client.messages.create(
-                model="claude-3-haiku-20240307",
-                max_tokens=4096,
-                system=system_prompt,
-                messages=[{"role": "user", "content": f"Extract tours:\n\n{html[:35000]}"}]
-            )
-            
-            # Xử lý kết quả trả về
-            txt = message.content[0].text.strip()
-            json_match = re.search(r'\{.*\}', txt, re.DOTALL)
-            
-            if not json_match:
-                print(" Claude không trả về JSON.")
-                return results
-                
-            data = json.loads(json_match.group(0))
-            tours_list = data.get('tours', [])
-            
-            # Fallback tìm ảnh bằng Regex nếu AI bỏ sót
-            fallback_images = re.findall(r'!\[.*?\]\((https?://[^\s)]+)\)', html)
+            if agent_output:
+                # 1. Chuyển đổi Dict -> Object (Pydantic tự map các trường)
+                trip_obj = RawTripInfo(**agent_output)
+                results = [trip_obj]
 
-            # Map dữ liệu vào RawTripInfo và Xử lý ảnh
-            for i, item in enumerate(tours_list):
-                # Điền các giá trị mặc định cho RawTripInfo
-                item['ID'] = str(uuid.uuid4())
-                if 'sourceUrl' not in item: item['sourceUrl'] = "https://travel.com.vn"
-                item['crawled_at'] = datetime.now()
-                item['source_published_at'] = datetime.now()
-                item['doc_type'] = 'html'
-                
-                # Fix lỗi thiếu trường bắt buộc
-                if 'summary' not in item: item['summary'] = item.get('title', '')
-                if 'raw_text' not in item: item['raw_text'] = f"{item.get('title')} {item.get('price', '')}"
+                # 2. In Log chi tiết
+                print("\n" + "=" * 40)
+                print("KẾT QUẢ CÀO DỮ LIỆU")
+                print("=" * 40)
+                print(f"1. ID (UUID)      : {trip_obj.id}")
 
-                try:
-                    # Tạo object RawTripInfo
-                    tour_obj = RawTripInfo(**item)
-                    
-                    # --- KẾ THỪA LOGIC ẢNH TỪ & ---
-                    # 1. Lấy URL ảnh (ưu tiên AI detect, nếu không có thì dùng Regex fallback)
-                    img_urls = item.get('metadata', {}).get('detected_image_urls', [])
-                    if not img_urls and fallback_images:
-                        # Gán ảnh tương ứng theo thứ tự hoặc ảnh đầu tiên
-                        img_urls = [fallback_images[i]] if i < len(fallback_images) else [fallback_images[0]]
+                # Lưu ý: Trong Raws.py, field là 'source_url' (alias='sourceUrl')
+                print(f"2. URL            : {trip_obj.source_url}")
+                print(f"3. Title          : {trip_obj.title}")
+                print(f"4. Published Date : {trip_obj.source_published_at}")
+                print(f"5. Summary        : {trip_obj.summary}")
+                print(f"6. Crawled At     : {trip_obj.crawled_at}")
+                print(f"7. Ảnh thu thập   : {len(trip_obj.images)} ảnh")
+                print(f"8. Raw Text       : {trip_obj.raw_text}")
+                print("=" * 40 + "\n")
 
-                    # 2. Tải ảnh và chuyển đổi sang Base64
-                    if img_urls:
-                        # Lấy ảnh đầu tiên làm đại diện
-                        first_img_url = img_urls[0]
-                        try:
-                            # print(f" Đang tải ảnh: {first_img_url}")
-                            img_resp = requests.get(first_img_url, timeout=10)
-                            if img_resp.status_code == 200:
-                                # Gọi hàm add_images của RawTripInfo
-                                # Hàm này sẽ gọi ImageProcessor.bytes_to_base64 trong datachef.py
-                                tour_obj.add_images(img_resp.content)
-                        except Exception as e:
-                            print(f" Lỗi tải ảnh: {e}")
-
-                    results.append(tour_obj)
-                    
-                except Exception as e:
-                    print(f" Lỗi validate data: {e}")
-                    continue
-
-        except Exception as e:
-            print(f" Parse error: {e}")
-        return results
-    
-    # 3. HÀM MAIN TEST (CHẠY TRỰC TIẾP FILE NÀY)
-# ============================================================================
-if __name__ == "__main__":
-    print("\n" + "="*60)
-    print(" ĐANG CHẠY TEST TRỰC TIẾP TẠI FILE CRAWLING.PY")
-    print("="*60)
-    
-    if not os.getenv("ANTHROPIC_API_KEY"):
-        os.environ["ANTHROPIC_API_KEY"] = "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" 
-    if not os.getenv("FIRECRAWL_API_KEY"):
-        os.environ["FIRECRAWL_API_KEY"] = "fc-a7828ceafcfb4278b9051cb5848c417e"
-
-    # Khởi tạo
-    crawler = ManualCrawler()
-    target = "https://travel.com.vn/du-lich-ho-chi-minh.aspx"
-    
-    # Test Crawl
-    print(f"📡 Crawl: {target}")
-    crawler.crawl(target) # Sẽ gọi logic _fetch_markdown bên trong
-    
-    # Lấy dữ liệu raw
-    raw_md = crawler.crawled_contents.get(target)
-    
-    if raw_md:
-        # Test Parse
-        print("🧠 Parse & Download ảnh...")
-        data = crawler.parse(raw_md)
-        
-        print("\n" + "="*60)
-        print(f"📊 KẾT QUẢ: {len(data)} TOUR")
-        print("="*60)
-        
-        for idx, t in enumerate(data, 1):
-            print(f"Tour #{idx}: {t.title}")
-            print(f" - Giá: {t.metadata.get('price', 'N/A')}")
-            if t.images:
-                print(f" - Ảnh: ✅ Đã có Base64 (Len: {len(t.images[0])})")
             else:
-                print(" - Ảnh: ⚠️ Không có")
-            print("-" * 30)
-    else:
-        print("❌ Không có dữ liệu để parse.")
+                print("Nhận dữ liệu rỗng.")
+                results = []
+        except Exception as e:
+            # In lỗi chi tiết để debug nếu Pydantic validate sai
+            print(f"Lỗi khi chuyển đổi dữ liệu: {e}")
+            results = []
+
+        return results
+
+
+if __name__ == "__main__":
+    crawler = AgenticCrawler()
+
+    print("=" * 50)
+    print("Nhập đường link để bắt đầu xử lý.")
+    print("Nhập 'stop' để kết thúc chương trình.")
+    print("=" * 50)
+
+    while True:
+        # 1. Nhập liệu từ Admin
+        url = input("\nNhập URL (hoặc 'stop'): ").strip()
+
+        # 2. Kiểm tra điều kiện dừng
+        if url.lower() == "stop":
+            print("\n Đã dừng ")
+            break  # Vòng lặp chính, break là hợp lý ở đây
+
+        # 3. Kiểm tra input rỗng
+        if not url:
+            # Không làm gì nếu url rỗng
+            pass
+        else:
+            # 4. Gọi hàm crawl xử lý URL vừa nhập
+            try:
+                crawler.crawl(url)
+            except Exception as e:
+                print(f"Có lỗi xảy ra khi xử lý URL này: {e}")
