@@ -12,6 +12,7 @@ dependencies = [
     "certifi==2026.1.4",
     "charset-normalizer==3.4.4",
     "dotenv==0.9.9",
+    "fastapi>=0.128.0",
     "firebase-admin>=7.1.0",
     "greenlet==3.3.0",
     "idna==3.11",
@@ -26,4 +27,5 @@ dependencies = [
     "typing-extensions==4.15.0",
     "typing-inspection==0.4.2",
     "urllib3==2.6.3",
+    "uvicorn>=0.40.0",
 ]
