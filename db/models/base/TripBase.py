@@ -1,9 +1,10 @@
 from typing import List
 from datetime import datetime
-from pydantic import BaseModel, Field, HttpUrl, field_validator
+from pydantic import Field
+from BaseEntity import BaseEntity
 
 
-class TripInfoBase(BaseModel):
+class TripInfoBase(BaseEntity):
     id: str = Field(..., alias="ID")
     province: str = Field(..., alias="Province")
     min_price: float = Field(ge=0)

@@ -5,9 +5,9 @@ from google.cloud.firestore import AsyncClient
 
 class FireStoreRepository(BaseRepository[T]):
     """
-    __description:
+    __description__:
         Firestore Repository for handle basic CRUD operation
-    __args:
+    __args__:
         collection_name: the name existing collection on firestore
         model_cls: the data model from db/models. For example: Trip()
     """

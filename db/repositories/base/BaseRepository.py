@@ -1,10 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import TypeVar, Generic, List, Optional, Any
-from pydantic import BaseModel
-
-
-class BaseEntity(BaseModel):
-    id: str
+from db.models.base.BaseEntity import BaseEntity
 
 T = TypeVar('T', bound=BaseEntity)
 

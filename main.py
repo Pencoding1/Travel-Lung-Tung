@@ -1,7 +1,8 @@
 import os
 import sys
-import logging
 import uvicorn
+
+from loguru import logger
 
 from fastapi import FastAPI
 from dotenv import load_dotenv
@@ -12,18 +13,13 @@ from db.database.Neo4jConnector import Neo4jConnector
 from db.database.FirebaseConnector import FireStoreConnector
 
 load_dotenv()
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    handlers=[logging.StreamHandler(sys.stdout)]
-)
-logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("THE APPLICATION IS LAUNCHING....")
     graph_db = Neo4jConnector()
     firebase_db = FireStoreConnector()
+    
 
     yield
     logger.info("THE APPLICATION IS CLOSING....")

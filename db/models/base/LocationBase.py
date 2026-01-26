@@ -1,8 +1,8 @@
-from pydantic import BaseModel, Field
+from pydantic import Field
+from BaseEntity import BaseEntity
 from typing import List, Optional
 
-class LocationBase(BaseModel):
-    id: str
+class LocationBase(BaseEntity):
     name: str
     province: str
     description: Optional[str] = None
