@@ -1,15 +1,17 @@
+import re
+import os
 import json
 import uuid
-import re
 import asyncio
 
 from utils.Content_Processor import ContentProcessor
 from db.repositories.Repositories import FireStoreRepository
 from pipelines.crawling.base.PipelineBase import BaseCrawler
 
+from dotenv import load_dotenv
+from pathlib import Path
 from loguru import logger
 from datetime import datetime
-from copy import deepcopy
 from typing import List, Optional
 
 from db.models.Raws import RawTripInfo
@@ -17,15 +19,25 @@ from db.models.Raws import RawTripInfo
 from openai import AsyncOpenAI
 from playwright.async_api import async_playwright
 
+load_dotenv()
+
 class AgenticCrawler(BaseCrawler):
+    """
+    AgenticCrawler
+        _Attribute_:
+            - source_name (str): the name of crawler. It could be agentic or manual.
+        _Methods_:
+            - crawl(): Run the workflow to crawl data from list of website urls or scrape data from a single url.
+            - parse(): Parse data received from the agent or scraper to RawTripInfo object.
+    """
     def __init__(self):
-        super().__init__(source_name="Deep Research")
-        # Khởi tạo OpenAI Client cho các hàm nội bộ dùng
+        super().__init__(source_name="Agentic Crawler")
         self.ai_client = AsyncOpenAI(
             base_url="http://localhost:1234/v1",
             api_key="lm-studio"
         )
         self.firestore_repo = FireStoreRepository[RawTripInfo]("RawData", RawTripInfo)
+        self.version = os.getenv("SCRAPER_PROMPT_VERSION", "0.1.0")
         logger.info("Firestore Repository initialized for collection: RawData")
 
     # --- CÁC PHƯƠNG THỨC HỖ TRỢ LOGIC TỪ MAIN.PY ---
@@ -77,24 +89,24 @@ class AgenticCrawler(BaseCrawler):
     async def _analyze_with_ai(self, raw_data: RawTripInfo) -> dict:
         """Logic phân tích AI từ main.py"""
         if not raw_data: return {}
-        logger.info(f"\AI Agent is calling for Analyzing the data: {raw_data.title}...")
+        logger.info(f"AI Agent is calling for Analyzing the data: {raw_data.title}...")
 
-        prompt = """
-        Bạn là một chuyên gia về du lịch. Hãy phân tích văn bản và trả về JSON:
-        {
-            "summary": "Tóm tắt ngắn gọn, gồm khoảng 4 câu, tóm lược toàn bộ nội dung chính, điểm nổi bật và trải nghiệm đặc sắc nhất trong bài viết.",
-            "metadata": {
-                "location": "Địa điểm",
-                "price": "Trích xuất TẤT CẢ thông tin liên quan đến chi phí. Hãy tìm kỹ các con số như giá vé tham quan, giá phòng, chi phí ăn uống hoặc tổng chi phí chuyến đi. Nếu có nhiều loại giá, hãy tóm tắt lại (Ví dụ: 'Vé vào cửa: 950k, Ăn uống: 500k')."
-            }
-        }
-        """
         try:
+            logger.info("Load prompt file...") 
+            root_path = Path(__file__).resolve().parent.parent.parent
+            with open(root_path, 'r') as f:
+                prompt_file = json.load(f)
+                logger.info("File is successfully loaded.")
+        except FileNotFoundError:
+            logger.exception("The prompt file is not found.")
+        
+        try:
+            prompt = prompt_file[self.version]['prompt']
             input_text = raw_data.raw_text[:8000]
             response = await self.ai_client.chat.completions.create(
                 model="local-model",
                 messages=[
-                    {"role": "system", "content": prompt},
+                    {"role": prompt['role'], "content": prompt['instruction']},
                     {"role": "user", "content": f"Bài viết:\n{input_text}"}
                 ],
                 temperature=0.3
