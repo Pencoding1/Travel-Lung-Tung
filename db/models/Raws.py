@@ -1,6 +1,6 @@
 from pydantic import Field
 from datetime import datetime
-from base.BaseEntity import BaseEntity
+from db.models.base.BaseEntity import BaseEntity
 from utils.datachef import ImageProcessor
 from typing import List, Literal, Dict, Any, Optional
 
@@ -14,7 +14,7 @@ class RawTripInfo(BaseEntity):
     images_url: List[str] = Field(default_factory=list)
     source_url: str = Field(..., alias="sourceUrl")
     crawled_at: datetime
-    source_published_at: Optional[datetime]
+    source_published_at: Optional[datetime] = None
     metadata: Dict[str, Any] = Field(default_factory=dict)
     
     def add_images(self, raw_bytes: bytes) -> None:

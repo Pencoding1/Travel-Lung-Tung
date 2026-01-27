@@ -1,4 +1,4 @@
-from base.BaseRepository import BaseRepository, T
+from db.repositories.base.BaseRepository import BaseRepository, T
 from typing import List, Optional, Type
 from google.cloud.firestore import AsyncClient
 
