@@ -5,6 +5,7 @@ from pipelines.crawling.base.PipelineBase import BasePipelineCrawler
 class VietravelCrawler(BasePipelineCrawler):
     def __init__(self, place_name: str, city_data: Dict = None, **kwargs):
         super().__init__(**kwargs)
+        self.lang_code = "vi"
         self.place_name = place_name
         self.city_data = city_data or {}
         self.webpage_name = "vietravel"

@@ -1,6 +1,7 @@
 # FILE: main.py
 import asyncio
 from pipelines.crawling.config import CrawlerGlobalConfig
+from pipelines.crawling.spiders.VNtravelCrawler import VNTravelCrawler
 from pipelines.crawling.spiders.VietravelCrawler import VietravelCrawler
 from pipelines.crawling.spiders.TravelokaCrawler import TravelokaCrawler
 from pipelines.crawling.spiders.VietnamCoracleCrawler import VietnamCoracleCrawler
@@ -20,12 +21,13 @@ CITY_CONFIGS = {
                            "*ho-chi-minh*",
                            "*sai-gon*",
                            "*sg*", "*near-saigon*"
-                           "*tp-ho-chi-minh*"],
+                           "*tp-ho-chi-minh*", "*ho-chi-minh-tour"],
         "urls": {
             "traveloka": "https://www.traveloka.com/vi-vn/destination/area/ho-chi-minh-city-10009794",
             "Vietravel": "https://travel.com.vn/du-lich-ho-chi-minh",
             "VietnamCoracle": "https://www.vietnamcoracle.com/browse/destinations/",
-            "VietnamTravel": "https://vietnam.travel/places-to-go/southern-vietnam/ho-chi-minh-city/"
+            "VietnamTravel": "https://vietnam.travel/places-to-go/southern-vietnam/ho-chi-minh-city/",
+            "Vntravel": "https://vntravel.org.vn/"
         }
     },
 }
@@ -35,6 +37,7 @@ SPIDER_MAP = {
     "Vietravel": VietravelCrawler,
     "VietnamCoracle": VietnamCoracleCrawler,
     "VietnamTravel": VietnamTravelCrawler,
+    "Vntravel": VNTravelCrawler,
 }
 
 
@@ -61,7 +64,7 @@ async def run_crawler(web_id: str, city_id: str):
 
 if __name__ == "__main__":
     # Đổi 2 tham số
-    TARGET_WEB = "traveloka"
+    TARGET_WEB = "Vntravel"
     TARGET_CITY = "HCM"
 
     asyncio.run(run_crawler(TARGET_WEB, TARGET_CITY))
