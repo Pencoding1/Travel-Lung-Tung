@@ -1,5 +1,3 @@
-import os
-import json
 from typing import List, Optional, Dict, Any
 from pipelines.crawling.base.PipelineBase import BasePipelineCrawler
 
@@ -34,9 +32,9 @@ class VietnamCoracleCrawler(BasePipelineCrawler):
         # Trang này thường dùng slug tên địa danh trực tiếp trong URL
         return [f"*{slug}*", "*/category/vietnam/*"]
 
-    def get_embedding_query(self) -> str:
+    #def get_embedding_query(self) -> str:
         # AI tập trung lấy nội dung bài review, hướng dẫn du lịch
-        return f"Các bài viết review du lịch, hướng dẫn đường đi và trải nghiệm tại {self.place_name}"
+    #    return f"Các bài viết review du lịch, hướng dẫn đường đi và trải nghiệm tại {self.place_name}"
 
     def get_specific_keywords(self) -> List[str]:
         return [self.place_name, "guide", "review", "travel", "motorcycle", "stay"]
@@ -63,41 +61,3 @@ class VietnamCoracleCrawler(BasePipelineCrawler):
             await new Promise(r => setTimeout(r, 500));
         };
         """
-
-    def _generate_filename(self, stt: Any, ext: str) -> str:
-        topic = getattr(self, 'topic_keyword', 'general_scan')
-        return f"{self.place_name}_{topic}_{self.webpage_name}_en_{stt}.{ext}"
-
-    def save_item_to_disk(self, data: Dict, folder: str):
-        # Lưu file theo cấu trúc dự án Travel-Lung-Tung
-        path = os.path.join(folder, self.get_domain_name(), self.place_name)
-        os.makedirs(path, exist_ok=True)
-
-        stt = len(self.results_data) + 1
-        filename_md = self._generate_filename(stt, "md")
-
-        with open(os.path.join(path, filename_md), "w", encoding="utf-8") as f:
-            f.write(data['content'])
-
-        json_meta = {
-            "stt": stt,
-            "filename": filename_md,
-            "url": data.get("url"),
-            "source": data.get("source")
-        }
-        self.results_data.append(json_meta)
-        print(f"Saved content: {filename_md}")
-
-        data['stt'] = stt
-        data['filename'] = filename_md
-        self.results_data.append(data)
-
-    async def execute(self, start_url: str, output_folder: str = "../data"):
-        await super().execute(start_url, output_folder)
-        if self.results_data:
-            summary_path = os.path.join(output_folder, "crawled_data", self.get_domain_name(), self.place_name)
-            os.makedirs(summary_path, exist_ok=True)
-
-            filename_list = self._generate_filename("List", "json")
-            with open(os.path.join(summary_path, filename_list), "w", encoding="utf-8") as f:
-                json.dump(self.results_data, f, indent=4, ensure_ascii=False)

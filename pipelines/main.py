@@ -61,7 +61,7 @@ async def run_crawler(web_id: str, city_id: str):
 
 if __name__ == "__main__":
     # Đổi 2 tham số
-    TARGET_WEB = "VietnamCoracle"
+    TARGET_WEB = "traveloka"
     TARGET_CITY = "HCM"
 
     asyncio.run(run_crawler(TARGET_WEB, TARGET_CITY))
