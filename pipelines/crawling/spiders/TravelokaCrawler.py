@@ -11,8 +11,9 @@ logger = logging.getLogger('TravelokaCrawler')
 
 
 class TravelokaCrawler(BasePipelineCrawler):
-    def __init__(self, place_name: str, topic_keyword: str = "general_scan", lang_code: str = "vi", **kwargs):
+    def __init__(self, place_name: str, city_data: Dict = None, topic_keyword: str = "general_scan", lang_code: str = "vi", **kwargs):
         super().__init__(**kwargs)
+        self.city_data = city_data or {}
         self.place_name = place_name
         self.topic_keyword = topic_keyword
         self.lang_code = lang_code
@@ -35,6 +36,9 @@ class TravelokaCrawler(BasePipelineCrawler):
         return [self.place_name, "tour", "vé máy bay", "khách sạn", "trải nghiệm"]
 
     def get_place_patterns(self) -> List[str]:
+        if "place_patterns" in self.city_data:
+            return self.city_data["place_patterns"]
+
         slug = self.place_name.lower().replace(" ", "-")
         return [
             f"*{slug}*",
@@ -77,32 +81,3 @@ class TravelokaCrawler(BasePipelineCrawler):
             with open(json_file_path, "w", encoding="utf-8") as f:
                 json.dump(self.results_data, f, indent=4, ensure_ascii=False)
             print(f"✅ Exported Summary: {json_file_path}")
-
-
-async def main():
-    city_configs = {
-        "HCM": {
-            "place_patterns": ["*ho-chi-minh-city*", "*tp-hcm*",
-                               "*saigon*", "*hcmc*", "*ho-chi-minh*"],
-            "url": "https://www.traveloka.com/vi-vn/destination/area/ho-chi-minh-city-10009794"
-        }
-    }
-    target_city = "HCM"
-    city_data = city_configs.get(target_city)
-    if not city_data:
-        print("not found")
-        return
-    #Tách main thì set headless = True
-    config = CrawlerGlobalConfig(headless=False, max_pages=100)
-
-    crawler = TravelokaCrawler(
-        place_name=target_city,
-        topic_keyword="general_scan",
-        lang_code="vi",
-        config=config
-    )
-
-    await crawler.execute(city_data["url"])
-
-if __name__ == "__main__":
-    asyncio.run(main())

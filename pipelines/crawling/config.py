@@ -15,10 +15,10 @@ class CrawlerGlobalConfig:
         "*/vi-vn/*", "*vietnam*", "*viet-nam*", "*destinations*",
         "*destination*", "*tour*", "*travel*", "*guide*",
         "*activity*", "*activities*", "*attraction*", "*attractions*",
-        "*/viet nam/*", "*/viet nam/*"
+        "*/viet nam/*", "*/viet nam/*", "*/du-lich/*"
     ])
 
-    max_depth: int = 3
+    max_depth: int = 2
     max_pages: int = 100
 
     def to_browser_config(self) -> BrowserConfig:
@@ -29,5 +29,9 @@ class CrawlerGlobalConfig:
             user_agent=self.user_agent,
             verbose=True,
             enable_stealth=True,
-            extra_args=["--disable-blink-features=AutomationControlled", "--no-sandbox"]
+            extra_args=["--disable-blink-features=AutomationControlled",
+                        "--no-sandbox",
+                        "--disable-setuid-sandbox",
+                        "--disable-gpu",
+                        ]
         )
