@@ -1,21 +1,28 @@
+import logging
 from typing import List, Optional, Dict, Any
 from pipelines.crawling.base.PipelineBase import BasePipelineCrawler
+from pipelines.crawling.utils import load_js
+
+logger = logging.getLogger("VietravelCrawler")
 
 
 class VietravelCrawler(BasePipelineCrawler):
     def __init__(self, place_name: str, city_data: Dict = None, **kwargs):
         super().__init__(**kwargs)
-        self.lang_code = "vi"
         self.place_name = place_name
         self.city_data = city_data or {}
         self.webpage_name = "vietravel"
+        self.lang_code = "vi"
+        self.browser_cfg.enable_stealth = True
         self.results_data = []
 
     def get_domain_name(self) -> str:
         return self.webpage_name
 
+    def get_specific_keywords(self) -> List[str]:
+        return [self.place_name, "dịch vụ", "tour", "khởi hành"]
+
     def get_css_selectors(self) -> List[str]:
-        # Các selector đặc thù để lấy nội dung tour và bài viết trên Vietravel
         return [
             '.tour-introduction',
             '.tour-itinerary',
@@ -24,26 +31,59 @@ class VietravelCrawler(BasePipelineCrawler):
             '.tour-detail-info'
         ]
 
+    def get_excluded_selectors(self) -> List[str]:
+        return [
+            "header", "footer", "nav", "aside",
+            "script", "style", "iframe", "svg",
+            ".btn-book-tour", ".hotline-fixed", ".footer-vtv", ".sidebar-tour",
+            ".promoBanner", ".newsletter", ".breadcrumbs",
+            ".ad", ".advertisement", ".sponsor", ".promo",
+            "img[src*='icon']", "img[src*='logo']", "img[src*='badge']",
+            "img[src*='sprite']", "img[src*='imageresource']", "img[src*='.svg']",
+            ".ad img", ".advertisement img", ".sponsor img", ".promo img",
+            "[class*='ad'] img", "[class*='sponsor'] img", "[class*='promo'] img",
+            "[class*='icon'] img", "[class*='logo'] img", "[class*='badge'] img",
+            "[class*='button'] img", "[class*='arrow'] img", "[class*='chevron'] img",
+        ]
+
     def get_place_patterns(self) -> List[str]:
-        # Ưu tiên lấy pattern từ main.py truyền vào để lọc sát khu vực
         if "place_patterns" in self.city_data:
             return self.city_data["place_patterns"]
-        else:
-            slug = self.place_name.lower().replace(" ", "-")
-            includes = [f"*{slug}*", "*/tour/*", "*/du-lich/*", "*/trong-nuoc/*"]
-            excludes = [
-                "!*chau-a*", "!*chau-au*", "!*chau-my*", "!*chau-phi*", "!*chau-uc*",
-                "!*nuoc-ngoai*", "!*quoc-te*"
-            ]
+        slug = self.place_name.lower().replace(" ", "-")
+        return [
+            f"*{slug}*",
+            "*/tour/*",
+            "*/du-lich/*",
+            "*/tin-tuc-du-lich/*",
+            "*.aspx"
+        ]
 
-            return includes + excludes  # Trả về danh sách kết hợp
+    def get_js_actions(self) -> Optional[str]:
+        return load_js()
 
-    #def get_embedding_query(self) -> str:
-        # AI sẽ dùng câu này để lọc nội dung đúng chủ đề du lịch
-    #    return f"Thông tin tour du lịch, lịch trình tham quan và điểm đến tại {self.place_name} của Vietravel"
+    def use_semantic_filter(self) -> bool:
+        return True
 
-    def get_specific_keywords(self) -> List[str]:
-        return [self.place_name, "dịch vụ", "tour", "khởi hành"]
+    def get_embedding_query(self) -> str:
+        return f"Travel guide, road trip, experience in {self.place_name}"
 
-    def get_excluded_selectors(self) -> List[str]:
-        return [".btn-book-tour", ".hotline-fixed", ".footer-vtv", ".sidebar-tour"]
+    def process_item(self, result):
+        processed = super().process_item(result)
+        if not processed:
+            return None
+        content = processed.get("content", "")
+        if content:
+            lines, filtered = content.split("\n"), []
+            for line in lines:
+                if "![" in line and "](" in line:
+                    part = line.split("](")[1].split(")")[0] if "](" in line else ""
+                    low = part.lower()
+                    if any(k in low for k in [
+                        "icon", "logo", "badge", "sprite", "imageresource",
+                        ".svg", "ad", "sponsor", "promo", "button", "arrow"
+                    ]):
+                        continue
+                filtered.append(line)
+            processed["content"] = "\n".join(filtered)
+        return processed
+

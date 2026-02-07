@@ -1,10 +1,9 @@
 import os
 import torch
-from torch.nn.functional import cosine_similarity
-from sentence_transformers import SentenceTransformer
-from crawl4ai.deep_crawling.filters import ContentRelevanceFilter
-from crawl4ai.utils import HeadPeekr
-from typing_extensions import override
+from typing import List
+from sentence_transformers import SentenceTransformer, util
+from crawl4ai.deep_crawling import BestFirstCrawlingStrategy
+from crawl4ai.deep_crawling.scorers import KeywordRelevanceScorer
 
 def load_js(filename="expand_script.js"):
     if os.path.exists(filename):
@@ -12,37 +11,59 @@ def load_js(filename="expand_script.js"):
             return f.read()
     return ""
 
-class BatchedEmbeddingFilter(ContentRelevanceFilter):
-    def __init__(self, query, threshold, batch_size=16, model_name="all-MiniLM-L6-v2"):
-        super().__init__(query, threshold)
-        self.device = "cuda" if torch.cuda.is_available() else "cpu"
-        self.model = SentenceTransformer(model_name, device=self.device)
-        self.query_embedding = self.model.encode(self.query, convert_to_tensor=True)
-        self.batch_size = batch_size
-        self.buffer = []
-        self.scores_cache = {}
+# Dành cho Vietravel
+def filter_location(filename="filter_location.js"):
+    if os.path.exists(filename):
+        with open(filename, "r", encoding="utf-8") as f:
+            return f.read()
+    return ""
 
-    @override
-    async def apply(self, url: str) -> bool:
-        head_content = await HeadPeekr.peek_html(url)
-        if not head_content: return False
-        doc_text = self._build_document({
-            "title": HeadPeekr.get_title(head_content) or "",
-            "meta": HeadPeekr.extract_meta_tags(head_content),
-        })
-        self.buffer.append((url, doc_text))
-        if len(self.buffer) >= self.batch_size:
-            await self._run_batch_inference()
-        return self.scores_cache.get(url, True)
+def create_best_first_strategy(
+    keywords: List[str],
+    max_depth: int = 4,
+    max_pages: int = 1000,
+    weight: float = 0.8
+) -> BestFirstCrawlingStrategy:
+    if not keywords:
+        keywords = ["du lịch", "kham pha", "review"]
 
-    async def _run_batch_inference(self):
-        if not self.buffer: return
-        urls, texts = zip(*self.buffer)
-        doc_embeddings = self.model.encode(list(texts), batch_size=self.batch_size, convert_to_tensor=True)
-        scores = cosine_similarity(self.query_embedding.mean(dim=0, keepdim=True), doc_embeddings)
-        for url, score in zip(urls, scores):
-            self.scores_cache[url] = score.item() >= self.threshold
-        self.buffer.clear()
+    scorer = KeywordRelevanceScorer(
+        keywords=keywords,
+        weight=weight
+    )
 
-    async def flush(self):
-        if self.buffer: await self._run_batch_inference()
+    return BestFirstCrawlingStrategy(
+        max_depth=max_depth,
+        max_pages=max_pages,
+        url_scorer=scorer
+    )
+
+_model = None
+_query_embedding = None
+
+def init_semantic_filter(
+    query: str,
+    model_name: str = "AITeamVN/Vietnamese_Embedding_v2"
+):
+    global _model, _query_embedding
+
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    _model = SentenceTransformer(model_name, device=device)
+
+    emb = _model.encode(query, convert_to_tensor=True)
+    if emb.dim() == 1:
+        emb = emb.unsqueeze(0)
+
+    _query_embedding = emb
+
+
+def is_relevant(markdown: str, threshold: float = 0.4) -> bool:
+    if not markdown or _model is None or _query_embedding is None:
+        return False
+
+    emb = _model.encode(markdown[:3000], convert_to_tensor=True)
+    if emb.dim() == 1:
+        emb = emb.unsqueeze(0)
+
+    score = util.cos_sim(_query_embedding, emb).item()
+    return score >= threshold
