@@ -44,8 +44,8 @@ class BasePipelineCrawler(ABC):
     def get_place_patterns(self) -> List[str]:
         pass
 
-    def get_js_actions(self) -> Optional[str]:
-        return None
+    def get_js_actions(self) -> str | List[str]:
+        return []
 
     def get_excluded_selectors(self) -> List[str]:
         return []
@@ -195,7 +195,7 @@ class BasePipelineCrawler(ABC):
                                 self.logger.info(f"Skipped low relevance: {current_url}")
                         if should_save:
                             self.save_item_to_disk(processed_data, output_folder)
-                    all_results.extend(results)
+                    all_results.extend(results) #type: ignore
                 except Exception as e:
                     self.logger.error(f"Error crawling {url}: {e}")
 

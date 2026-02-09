@@ -12,7 +12,7 @@ dependencies = [
     "beautifulsoup4==4.14.3",
     "certifi==2026.1.4",
     "charset-normalizer==3.4.4",
-    "crawl4ai>=0.8.0",
+    "crawl4ai[full]>=0.8.0",
     "dotenv==0.9.9",
     "fastapi>=0.128.0",
     "firebase-admin>=7.1.0",

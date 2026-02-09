@@ -3798,7 +3798,7 @@ requires-dist = [
     { name = "beautifulsoup4", specifier = "==4.14.3" },
     { name = "certifi", specifier = "==2026.1.4" },
     { name = "charset-normalizer", specifier = "==3.4.4" },
-    { name = "crawl4ai", specifier = ">=0.8.0" },
+    { name = "crawl4ai", extras = ["full"], specifier = ">=0.8.0" },
     { name = "dotenv", specifier = "==0.9.9" },
     { name = "fastapi", specifier = ">=0.128.0" },
     { name = "firebase-admin", specifier = ">=7.1.0" },
