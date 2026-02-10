@@ -1,12 +1,12 @@
 # FILE: main.py
 import asyncio
-from pipelines.crawling.config import CrawlerGlobalConfig
+from config.crawling_cofig import CrawlerGlobalConfig
 from pipelines.crawling.spiders.VNtravelCrawler import VNTravelCrawler
 from pipelines.crawling.spiders.VietravelCrawler import VietravelCrawler
 from pipelines.crawling.spiders.TravelokaCrawler import TravelokaCrawler
 from pipelines.crawling.spiders.VietnamCoracleCrawler import VietnamCoracleCrawler
 from pipelines.crawling.spiders.VietnamTravel import VietnamTravelCrawler
-from pipelines.crawling.utils import init_semantic_filter
+from utils.crawling_utils import init_semantic_filter
 
 CITY_CONFIGS = {
     "HaNoi": {
@@ -78,7 +78,7 @@ GLOBAL_CRAWL_SETTINGS = {
 
 async def run_crawler(web_id: str, city_id: str):
     city_info = CITY_CONFIGS.get(city_id)
-    url = city_info["urls"].get(web_id)
+    url = city_info["urls"].get(web_id) # type:ignore
 
     if not url:
         print(f"Not found {web_id} at {city_id}")

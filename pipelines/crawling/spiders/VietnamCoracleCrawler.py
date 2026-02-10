@@ -11,14 +11,14 @@ from crawl4ai import (
 )
 from crawl4ai.async_crawler_strategy import AsyncPlaywrightCrawlerStrategy
 from pipelines.crawling.base.PipelineBase import BasePipelineCrawler
-from pipelines.crawling.utils import load_js, is_relevant
+from utils.crawling_utils import load_js, is_relevant
 
 logger = logging.getLogger("VietnamCoracleCrawler")
 
 
 class VietnamCoracleCrawler(BasePipelineCrawler):
 
-    def __init__(self, place_name: str, city_data: Dict = None, **kwargs):
+    def __init__(self, place_name: str, city_data: Dict = {}, **kwargs):
         super().__init__(**kwargs)
         self.place_name = place_name
         self.city_data = city_data or {}
@@ -76,7 +76,7 @@ class VietnamCoracleCrawler(BasePipelineCrawler):
             markdown_generator=md_generator,
             scraping_strategy=LXMLWebScrapingStrategy(),
             magic=True,
-            js_code=self.get_js_actions(),
+            js_code=self.get_js_actions(), # type: ignore
             wait_until="domcontentloaded",
             # Chờ lâu hơn để trang vượt verification (antibot)
             delay_before_return_html=15.0,

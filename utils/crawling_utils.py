@@ -1,6 +1,9 @@
 import os
 import torch
+import requests
 from typing import List
+
+
 from sentence_transformers import SentenceTransformer, util
 from crawl4ai.deep_crawling import BestFirstCrawlingStrategy
 from crawl4ai.deep_crawling.scorers import KeywordRelevanceScorer
@@ -67,3 +70,15 @@ def is_relevant(markdown: str, threshold: float = 0.4) -> bool:
 
     score = util.cos_sim(_query_embedding, emb).item()
     return score >= threshold
+
+def is_dynamic_site(url: str) -> bool:
+    html = requests.get(url, timeout=10).text.lower()
+
+    js_signals = [
+        "react", "vue", "angular",
+        "__next", "nuxt",
+        "window.__",
+        "fetch("
+    ]
+
+    return any(sig in html for sig in js_signals)

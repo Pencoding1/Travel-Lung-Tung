@@ -3,7 +3,7 @@ from typing import List, Optional, Dict, Any
 from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 
 from pipelines.crawling.base.PipelineBase import BasePipelineCrawler
-from pipelines.crawling.utils import load_js
+from utils.crawling_utils import load_js
 
 logger = logging.getLogger("VNTravelCrawler")
 
@@ -12,7 +12,7 @@ MAX_PAGINATION_PAGES = 15
 
 
 class VNTravelCrawler(BasePipelineCrawler):
-    def __init__(self, place_name: str, city_data: Dict = None, **kwargs):
+    def __init__(self, place_name: str, city_data: Dict = {}, **kwargs):
         self.place_name = place_name
         super().__init__(**kwargs)
 

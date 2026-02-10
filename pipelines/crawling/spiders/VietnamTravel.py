@@ -1,13 +1,13 @@
 import logging
 from typing import List, Optional, Dict, Any
 from pipelines.crawling.base.PipelineBase import BasePipelineCrawler
-from pipelines.crawling.utils import load_js
+from utils.crawling_utils import load_js
 
 logger = logging.getLogger("VietnamTravelCrawler")
 
 
 class VietnamTravelCrawler(BasePipelineCrawler):
-    def __init__(self, place_name: str, city_data: Dict = None, **kwargs):
+    def __init__(self, place_name: str, city_data: Dict = {}, **kwargs):
         super().__init__(**kwargs)
         self.place_name = place_name
         self.city_data = city_data or {}

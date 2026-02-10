@@ -7,8 +7,8 @@ import logging
 import fnmatch
 from crawl4ai.content_scraping_strategy import LXMLWebScrapingStrategy
 from crawl4ai import AsyncWebCrawler, CrawlerRunConfig, DefaultMarkdownGenerator, CacheMode
-from pipelines.crawling.utils import create_best_first_strategy, is_relevant
-from pipelines.crawling.config import CrawlerGlobalConfig
+from utils.crawling_utils import create_best_first_strategy, is_relevant
+from config.crawling_cofig import CrawlerGlobalConfig
 
 # Setup Logger
 logging.basicConfig(level=logging.INFO)

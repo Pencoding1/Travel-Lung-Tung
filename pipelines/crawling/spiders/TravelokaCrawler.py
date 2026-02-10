@@ -1,6 +1,6 @@
 import logging
 from typing import List, Optional, Dict, Any
-from pipelines.crawling.utils import load_js
+from utils.crawling_utils import load_js
 from pipelines.crawling.base.PipelineBase import BasePipelineCrawler
 
 logger = logging.getLogger("TravelokaCrawler")
@@ -10,7 +10,7 @@ class TravelokaCrawler(BasePipelineCrawler):
     def __init__(
         self,
         place_name: str,
-        city_data: Dict = None,
+        city_data: Dict = {},
         topic_keyword: str = "general_scan",
         lang_code: str = "vi",
         **kwargs
