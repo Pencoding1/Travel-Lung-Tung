@@ -1,41 +1,78 @@
-"""
-Docstring for pipelines.data_ingestion.base.PipelineBase
+import logging 
 
-We choose ELT pipeline as base pipeline for Data Ingestion pipeline because we need transform documents into
-suitable structure for graph and vector database. Including:
+from typing import Optional, List, Set
+from abc import ABC, abstractmethod
 
-- Cleaning Process: remove header, footer, copyright, unrelated or meaningless part can exist in crawled docs.
-- Extraction Process: extract parts within the webpage such as comment or review in Website about a tour.
-- Data Classification: classify difference context document into difference type to create metadata, improving indexing process.
-- Deduplication & Filtering: remove unrelated docs or duplicated docs. Applying PII for personal privacy.
-- RAG process:
-    + Chunking: split documents into several chunks using markdown structure based strategy before embedding the text.
-    + Embedding: use vietnamese embedding model to embed the chunks
-    + Indexing and storage: # TODO write this part
-- GraphRAG process:
-    + NER: for extracting entities
-    + Relationship extraction: using LLM to read and identify the connection between entities.
-    + # TODO add more here
-"""
+from db.models.IngestionRecords import RawDataRecord, TransformRecord
+from pipelines.preprocessing.base.PipelineBase import BasePreprocessor
 
 from config.data_ingestion import IngestionConfig
-from abc import ABC, abstractmethod
-from typing import List, Any
+
 
 class BaseDataIngestion(ABC):
-    def __init__(self, config: IngestionConfig) -> None:
-        self.model_name = config.MODEL_NAME
-        self.batch_size = config.BATCH_SIZE
-        self.data_source = config.DATA_SOURCE
+    """
+        Base class for Travel Lung Tung Data Ingestion (ETL).
+        
+        Workflow:
+        1. Extract: Fetch data (from Crawl4AI or Local DB).
+        2. Transform: Clean -> Chunk -> Embed -> Extract Graph Entities (NER).
+        3. Load: Save to Vector DB (e.g., Qdrant/Chroma) and Graph DB (Neo4j).
+    """
+
+    def __init__(self, processor: Optional[BasePreprocessor]=None, config: Optional[IngestionConfig] = None) -> None:
+        self.config = config if config else IngestionConfig()
+        self.logger = logging.getLogger(self.__class__.__name__)
+        self.processor = processor
     
     @abstractmethod
-    def extract(self):...
+    async def extract(self) -> Set[RawDataRecord]:
+        """
+        Pull raw data from the source (Web/DB/Local).
+        Returns list of RawData object with 'raw_content' populated with path to markdown file.
+        """
+        pass
 
     @abstractmethod
-    def load(self):...
+    async def transform(self, records: Set[RawDataRecord]) -> List[TransformRecord]:
+        """
+        Apply cleaning, chunking, embedding, and GraphRAG extraction.
+        
+        Recommended sub-steps to call here:
+        - _clean_data()
+        - _chunk_and_embed()  <-- Vietnamese embedding here
+        - _extract_graph_entities() <-- LLM based NER here
+        """
+        pass
 
     @abstractmethod
-    def transform(self):...
+    async def load(self, records: List[TransformRecord]):
+        """
+        Persist the processed records to the appropriate databases.
+        - Vector DB: chunks + embeddings
+        - Graph DB: nodes + relationships
+        """
+        pass
 
-    def apply(self):...
-    # TODO: add the base pipeline overhere. First define preprocessing step.
+    async def run(self):
+        self.logger.info("Starting Data Ingestion Pipeline...")
+
+        try:
+            self.logger.info("STEP 1: Extracting data")
+            raw_records = await self.extract()
+            if not raw_records:
+                self.logger.warning("No records extracted. Stopping pipeline.")
+                return
+            
+            self.logger.info(f"STEP 2: Trasnforming {len(raw_records)} records...")
+            processed_records = await self.transform(raw_records)
+
+            valid_records = [r for r in processed_records if r.status != "failed"]
+            if valid_records:
+                self.logger.info(f"STEP 3: Loading {len(valid_records)} records to {self.config.DESTINATION}")
+                await self.load(valid_records)
+            
+            self.logger.info("Pipeline completed successfully.")
+
+        except Exception as e:
+            self.logger.error(f"Critical Pipeline Failure: {str(e)}", exc_info=True)
+            raise e

@@ -1,84 +1,45 @@
-import os
-import torch
-import requests
-from typing import List
+import json
+
+from pathlib import Path
+from typing import Optional, List, Dict
+
+from config.web_layout_constant.traveloka import JUNK, VEHICLES_LIST
+
+JS_REMOVER_HELPER_PATH = Path(__file__).parent / "js_helper" / "xpath_remover.js"
+JS_EXTRACTOR_HELPER_PATH = Path(__file__).parent / "js_helper" / "traveloka_vehicle_extractor.js"
 
 
-from sentence_transformers import SentenceTransformer, util
-from crawl4ai.deep_crawling import BestFirstCrawlingStrategy
-from crawl4ai.deep_crawling.scorers import KeywordRelevanceScorer
+def remover(xpath: Optional[List[str] | str | JUNK]=None, script: Optional[str]=None):
+    if not script:
+        if JS_REMOVER_HELPER_PATH.exists():
+            script = JS_REMOVER_HELPER_PATH.read_text('utf-8')
+        else:
+            raise FileNotFoundError(f"Could not find JS helper at: {JS_REMOVER_HELPER_PATH}")
+        
+    if xpath:
+        removal_commands = "\n".join([f"removeElement({json.dumps(xp)});" for xp in xpath])
+    else:
+        removal_commands = "\n".join([f"removeElement({json.dumps(xp.value)});" for xp in JUNK])
 
-def load_js(filename="expand_script.js"):
-    if os.path.exists(filename):
-        with open(filename, "r", encoding="utf-8") as f:
-            return f.read()
-    return ""
-
-# Dành cho Vietravel
-def filter_location(filename="filter_location.js"):
-    if os.path.exists(filename):
-        with open(filename, "r", encoding="utf-8") as f:
-            return f.read()
-    return ""
-
-def create_best_first_strategy(
-    keywords: List[str],
-    max_depth: int = 4,
-    max_pages: int = 1000,
-    weight: float = 0.8
-) -> BestFirstCrawlingStrategy:
-    if not keywords:
-        keywords = ["du lịch", "kham pha", "review"]
-
-    scorer = KeywordRelevanceScorer(
-        keywords=keywords,
-        weight=weight
-    )
-
-    return BestFirstCrawlingStrategy(
-        max_depth=max_depth,
-        max_pages=max_pages,
-        url_scorer=scorer
-    )
-
-_model = None
-_query_embedding = None
-
-def init_semantic_filter(
-    query: str,
-    model_name: str = "AITeamVN/Vietnamese_Embedding_v2"
-):
-    global _model, _query_embedding
-
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-    _model = SentenceTransformer(model_name, device=device)
-
-    emb = _model.encode(query, convert_to_tensor=True)
-    if emb.dim() == 1:
-        emb = emb.unsqueeze(0)
-
-    _query_embedding = emb
+    return script.replace("{REMOVAL_LOGIC}", removal_commands)
 
 
-def is_relevant(markdown: str, threshold: float = 0.4) -> bool:
-    if not markdown or _model is None or _query_embedding is None:
-        return False
+def traveloka_vehicle_extractor(xpaths: Optional[Dict[str, str]]=None, script: Optional[str]=None):
+    if not script:
+        if JS_EXTRACTOR_HELPER_PATH.exists():
+            script = JS_EXTRACTOR_HELPER_PATH.read_text('utf-8')
+        else:
+            raise FileNotFoundError(f"Could not find JS helper at: {JS_EXTRACTOR_HELPER_PATH}")
+    
+    if xpaths:
+        script = script.replace("{js_paragraph}", json.dumps(xpaths.get('paragraphs')))
+        script = script.replace("{js_buttons}", json.dumps(xpaths.get('button')))
+        script = script.replace("{js_container}", json.dumps(xpaths.get('container')))
+        script = script.replace("{wait_ms}", json.dumps(xpaths.get('wait_ms', 300)))
 
-    emb = _model.encode(markdown[:3000], convert_to_tensor=True)
-    if emb.dim() == 1:
-        emb = emb.unsqueeze(0)
-
-    score = util.cos_sim(_query_embedding, emb).item()
-    return score >= threshold
-
-def is_dynamic_site(url: str) -> bool:
-    html = requests.get(url, timeout=10).text.lower()
-
-    js_signals = [
-        "react", "vue", "angular",
-        "__next", "nuxt",
-        "window.__",
-        "fetch("
-    ]
-
-    return any(sig in html for sig in js_signals)
+    else:
+        script = script.replace("{js_paragraph}", json.dumps(VEHICLES_LIST.PARAGRAPH))
+        script = script.replace("{js_buttons}", json.dumps((VEHICLES_LIST.BUTTON_LIST)))
+        script = script.replace("{js_container}", json.dumps(VEHICLES_LIST.CONTAINER))
+        script = script.replace("{wait_ms}", json.dumps(300))
+    return script
