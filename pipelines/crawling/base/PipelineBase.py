@@ -39,18 +39,6 @@ class BasePipelineCrawler(ABC):
     def get_domain_name(self) -> str:
         pass
 
-    @abstractmethod
-    def get_css_selectors(self) -> List[str]:
-        pass
-
-    @abstractmethod
-    def get_specific_keywords(self) -> List[str]:
-        pass
-
-    @abstractmethod
-    def get_place_patterns(self) -> List[str]:
-        pass
-
     def _generate_filename(self, stt: Any, ext: str) -> str:
         place = getattr(self, 'place_name', 'unknown').lower().replace(" ", "_")
         topic = getattr(self, 'topic_keyword', 'general_scan')
@@ -117,3 +105,5 @@ class BasePipelineCrawler(ABC):
 
     @abstractmethod
     async def crawl(self, url:Union[List[str], str]) -> CrawlResult:...
+
+    

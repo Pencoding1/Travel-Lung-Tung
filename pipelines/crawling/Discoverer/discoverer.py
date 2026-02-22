@@ -1,18 +1,70 @@
 import re
-import json
 import logging
 
-from pathlib import Path
-from typing import Optional
+from typing import Optional, Dict
 
 from utils.discover_strategies import VNEmbeddingStrategy, VNStatistcalStrategy
 
 from config.discover_config import DiscoverSettings
 
-import networkx as nx
-
-from crawl4ai import CrawlState, AsyncWebCrawler, BrowserConfig
+from crawl4ai import (CrawlState, 
+                    AsyncWebCrawler, 
+                    BrowserConfig, 
+                    CrawlStrategy,
+                    CrawlResult,
+                    CrawlerRunConfig,
+                    LinkPreviewConfig
+                    ) 
 from crawl4ai.adaptive_crawler import AdaptiveCrawler, AdaptiveConfig
+
+class ModifiedAdaptiveCrawler(AdaptiveCrawler):
+    def __init__(self, 
+                 crawler_run_config: Optional[CrawlerRunConfig]=None, 
+                 crawler: AsyncWebCrawler | None = None, 
+                 config: AdaptiveConfig | None = None, 
+                 strategy: CrawlStrategy | None = None):
+        
+        super().__init__(crawler, config, strategy)
+        self.crawler_run_config: CrawlerRunConfig = crawler_run_config if crawler_run_config else CrawlerRunConfig()
+
+    async def _crawl_with_preview(self, url: str, query: str) -> Optional[CrawlResult]:
+        """Crawl a URL with link preview enabled"""
+        link_preview_config = LinkPreviewConfig(
+                                                include_internal=True,
+                                                include_external=False,
+                                                query=query,  # For BM25 scoring
+                                                concurrency=5,
+                                                timeout=5,
+                                                max_links=50,  # Reasonable limit
+                                                verbose=False
+                                            )
+        if not self.crawler_run_config:
+            self.crawler_run_config = CrawlerRunConfig(
+                magic=True,
+                delay_before_return_html=3,
+                link_preview_config=link_preview_config,
+                score_links=True  # Enable intrinsic scoring
+            )
+        else:
+            self.crawler_run_config.link_preview_config = link_preview_config
+            self.crawler_run_config.score_links = True
+        
+        try:
+            result = await self.crawler.arun(url=url, config=self.crawler_run_config) #type: ignore
+            
+            # Extract the actual CrawlResult from the container
+            if hasattr(result, '_results') and result._results: #type: ignore
+                result = result._results[0] #type: ignore
+
+            # Filter our all links do not have head_date
+            if hasattr(result, 'links') and result.links: #type: ignore
+                result.links['internal'] = [link for link in result.links['internal'] if link.get('head_data')] #type: ignore
+
+            return result #type: ignore
+        except Exception as e:
+            print(f"Error crawling {url}: {e}")
+            return None
+        
 
 class Discoverer:
     def __init__(self, 
@@ -24,8 +76,10 @@ class Discoverer:
         self.adaptive_config = adaptive_config
         self.discover_config = discover_config if discover_config else DiscoverSettings()
         self.discover_config.ensure_paths()
+
+        self.discovery_result = None
     
-    async def discover(self, url:str) -> CrawlState:
+    async def discover(self, url:str, print_stats: bool=False) -> CrawlState:
         if self.discover_config.strategy_type == "statistical":
             strategy = VNStatistcalStrategy()
         elif self.discover_config.strategy_type == "embedding":
@@ -33,8 +87,8 @@ class Discoverer:
 
         async with AsyncWebCrawler(config=self.discover_config.get_browser_config(self.browser_config),
                                     base_directory=self.discover_config.base_directory) as crawler: # type: ignore
-            adaptive = AdaptiveCrawler(crawler, config=self.discover_config.get_adaptive_config(self.adaptive_config), strategy=strategy)
-            query = self.discover_config.query if self.discover_config.query else "Nothing happend yeah"
+            adaptive = ModifiedAdaptiveCrawler(crawler=crawler, config=self.discover_config.get_adaptive_config(self.adaptive_config), strategy=strategy)
+            query = self.discover_config.query if self.discover_config.query else "Find useful thing."
 
             result = await adaptive.digest(
                 start_url=url,
@@ -47,190 +101,84 @@ class Discoverer:
 
             if self.discover_config.get_knowledge_base:
                 adaptive.export_knowledge_base(self.discover_config.graph_output_path)
-                
+        
+        if print_stats:
+            adaptive.print_stats(detailed=True)
+        
+        self.discovery_result = result
         return result
-
-    def filtering_by_content(self, included_pattern:re.Pattern, excluded_pattern: re.Pattern) -> nx.DiGraph:
+    
+    def is_data_valid(self, 
+                      source_url, 
+                      confidence_score, 
+                      included_pattern: re.Pattern, 
+                      excluded_pattern: re.Pattern) -> bool:
         """
-        Filters the raw graph data based on content rules (HCM specific, exclude list, scores).
-        Returns a NetworkX DiGraph object instead of plotting.
+            Returns True if the data should be KEPT (Valid).
+            Returns False if the data should be DISCARDED (Invalid).
         """
-        # Resolve defaults from Settings if not provided
-        G = nx.DiGraph()
-        if isinstance(self.discover_config.graph_output_path, str):
-            self.discover_config.graph_output_path = Path(self.discover_config.graph_output_path)
-        if not self.discover_config.graph_output_path.exists():
-            self.logger.error(f"Graph file not found at: {self.discover_config.graph_output_path}")
-            return G
+        is_excluded = re.search(excluded_pattern, source_url.lower()) is not None
+        is_included = re.search(included_pattern, source_url.lower()) is not None
+        
+        is_invalid_url = is_excluded and not is_included
 
-        self.logger.info(f"Filtering content from {self.discover_config.graph_output_path} with threshold {self.discover_config.weight_threshold}...")
+        if is_invalid_url or confidence_score < self.discover_config.weight_threshold:
+            return False
+        
+        return True
+    
+    def connected_link_filtering(self, data: CrawlState,
+                                 included_pattern: re.Pattern, 
+                                 excluded_pattern: re.Pattern,
+                                 threshold: float = 1.0) -> Optional[Dict]:
+        qualified_links = dict()
+        global_confidence = data.metrics.get('confidence', 0.0)
+        
+        if not data.knowledge_base:
+            self.logger.warning("Knowledge base is empty.")
+            return None
 
-        with open(self.discover_config.graph_output_path, 'r', encoding='utf-8') as f:
-            for line in f:
-                if not line.strip(): continue
-                try:
-                    data = json.loads(line)
-                except json.JSONDecodeError:
-                    continue
+        for source_page in data.knowledge_base:
+            source_url = source_page.url
 
-                source_url = data.get('url', '')
+            if self.is_data_valid(source_url, 
+                                  included_pattern=included_pattern, 
+                                  excluded_pattern=excluded_pattern,
+                                  confidence_score=global_confidence):
+                internal_links = []
+                links_attr = getattr(source_page, 'links', {})
                 
-                # Enforce HCM location relevance
-                if not re.search(included_pattern, source_url.lower()) or re.search(excluded_pattern, source_url.lower()):
-                    continue
-
-                # --- 2. Source Node Confidence Filtering ---
-                crawl_weight = data.get('crawl_metadata', {}).get('confidence_at_crawl', 0.0)
+                if isinstance(links_attr, dict):
+                    internal_links = links_attr.get('internal', [])
+                elif hasattr(links_attr, 'internal'):
+                    internal_links = links_attr.internal
                 
-                if crawl_weight < self.discover_config.weight_threshold:
-                    continue
+                found_links_on_this_page = False
 
-                # Title Processing (Traveloka specific clean-up)
-                source_meta = data.get('metadata', {})
-                prefix = "https://traveloka.com/vi-vn/"
-                if source_url.startswith(prefix):
-                    source_title = source_url[len(prefix):].strip('/').replace('-', ' ')
-                else:
-                    source_title = source_meta.get('title') or source_url
-
-                # Add Valid Source Node
-                G.add_node(source_url, 
-                           label=source_title, 
-                           confidence=crawl_weight,
-                           type="source")
-
-                # --- 3. Edge/Link Filtering ---
-                links = data.get('links', {}).get('internal', [])
-                for link in links:
-                    target_url = link.get('href')
+                for link in internal_links:
+                    if isinstance(link, dict):
+                        target_url = link.get('href')
+                        score = link.get('total_score')
+                    else:
+                        target_url = getattr(link, 'href', None)
+                        score = getattr(link, 'total_score', None)
                     
-                    # Check against Excluded List (from Settings)
-                    if not target_url or target_url in self.discover_config.excluded_urls:
-                        continue
+                    score = score or 0.0
                     
-                    relevance_score = link.get('contextual_score') or 0.0
+                    if target_url:
+                        is_excluded_target = target_url in self.discover_config.excluded_urls
+                        is_good_score = score >= threshold
+                        
+                        if not is_excluded_target and is_good_score:
+                            qualified_links[target_url] = score
+                            found_links_on_this_page = True 
+                
+                if not found_links_on_this_page:
+                    self.logger.warning(f"The source page: {source_url} produced no qualified links.")
                     
-                    # Filter weak links
-                    if relevance_score < self.discover_config.weight_threshold:
-                        continue
-                    
-                    # Prepare Target Node Label
-                    raw_label = link.get('title') or link.get('text')
-                    target_label = raw_label if raw_label and raw_label != "Unknown" else target_url
-                    
-                    # Add Target Node if not exists (or update attributes)
-                    if target_url not in G:
-                        G.add_node(target_url, label=target_label, type="target")
-                    
-                    # Add Edge with weight
-                    G.add_edge(source_url, target_url, weight=relevance_score)
-
-        self.logger.info(f"Filtering complete. Graph contains {G.number_of_nodes()} nodes and {G.number_of_edges()} edges.")
-        return G
-    
-
-if __name__ == "__main__":
-    import asyncio
-    import shutil
-    
-    # 1. DEFINE TEST SETTINGS
-    # We use a temporary directory for the test output to avoid messing up your real data
-    TEST_DIR = Path("./test_output_env")
-    TEST_GRAPH_PATH = TEST_DIR / "test_knowledge_graph.json"
-    
-    # Ensure clean state
-    if TEST_DIR.exists():
-        shutil.rmtree(TEST_DIR)
-    TEST_DIR.mkdir(parents=True, exist_ok=True)
-
-    async def run_full_pipeline_test():
-        print("\n" + "="*60)
-        print("🚀 STARTING FULL PIPELINE TEST (Real Crawl -> Graph)")
-        print("="*60)
-
-        # --- STEP 1: CONFIGURATION ---
-        print("[1/4] Configuring Discoverer for Test Mode...")
+        if not qualified_links:
+            self.logger.warning("The provided data are invalid (no links found in total). Return None.")
+            return None
         
-        # Override settings for a "Micro-Crawl"
-        # We limit max_pages to 3 to ensure the test finishes in <10 seconds
-        test_settings = DiscoverSettings(
-            base_directory=TEST_DIR / "cache",
-            graph_output_path=TEST_GRAPH_PATH,
-            stats_file=TEST_DIR / "stats.txt",
-            weight_threshold=0.1,  # Lower threshold to ensure we get *some* data for the test
-            strategy_type="statistical",
-            query="Find interesting activities and locations in Ho Chi Minh City"
-        )
+        return qualified_links
         
-        # Custom Adaptive Config to stop it from running wild
-        test_adaptive_config = AdaptiveConfig(
-            max_pages=3,       # HARD LIMIT: Only crawl 3 pages max
-            max_depth=1,       # HARD LIMIT: Do not go deep
-            confidence_threshold=0.5
-        )
-
-        discoverer = Discoverer(
-            discover_config=test_settings,
-            adaptive_config=test_adaptive_config
-        )
-
-        # --- STEP 2: DISCOVERY (THE CRAWL) ---
-        start_url = "https://www.traveloka.com/vi-vn/destination/area/ho-chi-minh-city-10009794"
-        print(f"[2/4] crawling target: {start_url}")
-        print("      (This may take 10-20 seconds depending on network...)")
-        
-        try:
-            # Run the actual crawl
-            await discoverer.discover(start_url)
-            print("      ✅ Crawl finished.")
-        except Exception as e:
-            print(f"      ❌ Crawl failed: {e}")
-            return
-
-        # Check if file exists
-        if not TEST_GRAPH_PATH.exists():
-            print("      ❌ Error: Graph file was not created!")
-            return
-        
-        file_size = TEST_GRAPH_PATH.stat().st_size
-        print(f"      ✅ Graph file created at: {TEST_GRAPH_PATH} ({file_size} bytes)")
-
-        # --- STEP 3: FILTERING & GRAPH FORMULATION ---
-        print("[3/4] Building Graph from Crawled Data...")
-        
-        # Define regex for Ho Chi Minh City
-        include_pattern = re.compile(r'(ho-chi-minh|hcm|sai-gon|saigon|tphcm)', re.IGNORECASE)
-        # Define regex to exclude purely functional pages
-        exclude_pattern = re.compile(r'/(login|register|forgot-password|promotion|partnership)/', re.IGNORECASE)
-
-        # Run the filtering logic
-        G = discoverer.filtering_by_content(include_pattern, exclude_pattern)
-
-        # --- STEP 4: VERIFICATION ---
-        print("[4/4] Verifying Results...")
-        
-        node_count = G.number_of_nodes()
-        edge_count = G.number_of_edges()
-        
-        print("\n" + "-"*40)
-        print(f"📊 FINAL GRAPH: {node_count} Nodes | {edge_count} Edges")
-        print("-" * 40)
-
-        if node_count > 0:
-            print("✅ TEST PASSED: Graph was successfully built from real web data.")
-            
-            # Print first 3 nodes as a sample
-            print("\nSample Nodes:")
-            for i, (node, attrs) in enumerate(list(G.nodes(data=True))[:3]):
-                print(f"  {i+1}. {attrs.get('label', 'No Label')} ({node})")
-        else:
-            print("⚠️  TEST WARNING: Graph is empty.")
-            print("   Possible reasons:")
-            print("   1. The crawler got blocked (check logs).")
-            print("   2. The Regex pattern didn't match any crawled URLs.")
-            print("   3. The 'weight_threshold' is too high for the crawled data.")
-
-    # Run the test
-    asyncio.run(run_full_pipeline_test())
-
-    # TODO: FIX TESTING PROCESS

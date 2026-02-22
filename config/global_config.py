@@ -61,3 +61,4 @@ GLOBAL_CRAWL_SETTINGS = {
     "max_pages": 1000,
     "headless": False,
 }
+

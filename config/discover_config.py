@@ -58,7 +58,7 @@ class DiscoverSettings(BaseSettings):
         self.stats_file.parent.mkdir(parents=True, exist_ok=True) #type: ignore
 
     def get_browser_config(self, user_config: Optional[BrowserConfig] = None) -> BrowserConfig:
-        return user_config or BrowserConfig(headless=True, verbose=True)
+        return user_config or BrowserConfig(headless=False, verbose=True)
 
     def get_adaptive_config(self, user_config: Optional[AdaptiveConfig] = None) -> AdaptiveConfig:
         default_config = {
