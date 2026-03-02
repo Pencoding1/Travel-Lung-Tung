@@ -55,4 +55,5 @@ class BlogExtractor(IExtractorStrategy):
         return scripts
     
     def parse_clean(self, raw_data):
-        raise IntentedNotImplementedException()
+        result = json.loads(raw_data)
+        return result
