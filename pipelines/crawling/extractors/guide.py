@@ -16,8 +16,8 @@ class GuideExtractor(IExtractorStrategy):
         self.logger = logging.getLogger(self.__class__.__name__)
 
     def load_schema(self) -> Optional[Tuple[Optional[Dict], Optional[Dict]]]:
-        css_schema_path = self.root_dir / "schemas" / "css" / self.cfg.domain.value / "place_holder.json"
-        xpath_schema_path = self.root_dir / "schemas" / "xpath" / self.cfg.domain.value / "place_holder.json"
+        css_schema_path = self.root_dir / "schemas" / "css" / self.cfg.domain.value / "guide" / "place_holder.json"
+        xpath_schema_path = self.root_dir / "schemas" / "xpath" / self.cfg.domain.value / "guide" / "place_holder.json"
         if not (css_schema_path.is_file() or xpath_schema_path.is_file()):
             self.logger.warning(f"No schema has found at.\nCSS Schema: {css_schema_path}\nXpath Schema:{xpath_schema_path}")
             return None
