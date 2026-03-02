@@ -1,7 +1,7 @@
 import functools
 
 from abc import ABC, abstractmethod
-from typing import Dict, Optional, List, Any, Callable, Tuple
+from typing import Optional, List, Callable, Tuple
 
 from crawl4ai import (
     CrawlerRunConfig, 
@@ -15,7 +15,7 @@ from crawl4ai import (
 
 from config.crawling_cofig import CrawlerGlobalConfig
 
-from pipelines.crawling.Discoverer.discoverer import Discoverer
+from pipelines.crawling.discover.discoverer import Discoverer
 from pipelines.crawling.base.PipelineBase import BasePipelineCrawler
 
 def run_with_hook(hook_method_name: str = "get_hook"):
@@ -54,7 +54,6 @@ class BaseDetailCrawler(BasePipelineCrawler, ABC):
                 ):
         
         super().__init__(config=cfg, run_config=crawler_config)
-        
         if browser_config:
             self.cfg.browser_config = browser_config
 
@@ -63,25 +62,26 @@ class BaseDetailCrawler(BasePipelineCrawler, ABC):
         if markdown_creator:
             self.crawler_config.markdown_generator = markdown_creator
         self.crawler_config.magic = True
-
+        self.schemas: Optional[Tuple] = None
     
     async def crawl_with_schema(self,
-                                url: str | List[str], 
-                                schema_css: Optional[Dict[str, Any]]=None,
-                                schema_xpath: Optional[Dict[str, Any]]=None, 
-                                verbose: bool = True):
-        if schema_xpath:
-            extraction_strategy = JsonXPathExtractionStrategy(schema_xpath, verbose=verbose)
-        elif schema_css:
-            extraction_strategy = JsonCssExtractionStrategy(schema_css, verbose=verbose)
-        else:
-            raise ValueError("Schema cannot empty. In case of LLM Extraction or no extraction provided please use crawl().")
+                                    url: str | List[str], 
+                                    verbose: bool = True):
+            if self.schemas:
+                if self.schemas[1]:
+                    extraction_strategy = JsonCssExtractionStrategy(self.schemas[1], verbose=verbose)
+                elif self.schemas[0]:
+                    extraction_strategy = JsonXPathExtractionStrategy(self.schemas[0], verbose=verbose)
+                else:
+                    raise ValueError("Neither CSS selector and Xpath selector has valid schemas.")
+        
+            else:
+                raise ValueError("Schema cannot empty. In case of LLM Extraction or no extraction provided please use crawl().")
 
-        self.crawler_config.extraction_strategy=extraction_strategy
+            self.crawler_config.extraction_strategy = extraction_strategy
+            results = await self.crawl(seed_url=url)
 
-        results = await self.crawl(seed_url=url)
-
-        return results
+            return results
 
     @run_with_hook()
     async def crawl(self, seed_url: str | List[str], crawler=None) -> Optional[CrawlResult]:

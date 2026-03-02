@@ -1,20 +1,28 @@
-from typing import Callable, Optional, Callable, Tuple
+from typing import Callable, List, Optional, Callable, Tuple
 
 from crawl4ai import CrawlerRunConfig, DefaultMarkdownGenerator, BrowserConfig
 
 from playwright.async_api import Page, BrowserContext
 
 from config.crawling_cofig import CrawlerGlobalConfig
+from config.exceptions import IntentedNotImplementedException
 from pipelines.crawling.base.detail_crawler import BaseDetailCrawler
-
+from pipelines.crawling.extractors.tour import TourExtractor
+from config.crawling_cofig import ExtractorConfig
 
 class TravelokaCrawler(BaseDetailCrawler):
     def __init__(self, cfg: Optional[CrawlerGlobalConfig] = None,
                  crawler_config: Optional[CrawlerRunConfig]= None,
                  markdown_creator: Optional[DefaultMarkdownGenerator] = None, 
-                 browser_config: Optional[BrowserConfig] = None):
+                 browser_config: Optional[BrowserConfig] = None,
+                 extractor_config: Optional[ExtractorConfig]=None):
         super().__init__(cfg, crawler_config, markdown_creator, browser_config)
-    
+
+        extract_cfg = extractor_config if extractor_config else ExtractorConfig()
+        extract_cfg.set_domain(self.get_domain_name())
+        
+        self.tour_extractor = TourExtractor(extract_cfg)
+        
     def get_domain_name(self) -> str: return "traveloka"
 
     @staticmethod
@@ -26,7 +34,20 @@ class TravelokaCrawler(BaseDetailCrawler):
 
     def get_hook(self) -> Tuple[Callable, str]:
         return self._goto_home, "before_goto"
-        
+    
+    def _load_extractor(self, name:List[str]=["tour_modal_extractor.js"]):
+        self.schemas = self.tour_extractor.load_schema()
+        self.crawler_config.js_code = self.tour_extractor.load_js(name)
+
+    async def crawl_with_schema(self, url: str | List[str], verbose: bool = True):
+        self._load_extractor()
+        results = await super().crawl_with_schema(url, verbose)
+        try:
+            return self.tour_extractor.parse_clean(results) # thêm key nếu không muốn xử lý cả cục result cào
+        except IntentedNotImplementedException:
+            self.logger.warning("Parser wasn't implemented.")
+            return results
+
 
 if __name__ == "__main__":
     import asyncio
@@ -34,28 +55,6 @@ if __name__ == "__main__":
         import json
         from crawl4ai import CrawlResult
         START_URL = "https://www.traveloka.com/en-vn/activities/vietnam/product/sun-world-ba-den-mountain-4234684001188"
-        
-        test_schema = {
-                        "name": "Tour Content",       
-                        "baseSelector": "html",
-                        "fields": [                   
-                            {
-                                "name": "seo_article",
-                                "selector": "div.seoArticleContent > div.css-1dbjc4n .r-13awgt0",
-                                "type" : "html"
-                            },
-                            {
-                                "name": "FAQ_json",
-                                "selector": "#faq-section > div > script",
-                                "type": "text"
-                            },
-                            {
-                                "name": "Product_schema",
-                                "selector": 'script[data-testid="product-schema"]',
-                                "type": "text"
-                            }
-                        ]
-        }
         
         crawler_config = CrawlerRunConfig(
             excluded_selector="div.articleTableOfContent",
@@ -71,7 +70,7 @@ if __name__ == "__main__":
 
         crawler = TravelokaCrawler(crawler_config=crawler_config) # type: ignore
         # 1. Run the crawler 
-        results:CrawlResult = await crawler.crawl_with_schema(START_URL, schema_css=test_schema) # type: ignore
+        results:CrawlResult = await crawler.crawl_with_schema(START_URL) # type: ignore
         if results.success:
             try:
                 if isinstance(results.extracted_content, str):

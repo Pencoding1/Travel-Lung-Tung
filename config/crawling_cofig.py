@@ -1,5 +1,6 @@
 import random
-import os
+
+from enum import Enum
 
 from crawl4ai import BrowserConfig
 from dotenv import load_dotenv
@@ -8,6 +9,9 @@ from dataclasses import dataclass, field, replace
 from typing import List, Literal, Optional
 
 load_dotenv()
+
+class DOMAIN(str, Enum):
+    traveloka = "traveloka"
 
 @dataclass
 class CrawlerGlobalConfig:
@@ -47,3 +51,12 @@ class CrawlerGlobalConfig:
         "*activity*", "*activities*", "*attraction*", "*attractions*",
         "*/viet nam/*", "*/viet nam/*", "*/du-lich/*"
     ])
+
+class ExtractorConfig:
+    domain: DOMAIN = DOMAIN.traveloka
+
+    def set_domain(self, domain_name: str):
+        try:
+            self.domain = DOMAIN[domain_name]
+        except KeyError:
+            raise ValueError(f"Invalid domain name: '{domain_name}'. Valid options are: {[e.name for e in DOMAIN]}")
