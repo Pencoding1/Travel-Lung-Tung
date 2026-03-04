@@ -4,25 +4,21 @@ from abc import ABC, abstractmethod
 from typing import Optional, List, Callable, Tuple
 
 from crawl4ai import (
-    CrawlerRunConfig, 
     CrawlResult,
     DefaultMarkdownGenerator, 
     AsyncWebCrawler,
     JsonXPathExtractionStrategy,
     JsonCssExtractionStrategy,
-    BrowserConfig,
 )
 
-from config.crawling_cofig import CrawlerGlobalConfig
-
-from pipelines.crawling.discover.discoverer import Discoverer
-from pipelines.crawling.base.PipelineBase import BasePipelineCrawler
+from config.settings import LoadPipelineSetting
+from pipelines.crawling.base.PipelineBase import BasePipelineCrawling
 
 def run_with_hook(hook_method_name: str = "get_hook"):
     def decorator(func):
         @functools.wraps(func)
         async def wrapper(self, *args, **kwargs):
-            crawler = AsyncWebCrawler(config=self.cfg.browser_config)
+            crawler = AsyncWebCrawler(config=self.cfg.crawler_cfg.browser_config)
 
             if hasattr(self, hook_method_name):
                 hook_method = getattr(self, hook_method_name)
@@ -45,42 +41,36 @@ def run_with_hook(hook_method_name: str = "get_hook"):
         return wrapper
     return decorator    
 
-class BaseDetailCrawler(BasePipelineCrawler, ABC):
+class BaseDetailCrawler(BasePipelineCrawling, ABC):
     def __init__(self,
-                 cfg: Optional[CrawlerGlobalConfig] = None,
-                 crawler_config: Optional[CrawlerRunConfig] = None,
+                 cfg: LoadPipelineSetting,
                  markdown_creator: Optional[DefaultMarkdownGenerator] = None,
-                 browser_config: Optional[BrowserConfig]=None, discoverer: Optional[Discoverer]=None
+                 use_magic=True
                 ):
-        
-        super().__init__(config=cfg, run_config=crawler_config)
-        if browser_config:
-            self.cfg.browser_config = browser_config
+        super().__init__(config=cfg)
+        self.cfg.crawler_cfg.run_cfg.magic = use_magic
 
-        self.crawler_config = crawler_config if crawler_config else CrawlerRunConfig()
-        
         if markdown_creator:
-            self.crawler_config.markdown_generator = markdown_creator
-        self.crawler_config.magic = True
-        self.schemas: Optional[Tuple] = None
+            self.cfg.crawler_cfg.run_cfg.markdown_generator = markdown_creator
+        
+        self.cfg.crawler_cfg.run_cfg.magic = True
+        self.schemas: Optional[dict] = None
     
     async def crawl_with_schema(self,
                                     url: str | List[str], 
                                     verbose: bool = True):
             if self.schemas:
-                if self.schemas[1]:
-                    extraction_strategy = JsonCssExtractionStrategy(self.schemas[1], verbose=verbose)
-                elif self.schemas[0]:
-                    extraction_strategy = JsonXPathExtractionStrategy(self.schemas[0], verbose=verbose)
+                if self.schemas['type'] == "css":
+                    extraction_strategy = JsonCssExtractionStrategy(self.schemas['schema'], verbose=verbose)
+                elif self.schemas['type'] == "xpath":
+                    extraction_strategy = JsonXPathExtractionStrategy(self.schemas['schema'], verbose=verbose)
                 else:
-                    raise ValueError("Neither CSS selector and Xpath selector has valid schemas.")
-        
+                    raise ValueError("Invalid type of schema.")
             else:
                 raise ValueError("Schema cannot empty. In case of LLM Extraction or no extraction provided please use crawl().")
 
-            self.crawler_config.extraction_strategy = extraction_strategy
+            self.cfg.crawler_cfg.run_cfg.extraction_strategy = extraction_strategy
             results = await self.crawl(seed_url=url)
-
             return results
 
     @run_with_hook()
@@ -88,9 +78,9 @@ class BaseDetailCrawler(BasePipelineCrawler, ABC):
         """Executes the crawler."""
         if crawler:
             if isinstance(seed_url, list):
-                results = await crawler.arun_many(seed_url, config=self.crawler_config)
+                results = await crawler.arun_many(seed_url, config=self.cfg.crawler_cfg.run_cfg)
             elif isinstance(seed_url, str):
-                results = await crawler.arun(seed_url, config=self.crawler_config)
+                results = await crawler.arun(seed_url, config=self.cfg.crawler_cfg.run_cfg)
             else:
                 raise ValueError("Invalid url type. Must be str or list[str].")
         

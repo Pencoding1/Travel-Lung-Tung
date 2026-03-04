@@ -31,3 +31,5 @@ env/
 *.pkl
 *.csv
 *.bin
+
+chromium_profile/

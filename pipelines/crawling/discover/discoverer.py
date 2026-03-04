@@ -1,19 +1,20 @@
 import re
 import logging
 
-from typing import Optional, Dict
+from typing import Optional, Dict, List
 
 from utils.discover_strategies import VNEmbeddingStrategy, VNStatistcalStrategy
 
-from config.discover_config import DiscoverSettings
+from config.settings import LoadPipelineSetting
+from config.exceptions import IntentedNotImplementedException
+from pipelines.crawling.base.PipelineBase import BasePipelineCrawling
 
 from crawl4ai import (CrawlState, 
-                    AsyncWebCrawler, 
-                    BrowserConfig, 
-                    CrawlStrategy,
-                    CrawlResult,
-                    CrawlerRunConfig,
-                    LinkPreviewConfig
+                        AsyncWebCrawler, 
+                        CrawlStrategy,
+                        CrawlResult,
+                        CrawlerRunConfig,
+                        LinkPreviewConfig
                     ) 
 from crawl4ai.adaptive_crawler import AdaptiveCrawler, AdaptiveConfig
 
@@ -66,41 +67,56 @@ class ModifiedAdaptiveCrawler(AdaptiveCrawler):
             return None
         
 
-class Discoverer:
-    def __init__(self, 
-                 discover_config: Optional[DiscoverSettings]=None,
-                 adaptive_config: Optional[AdaptiveConfig]=None,
-                 browser_config: Optional[BrowserConfig]=None):
+class Discoverer(BasePipelineCrawling):
+    def __init__(self, cfg:LoadPipelineSetting):
+        super().__init__(cfg)
         self.logger = logging.getLogger(self.__class__.__name__)
-        self.browser_config = browser_config
-        self.adaptive_config = adaptive_config
-        self.discover_config = discover_config if discover_config else DiscoverSettings()
-        self.discover_config.ensure_paths()
+        self.cfg = cfg
+        self.browser_config = cfg.crawler_cfg.browser_config 
+        self.discover_config = cfg.discover_cfg
 
         self.discovery_result = None
     
-    async def discover(self, url:str, print_stats: bool=False) -> CrawlState:
+    def get_domain_name(self) -> str:
+        return self.cfg.extractor_cfg.domain.value
+    
+    async def crawl(self, url: List[str] | str) -> CrawlResult:
+        raise IntentedNotImplementedException("This method is not implemented, use discovery() instead.")
+    
+    async def discovery(self, url:str, print_stats: bool=False) -> CrawlState:
         if self.discover_config.strategy_type == "statistical":
             strategy = VNStatistcalStrategy()
         elif self.discover_config.strategy_type == "embedding":
-            pass # NOTE: Since the embedding is unusedable so we cannot implement it.
+            raise NotImplementedError("The embedding module hasn't implemented yet. Switch to Statistical Strategy instead.")
+        else:
+            raise ValueError(f"Unsupported Strategy {self.discover_config.strategy_type}")
+        
+        async with AsyncWebCrawler(config=self.cfg.crawler_cfg.browser_config,
+                                    base_directory=str(self.discover_config.base_directory)) as crawler:
+            adaptive = ModifiedAdaptiveCrawler(crawler=crawler, 
+                                               config=self.discover_config.\
+                                                get_adaptive_config(), 
+                                                strategy=strategy
+                                              )
+            queries = self.discover_config.queries if self.discover_config.queries else []
 
-        async with AsyncWebCrawler(config=self.discover_config.get_browser_config(self.browser_config),
-                                    base_directory=self.discover_config.base_directory) as crawler: # type: ignore
-            adaptive = ModifiedAdaptiveCrawler(crawler=crawler, config=self.discover_config.get_adaptive_config(self.adaptive_config), strategy=strategy)
-            query = self.discover_config.query if self.discover_config.query else "Find useful thing."
-
-            result = await adaptive.digest(
-                start_url=url,
-                query=query,
-            )
-
+            if len(queries) == 1:
+                result = await adaptive.digest(
+                    url,
+                    query=queries[0]
+                )
+            else:
+                #TODO: sua lai chay da tien trinh
+                result = await adaptive.digest(
+                    url,
+                    query=queries[0] 
+                ) 
             relevant_pages = adaptive.get_relevant_content(top_k=self.discover_config.top_k)
             for page in relevant_pages:
                 self.logger.info(f"- {page['url']} (score: {page['score']:.2f})")
 
             if self.discover_config.get_knowledge_base:
-                adaptive.export_knowledge_base(self.discover_config.graph_output_path)
+                adaptive.export_knowledge_base(self.cfg.graph_output_path)
         
         if print_stats:
             adaptive.print_stats(detailed=True)
@@ -109,27 +125,27 @@ class Discoverer:
         return result
     
     def is_data_valid(self, 
-                      source_url, 
-                      confidence_score, 
-                      included_pattern: re.Pattern, 
-                      excluded_pattern: re.Pattern) -> bool:
+                      source_url: str, 
+                      confidence_score: float) -> bool:
         """
             Returns True if the data should be KEPT (Valid).
             Returns False if the data should be DISCARDED (Invalid).
         """
-        is_excluded = re.search(excluded_pattern, source_url.lower()) is not None
-        is_included = re.search(included_pattern, source_url.lower()) is not None
-        
-        is_invalid_url = is_excluded and not is_included
+        url_lower = source_url.lower()
 
+        is_excluded = any(re.search(pattern, url_lower) for pattern in self.discover_config.excluded_patterns)
+        is_included = any(re.search(pattern, url_lower) for pattern in self.discover_config.included_patterns)
+
+        if url_lower.rstrip("/").endswith(self.discover_config.disallowed_endings):
+            return False
+
+        is_invalid_url = is_excluded and not is_included
         if is_invalid_url or confidence_score < self.discover_config.weight_threshold:
             return False
         
         return True
     
     def connected_link_filtering(self, data: CrawlState,
-                                 included_pattern: re.Pattern, 
-                                 excluded_pattern: re.Pattern,
                                  threshold: float = 1.0) -> Optional[Dict]:
         qualified_links = dict()
         global_confidence = data.metrics.get('confidence', 0.0)
@@ -141,10 +157,7 @@ class Discoverer:
         for source_page in data.knowledge_base:
             source_url = source_page.url
 
-            if self.is_data_valid(source_url, 
-                                  included_pattern=included_pattern, 
-                                  excluded_pattern=excluded_pattern,
-                                  confidence_score=global_confidence):
+            if self.is_data_valid(source_url, confidence_score=global_confidence):
                 internal_links = []
                 links_attr = getattr(source_page, 'links', {})
                 
