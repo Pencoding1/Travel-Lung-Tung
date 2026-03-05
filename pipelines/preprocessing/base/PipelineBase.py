@@ -1,4 +1,4 @@
-from config.preprocessing_config import PreprocessConfig
+from config.settings import IngestionSettings
 from abc import ABC, abstractmethod
 from typing import Optional, Set
 
@@ -6,8 +6,8 @@ from pyvi import ViTokenizer
 from datasketch import MinHash, MinHashLSH
 
 class BasePreprocessor(ABC):
-    def __init__(self, lsh: Optional[MinHashLSH], config: Optional[PreprocessConfig] = None):
-        self.config = config if config else PreprocessConfig()
+    def __init__(self, lsh: Optional[MinHashLSH], config: Optional[IngestionSettings] = None):
+        self.config = config if config else IngestionSettings()
         self.lsh = lsh if lsh else MinHashLSH(threshold=0.9, num_perm=128)
 
     def _get_shingles_vietnamese(self, text: str, n: int = 3) -> Set[str]:

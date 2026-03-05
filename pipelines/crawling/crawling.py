@@ -136,8 +136,6 @@ class Crawler:
         
         detail_crawl_results = dict()
         for key, value in classified_urls.items():
-            if key != "activities":
-                continue
             self.logger.info(f"Is crawling for {key}")
             try:
                 results = []

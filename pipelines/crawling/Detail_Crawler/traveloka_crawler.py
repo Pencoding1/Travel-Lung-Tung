@@ -139,8 +139,8 @@ if __name__ == "__main__":
             config=get_dummy_extract_setting(), 
             lsh=None
         )
-        crawl_type = "explore"
-        results = await crawler.crawl_with_schema(url="https://www.traveloka.com/vi-vn/explore/culinary/anko/1005450", crawl_type=crawl_type)
+        crawl_type = "activities"
+        results = await crawler.crawl_with_schema(url="https://www.traveloka.com/vi-vn/activities/vietnam/product/hcmc-only-dmaris-seafood-buffet-chain-vouchers-by-giftpop-3585196162595", crawl_type=crawl_type)
         #print(results.extracted_content)
         #return results
         if results and results.success:
