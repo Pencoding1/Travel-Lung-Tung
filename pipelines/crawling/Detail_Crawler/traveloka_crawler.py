@@ -105,6 +105,7 @@ class TravelokaCrawler(BaseDetailCrawler):
         self.logger.info("No valid extractor has found. Run without extractor...")
 
     async def crawl_with_schema(self, url: str | List[str], verbose: bool = True, crawl_type="activities"):
+        self.current_crawl_type = crawl_type
         self._load_extractor(crawl_type=crawl_type)
         results = await super().crawl_with_schema(url, verbose)
         return results
@@ -112,8 +113,11 @@ class TravelokaCrawler(BaseDetailCrawler):
 if __name__ == "__main__":
     import asyncio
     import json
+    from pathlib import Path
     from config.settings import *
     from crawl4ai import CrawlResult
+
+    from pipelines.preprocessing.preprocessing import TravelokaPreprocessor
 
     def get_dummy_setting():
         setting = LoadPipelineSetting(
@@ -123,10 +127,45 @@ if __name__ == "__main__":
         )
         return setting
     
+    def get_dummy_extract_setting():
+        return ExtractPipelineSetting(
+            pipeline_cfg=IngestionSettings()
+        )
+    
     async def test():
         crawler = TravelokaCrawler(get_dummy_setting())
-        results = await crawler.crawl_with_schema(url="https://www.traveloka.com/vi-vn/explore/culinary/anko/1005450", crawl_type="explore")
-        print(results.extracted_content)
-        return results
+
+        preprocessor = TravelokaPreprocessor(
+            config=get_dummy_extract_setting(), 
+            lsh=None
+        )
+        crawl_type = "explore"
+        results = await crawler.crawl_with_schema(url="https://www.traveloka.com/vi-vn/explore/culinary/anko/1005450", crawl_type=crawl_type)
+        #print(results.extracted_content)
+        #return results
+        if results and results.success:
+            print("[*] Cào thành công! Đang tiến hành parse làm sạch dữ liệu...")
+            
+            # 4. Parse dữ liệu thô qua Preprocessor
+            parsed_result = preprocessor.parse(
+                content=results.extracted_content,
+                crawl_type=crawl_type
+            )
+            
+            # 5. Lưu vào file JSON
+            data_dir = Path("data")
+            data_dir.mkdir(parents=True, exist_ok=True) # Tự động tạo folder data nếu chưa có
+            
+            file_name = "Explore_Extractor.json"
+            out_file = data_dir / file_name
+            
+            # Viết dữ liệu ra file với chuẩn UTF-8 và indent đẹp mắt
+            out_file.write_text(
+                json.dumps(parsed_result, indent=4, ensure_ascii=False), 
+                encoding="utf-8"
+            )
+            print(f"[+] HOÀN TẤT! Dữ liệu đã được lưu gọn gàng tại: {out_file}")
+        else:
+            print("[-] Cào dữ liệu thất bại hoặc không có nội dung.")
     
     print(asyncio.run(test()))

@@ -18,6 +18,7 @@ from config.settings import *
 from pipelines.crawling.discover.discoverer import Discoverer
 from config.exceptions import IntentedNotImplementedException
 from pipelines.crawling.detail_crawler.traveloka_crawler import TravelokaCrawler
+from pipelines.preprocessing.preprocessing import TravelokaPreprocessor
 
 class Crawler:
     def __init__(self, cfg: AppSettings,
@@ -127,9 +128,16 @@ class Crawler:
         # NOTE: The discoverer seems uneffective due to only care about metadta.
         # NOTE: Already putted all loading script
         self.logger.info("Beginning crawling phase....")
+
+        preprocessor = TravelokaPreprocessor(
+            config=self.cfg.extract_settings[0], 
+            lsh=None
+        )
         
         detail_crawl_results = dict()
         for key, value in classified_urls.items():
+            if key != "activities":
+                continue
             self.logger.info(f"Is crawling for {key}")
             try:
                 results = []
@@ -139,8 +147,13 @@ class Crawler:
                         crawl_type=key
                     )
                     if crawl_results and crawl_results.success:
-                        result = json.loads(crawl_results.extracted_content) \
-                                            if crawl_results.extracted_content else None
+                        result = preprocessor.parse(
+                                content=crawl_results.extracted_content,
+                                crawl_type=key
+                        )
+                        #result = json.loads(crawl_results.extracted_content) \
+                        #                    if crawl_results.extracted_content else None
+                if result is not None:
                     results.append(result)
                 detail_crawl_results[key] = results
             except IntentedNotImplementedException:
