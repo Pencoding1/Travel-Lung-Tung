@@ -140,7 +140,7 @@ if __name__ == "__main__":
             lsh=None
         )
         crawl_type = "activities"
-        results = await crawler.crawl_with_schema(url="https://www.traveloka.com/vi-vn/activities/vietnam/product/hcmc-only-dmaris-seafood-buffet-chain-vouchers-by-giftpop-3585196162595", crawl_type=crawl_type)
+        results = await crawler.crawl_with_schema(url="https://www.traveloka.com/vi-vn/activities/v ietnam/product/hcmc-only-dmaris-seafood-buffet-chain-vouchers-by-giftpop-3585196162595", crawl_type=crawl_type)
         #print(results.extracted_content)
         #return results
         if results and results.success:

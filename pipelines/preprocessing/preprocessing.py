@@ -17,8 +17,6 @@ class TravelokaPreprocessor(BasePreprocessor):
         return ""
     
     def parse(self, content, crawl_type: str):
-        import json
-        from markdownify import markdownify as md
 
         # 1. Hàm tiện ích làm sạch HTML thừa thành Markdown
         def clean_markdown(html_str):
@@ -30,9 +28,7 @@ class TravelokaPreprocessor(BasePreprocessor):
         def convert_html_to_md_recursive(data):
             if isinstance(data, dict):
                 for k, v in data.items():
-                    # Thêm các từ khóa cần chuyển sang Markdown vào danh sách này
-                    # Lưu ý: Bắt cả 'review_block' và 'reviews_block' đề phòng schema viết khác nhau
-                    if k in ["modal_contents", "review_block", "reviews_block", "things_to_know", "content"]: 
+                    if k in ["modal_contents", "review_block", "reviews_block", "things_to_know", "content", "seo_article"]: 
                         data[k] = clean_markdown(v)
                     else:
                         data[k] = convert_html_to_md_recursive(v)

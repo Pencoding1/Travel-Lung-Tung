@@ -85,7 +85,7 @@ class Crawler:
         raise NotImplementedError("The database hasn't been implemented yet.")
 
     def save_to_local(self, data: Dict, file_name:str="Crawled_Results.json"):
-        data_to_str = json.dumps(data)
+        data_to_str = json.dumps(data, indent=4, ensure_ascii=False)
         (self.cfg.storage_path / file_name).write_text(data_to_str, encoding="utf-8")        
         
     async def pipeline(self):
@@ -151,8 +151,8 @@ class Crawler:
                         )
                         #result = json.loads(crawl_results.extracted_content) \
                         #                    if crawl_results.extracted_content else None
-                if result is not None:
-                    results.append(result)
+                        if result is not None:
+                            results.append(result)
                 detail_crawl_results[key] = results
             except IntentedNotImplementedException:
                 self.logger.warning(f"The extractor for {key} hasn't been implemented yet. Skipping this sub-domain.")
