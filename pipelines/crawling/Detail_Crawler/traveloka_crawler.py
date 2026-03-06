@@ -156,7 +156,7 @@ if __name__ == "__main__":
             data_dir = Path("data")
             data_dir.mkdir(parents=True, exist_ok=True) # Tự động tạo folder data nếu chưa có
             
-            file_name = "Explore_Extractor.json"
+            file_name = f"{crawl_type.capitalize()}_Extractor.json"
             out_file = data_dir / file_name
             
             # Viết dữ liệu ra file với chuẩn UTF-8 và indent đẹp mắt
