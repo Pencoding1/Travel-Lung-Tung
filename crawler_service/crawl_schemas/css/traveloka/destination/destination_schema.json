@@ -1,0 +1,17 @@
+{
+        "name": "Traveloka Destination Extraction",
+        "baseSelector": "html",
+        "fields": [
+            {
+                "name": "title",
+                "selector": "head meta[property='og:title']",
+                "type": "attribute",
+                "attribute": "content"
+            },
+            {
+                "name": "parsed_destination_data",
+                "selector": "#injected_destination_data",
+                "type": "text"
+            }
+        ]
+    }
