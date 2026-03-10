@@ -1,5 +1,4 @@
 import os
-import random
 
 from pathlib import Path
 from dotenv import load_dotenv
@@ -98,7 +97,7 @@ class CrawlerSetting(BaseSettings):
 
 class ExtractorSettings(BaseSettings):
     domain: Agency = Agency.TRAVELOKA
-    root_dir: Path = PARENT / "secrets"
+    root_dir: Path = PARENT
     def set_domain(self, domain_name: str):
         try:
             self.domain = Agency[domain_name.upper()]

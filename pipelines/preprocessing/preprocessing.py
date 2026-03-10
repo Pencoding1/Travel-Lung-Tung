@@ -12,9 +12,6 @@ class VNTravelPreprocessor(BasePreprocessor):...
 class TravelokaPreprocessor(BasePreprocessor):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-    def filter(self, text: str) -> str:
-        return ""
     
     def parse(self, content, crawl_type: str):
         import json
@@ -80,6 +77,3 @@ class TravelokaPreprocessor(BasePreprocessor):
 
         # Trả về dict nếu chỉ có 1 item, trả list nếu có nhiều
         return parsed_items[0] if len(parsed_items) == 1 else parsed_items
-
-    def clean(self, text: str) -> str:
-        return ""

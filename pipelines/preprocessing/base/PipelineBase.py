@@ -51,31 +51,3 @@ class BasePreprocessor(ABC):
     def filter_duplicated(self, text: str, text_id:str) -> str:
         if self.is_exist(text, text_id): return ""
         return text
-    
-    @abstractmethod
-    def filter(self, text: str) -> str:...
-        
-    @abstractmethod
-    def clean(self, text: str) -> str: ...
-
-    # Helper wrapper for usage in executors
-    def process_text(self, text: str, text_id:str) -> str:
-        """
-        Unified method to clean and then filter. 
-        This is what the ProcessPool will call.
-        """
-        cleaned_text = self.clean(text)
-        if not cleaned_text:
-            return ""
-        
-        deduped_text = self.filter_duplicated(cleaned_text, text_id) 
-        if not deduped_text:
-            return ""
-        
-        filtered = self.filter(deduped_text)
-        return filtered
-
-
-
-class BaseExtractor(ABC):...
-    
