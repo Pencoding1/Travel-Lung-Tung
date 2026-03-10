@@ -6,10 +6,10 @@
 # --- Secrets & Configs (CRITICAL) ---
 .env
 # This covers the file inside your secrets folder
-secrets/*.json
-secrets/
+./secrets/*.json
+./secrets/
 # This covers the file if it's in the root
-serviceAccountKey.json
+./serviceAccountKey.json
 .python-version
 
 # --- Python & Environment ---
