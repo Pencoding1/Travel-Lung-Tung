@@ -128,7 +128,7 @@ if __name__ == "__main__":
     
     def get_dummy_extract_setting():
         return ExtractPipelineSetting(
-            pipeline_cfg=IngestionSettings()
+            pipeline_cfg=ParserSettings()
         )
     
     async def test():

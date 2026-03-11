@@ -1,5 +1,6 @@
 import traceback
 
+from typing import Optional
 from fastapi import FastAPI, Depends, APIRouter, HTTPException
 from pydantic import HttpUrl, TypeAdapter, ValidationError
 
@@ -28,7 +29,7 @@ app = FastAPI(
     description="Agentic skill and bulk extraction service for travel data.",
 )
 
-async def crawl(url: str):
+async def crawl(url: str, crawl_type: Optional[str], discover: bool):
     load = LoadPipelineSetting(
         crawler_cfg=CrawlerSetting(),
         extractor_cfg=ExtractorSettings(),
@@ -42,14 +43,14 @@ async def crawl(url: str):
         extract_settings=[extract],
     )
     try:
-        validated_url = url_adapter.validate_python(url)
+        url_adapter.validate_python(url)
     except ValidationError:
         logger.error("Invalid url.")
         return None
         
     crawler = Crawler(app_settings, seed_url=url)
     crawler.cfg.load_settings[0].cache_mode=CACHE_MODE.WRITE
-    return await crawler.pipeline()
+    return await crawler.pipeline(discover=discover, service=True, crawl_type=crawl_type)
 
 @app.get("/")
 async def health_check():
@@ -64,7 +65,9 @@ protected_router = APIRouter(
 async def execute_crawl(payload: CrawlPayload):
     try:
         # Await the crawl helper
-        result = await crawl(payload.target_url)
+        result = await crawl(url=payload.target_url, 
+                             discover=payload.discover, 
+                             crawl_type=payload.crawl_type)
         if result:
             return {"status": "success", "result": result}
         return {"status": "failed", "result": {}}

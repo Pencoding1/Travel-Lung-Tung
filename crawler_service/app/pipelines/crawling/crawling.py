@@ -44,14 +44,15 @@ class Crawler:
         cache_file.write_text(json_data)
         return path / file_name
     
-    def _read_cache(self, file_path:Path) -> Optional[Dict]:
-        if file_path.is_file() and file_path.exists():
-            raw_data =file_path.read_text()
+    def _read_cache(self, file_path: Path) -> Optional[Dict]:
+        if not (file_path.is_file() and file_path.exists()):
+            return None
+        
         try:
-            data = json.loads(raw_data)
-            return data
+            raw_data = file_path.read_text(encoding="utf-8")
+            return json.loads(raw_data)
         except json.JSONDecodeError:
-            self.logger.error("Write cache fail.")
+            self.logger.error(f"Read cache failed. Invalid JSON in {file_path}")
             return None
         
     def _change_nation(self, urls:List[str]) -> List[str]:
@@ -62,7 +63,8 @@ class Crawler:
             if prefixes[3] != "vi-vn":
                 prefixes[3] = "vi-vn"
                 results.append("/".join(prefixes))
-            results.append(url)
+            else:
+                results.append(url)
 
         return results
     
@@ -89,77 +91,92 @@ class Crawler:
     def save_to_local(self, data: Dict, file_name:str="Crawled_Results.json"):
         data_to_str = json.dumps(data)
         (self.cfg.storage_path / file_name).write_text(data_to_str, encoding="utf-8")        
-        
-    async def pipeline(self, service=False):
-        # ========I. Discover Phase========
-        self.logger.info("Beginning discover phase....")
-
-        # TODO: this still uses the first load_setting. If run crawl for many domains it will be a bug since the crawler always crawl at the Traveloka.
-        if self.cfg.load_settings[0].cache_mode == CACHE_MODE.READ:
-               cache_file = list((self.cfg.load_settings[0].discover_cfg.cache_path).glob("*.json"))
-               cache_file.sort()
-               classified_urls = self._read_cache(cache_file[0])
-        else:
-            if self.cfg.DEBUG:
-                discovery_result = await self.discoverer \
-                                        .discovery(self.url,
-                                                  print_stats=True)
-            else:
-                discovery_result  = await self.discoverer \
-                                         .discovery(self.url)
-
-            final_result = self.discoverer.connected_link_filtering(discovery_result)
-            if not final_result:        
-                self.logger.warning("The discover result has no urls.")
-                return
-
-            noise_urls = list(final_result.keys())
-
-            urls = self._change_nation(noise_urls)
-            classified_urls = self._classifier(urls) # {"sub_domain" (this one is used to determine the crawl_type): url}
-            if self.cfg.load_settings[0].cache_mode == CACHE_MODE.WRITE:
-                    self._write_cache(classified_urls, self.cfg.load_settings[0].discover_cfg.cache_path, f"{int(datetime.now().timestamp())}.json") # type: ignore
-        
-        if not classified_urls:
-            self.logger.warning("Discovery found nothing. Stop the pipeline.")
-            return
     
-        # ========II. Crawl Phase========
-        # NOTE: the crawler now only return un-parsed result in dictionary type. Further Extraction to create parsed version are required
-        # NOTE: Put it in data ingestion pipeline with preprocessing step.
-        # NOTE: The discoverer seems uneffective due to only care about metadta.
-        # NOTE: Already putted all loading script
-        self.logger.info("Beginning crawling phase....")
+    async def discovery(self):
+        # 1. Check Cache First
+        first_setting = self.cfg.load_settings[0]
+        if first_setting.cache_mode == CACHE_MODE.READ:
+            cache_files = list(first_setting.discover_cfg.cache_path.glob("*.json"))
+            if cache_files:
+                cache_files.sort()
+                self.logger.info("Reading URLs from cache...")
+                return self._read_cache(cache_files[0])
+            self.logger.warning("Cache mode is READ but no cache files found. Proceeding with discovery.")
 
+        # 2. Perform Discovery (Run only once)
+        self.logger.info("Beginning discover phase....")
+        discovery_result = await self.discoverer.discovery(
+            self.url, 
+            print_stats=self.cfg.DEBUG
+        )
+
+        final_result = self.discoverer.connected_link_filtering(discovery_result)
+        if not final_result:        
+            self.logger.warning("The discover result has no urls. Pipeline stopped.")
+            return None
+
+        # 3. Process URLs
+        noise_urls = list(final_result.keys())
+        urls = self._change_nation(noise_urls)
+        classified_urls = self._classifier(urls) 
+
+        # 4. Write Cache if necessary
+        if first_setting.cache_mode == CACHE_MODE.WRITE and classified_urls:
+            file_name = f"{int(datetime.now().timestamp())}.json"
+            self._write_cache(classified_urls, first_setting.discover_cfg.cache_path, file_name)
+
+        return classified_urls
+
+    async def __detail_crawl(self, url:str, crawl_type:str):
         preprocessor = TravelokaPreprocessor(
             config=self.cfg.extract_settings[0], 
             lsh=None
         )
+        result = None
         
-        detail_crawl_results = dict()
-        for key, value in classified_urls.items():
-            self.logger.info(f"Is crawling for {key}")
-            try:
-                results = []
-                for url in value:
-                    crawl_results = await self.traveloka_cralwer.crawl_with_schema(
-                        url = url,
-                        crawl_type=key
-                    )
-                    result = None
-                    if crawl_results and crawl_results.success:
-                        result = preprocessor.parse(
-                                content=crawl_results.extracted_content,
-                                crawl_type=key
+        try:
+            crawl_results = await self.traveloka_cralwer.crawl_with_schema(
+                            url = url,
+                            crawl_type=crawl_type
                         )
-                        #result = json.loads(crawl_results.extracted_content) \
-                        #                    if crawl_results.extracted_content else None
+            if crawl_results and crawl_results.success:
+                result = preprocessor.parse(
+                        content=crawl_results.extracted_content,
+                        crawl_type=crawl_type
+                    )
+            else:
+                self.logger.warning(f"Crawl result isn't success or cannot crawl from the targeted url.\nCrawled Result: {crawl_results}")
+                return None
+        
+        except IntentedNotImplementedException:
+            self.logger.warning(f"Extractor for '{crawl_type}' not implemented. Failed on URL: {url}")
+        except Exception as e:
+            self.logger.error(f"Unexpected error while crawling {url}: {e}")
+
+        return result
+    
+    async def batch_detail_crawl(self, classified_urls: Dict, service=False):
+        detail_crawl_results = dict()
+        
+        for key, urls in classified_urls.items():
+            self.logger.info(f"Is crawling for sub-domain: {key}")
+            results = []
+            for url in urls:
+                try:
+                    result = await self.__detail_crawl(url, key)
                     if result is not None:
                         results.append(result)
+                except IntentedNotImplementedException:
+                    self.logger.warning(f"Extractor for '{key}' not implemented. Failed on URL: {url}")
+                    break
+                    
+                except Exception as e:
+                    self.logger.error(f"Unexpected error while crawling {url}: {e}")
+                    continue
+            
+            # Only add the key to the final dictionary if we actually successfully scraped something
+            if results:
                 detail_crawl_results[key] = results
-            except IntentedNotImplementedException:
-                self.logger.warning(f"The extractor for {key} hasn't been implemented yet. Skipping this sub-domain.")
-                continue
 
         if not detail_crawl_results:
             self.logger.warning("Extracted Results are empty.")
@@ -171,9 +188,30 @@ class Crawler:
             elif self.cfg.STORAGE == "db":
                 raise IntentedNotImplementedException("Database hasn't been implemented yet.")
             else:
-                raise ValueError("Invalid storage type.")
+                raise ValueError(f"Invalid storage type: {self.cfg.STORAGE}")
         else:
             return json.dumps(detail_crawl_results)
+            
+    async def pipeline(self, service=False, discover: bool = True, crawl_type: Optional[str]=None):
+        if not discover and not crawl_type:
+            raise ValueError("If the dicover mode isn't turned on the crawl_type should be defined.")
+        # ========I. Discover Phase========
+        if discover:
+            classified_urls = await self.discovery()
+        else:
+            classified_urls = None
+        # ========II. Crawl Phase========
+        # NOTE: the crawler now only return un-parsed result in dictionary type. Further Extraction to create parsed version are required
+        # NOTE: Put it in data ingestion pipeline with preprocessing step.
+        # NOTE: The discoverer seems uneffective due to only care about metadta.
+        # NOTE: Already putted all loading script
+        if classified_urls:
+            self.logger.info("Beginning crawling phase with batch crawling....")
+            return await self.batch_detail_crawl(classified_urls, service) # return json string of batch results
+        else:
+            self.logger.info(f"Beginning crawling phase with detail crawling\ntype:{crawl_type}....")
+            result = await self.__detail_crawl(self.url, crawl_type),
+            return json.dumps(result, indent=4)
 
 
 if __name__ == "__main__":
