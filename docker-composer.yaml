@@ -1,0 +1,10 @@
+services:
+  memgraph:
+    image: memgraph/memgraph-mage:latest
+    porst:
+      - "7687:7687"
+    environment:
+      - MEMGRAPH_USER=${MEMGRAPH_USER}
+      - MEMGRAPH_PASSWORD=${MEMGRAPH_PASSWORD}
+    volumes:
+      - ./mg_lib:/var/lib/memgraph
