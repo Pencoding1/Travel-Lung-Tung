@@ -1,37 +1,31 @@
-# Travel-Lung-Tung
-# MỤC TIÊU cho Version 0.1.0
-## XÂY DỰNG CHO CHATBOT TRẢ LỜI TƯ VẤN VÀ WEB/APP THỰC HIỆN ĐƯỢC CHỨC NĂNG CƠ BẢN CỦA MỘT ỨNG DỤNG BOOKING.
-# Quy định:
-## Các file/folder hỏi trước khi chỉnh sửa và xóa (edit and delete):
-
-1. File nằm trong thư mục base.
-2. File nằm trong thư mục scerets
-3. main.py tổng và main.py trong thư mục test
-4. Thư mục database
-
-## Các file/folder được thêm (add):
-
-1. .env
-2. Thư mục secrets
-3. Tất cả file không nằm danh sách "phải hỏi" 
-
-# TODO
-## 1. Cào dữ liệu
-### 1.1. Cào dữ liệu bằng Agent
-### 1.2. Cào dữ liệu bằng parse html/pdf thủ công
-### 1.3. Nén dữ liệu đã được cào
-
-## 2. Tiền xử lý dữ liệu
-### 2.1. Nén tài liệu và chuyển đổi thành dữ liệu dạng vector
-### 2.2. Chiết xuất Thực Thể (Entity)
-### 2.3. Trích xuất mối quan hệ của các thực thể
-
-## 3. Database
-### 3.1. Xây dựng Vector Database
-### 3.2. Xây dựng Bussiness Database
-### 3.3. Xây dựng knowledge graph database
-
-## 4. Agent
-### 4.1. Retriver để lấy dữ liệu từ vector và knowledge graph database
-### 4.2. Xây dựng MCP cho agent tương tác với các công cụ: booking, thanh toán, form,...
-### 4.3. Xây dựng agent điều phối và trả lời câu hỏi
+# TRAVEL VO LO - SMART TRAVEL ASSISTANT AGENT SYSTEM
+## KEY FEATURES
+Describe the key features of the Travel Vo Lo system.
+### 1. OTA FEATURES
+NOTE: Will be filled later
+### 2. AI-DRIVEN FEATURES
+- [ ] Customer Service Agent: provide useful information about destinations and POI to user. Release the user with overhelming researching process.
+- [ ] Vi vu feature: based on user's preference and leverage the LLM's cooperating with smart planning algorithm to generate a detail trip itinerary. The provided trip will maximize the user's utility, allow them enjoy the trip without considering which place to go and for how long.
+- [ ] Risks management: Based on the trip user are going to, with information gathered on the real-time updated travel database. The agent could predict risk and suggest alternative plan that could lower the chance of broken point during the trip. This feature with the Vi Vu allow the system to take over all user concerns about trip planning process, release them from time consumming preparing for a trip.
+## DEVELOPMENT PROGRESS
+### COMPLETE:
+- [ ] ...
+### TODO:
+- [ ] Multi-agent system: the back-bone of the AI features. The goal is a system could query from RAG database with travel data gathering during the crawling process to answer user's questions:
+    - [x] Crawling module
+    - [ ] RAG database module
+    - [x] Agent system architecture (draft)
+    - [ ] The system
+- [ ] Vi vu feature: the key difference of the system with others OTA services. The feature has three components: 
+    - [ ] LLM's grading based on user preferences.
+    - [ ] Smart Planning Algorithm.
+    - [ ] Graph RAG for grounding truth.
+## DEV's NOTE
+### DEVELOPMENT TODO LIST
+- [ ] UI's schema for Trip planning.
+- [ ] Complete data models and interaction service to manipulating the data.
+    - [x] Graph Entities Model Schema.
+    - [ ] Relationships Schema.
+    - [ ] Repositories for each entity.
+- [ ] After that build the data ingestion process to extract data from the crawled json file to knowledge graph using memgraph and vectorize `seo_article` using embedding model for the Vector RAG database. 
+**DEADLINE: 15/3/2026**

@@ -5,6 +5,7 @@ from datetime import datetime
 class Category(BaseModel):
     id: str
     name: str
+    context: str
 
 class Tag(BaseModel):
     id: str

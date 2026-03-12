@@ -1,7 +1,6 @@
 import os
 import firebase_admin
 
-from types import MemberDescriptorType
 from logging import getLogger
 
 
@@ -9,7 +8,6 @@ from neo4j import GraphDatabase
 from firebase_admin import credentials, firestore, _apps, initialize_app, delete_app
 
 from app.config import settings
-from app.core.repositories import memgraph
 
 
 base_dir = os.path.dirname(os.path.abspath(__file__))
