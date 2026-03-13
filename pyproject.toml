@@ -9,6 +9,6 @@ package=false
 members = [
     "shared_lib",
     "crawler_service",
-    "ingestion_service",
+    "POI_service",
     "ai_service"
 ]

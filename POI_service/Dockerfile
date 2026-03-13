@@ -12,7 +12,7 @@ COPY pyproject.toml uv.lock ./
 COPY --parents */pyproject.toml ./
 
 # Export ONLY the data ingestion dependencies
-RUN uv export --package data_ingestion --no-emit-workspace --no-dev --locked -o /requirements.txt
+RUN uv export --package POI_service --no-emit-workspace --no-dev --locked -o /requirements.txt
 
 # ==========================================
 # STAGE 2: The Production Image
@@ -38,12 +38,12 @@ COPY pyproject.toml uv.lock ./
 COPY --parents */pyproject.toml ./
 
 COPY shared_lib/ ./shared_lib/
-COPY data_ingestion/ ./data_ingestion/
+COPY POI_service/ ./POI_service/
 
-RUN uv pip install -e ./shared_lib -e ./data_ingestion
+RUN uv pip install -e ./shared_lib -e ./POI_service
 
 # 3. Execution
-WORKDIR /workspace/data_ingestion
+WORKDIR /workspace/POI_service
 
 EXPOSE 8002
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8002"]

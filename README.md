@@ -13,9 +13,13 @@ NOTE: Will be filled later
 ### TODO:
 - [ ] Multi-agent system: the back-bone of the AI features. The goal is a system could query from RAG database with travel data gathering during the crawling process to answer user's questions:
     - [x] Crawling module
+    - [ ] **Relationship Modeling**
+    - [ ] **Ingestion Module**
     - [ ] RAG database module
     - [x] Agent system architecture (draft)
     - [ ] The system
+- [ ] **Search Module.**
+- [ ] **Dataset (both from Traveloka & Openstreetmap + Searchnx)**
 - [ ] Vi vu feature: the key difference of the system with others OTA services. The feature has three components: 
     - [ ] LLM's grading based on user preferences.
     - [ ] Smart Planning Algorithm.
@@ -25,7 +29,8 @@ NOTE: Will be filled later
 - [ ] UI's schema for Trip planning.
 - [ ] Complete data models and interaction service to manipulating the data.
     - [x] Graph Entities Model Schema.
+    - [x] Basic CRUD on Graph.
     - [ ] Relationships Schema.
-    - [ ] Repositories for each entity.
+    - [x] Repositories for each entity.
 - [ ] After that build the data ingestion process to extract data from the crawled json file to knowledge graph using memgraph and vectorize `seo_article` using embedding model for the Vector RAG database. 
 **DEADLINE: 15/3/2026**

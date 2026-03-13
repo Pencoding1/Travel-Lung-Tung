@@ -1,7 +1,7 @@
 [project]
-name = "ingestion-service"
+name = "POI_service"
 version = "0.1.0"
-description = "Data Ingestion service"
+description = "POI logical and provider service"
 requires-python = ">=3.11"
 dependencies = [
     "fastapi>=0.128.0",
