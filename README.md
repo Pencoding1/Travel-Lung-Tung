@@ -19,7 +19,9 @@ NOTE: Will be filled later
     - [x] Agent system architecture (draft)
     - [ ] The system
 - [ ] **Search Module.**
-- [ ] **Dataset (both from Traveloka & Openstreetmap + Searchnx)**
+- [ ] **Dataset (both from Traveloka & Openstreetmap + Searchnx)**:
+    + [x] OSM dataset: +6000 Local POI with high structure from OSM. However they lack of explicit description.
+    + [ ] Traveloka: ... 
 - [ ] Vi vu feature: the key difference of the system with others OTA services. The feature has three components: 
     - [ ] LLM's grading based on user preferences.
     - [ ] Smart Planning Algorithm.

@@ -1,4 +1,4 @@
-from app.db.models.enum import BudgetLevel, TravelPace
+from POI_service.app.core.domain.enum import BudgetLevel, TravelPace
 
 from pydantic import BaseModel, HttpUrl, Field, model_validator
 from typing import List, Optional, Dict

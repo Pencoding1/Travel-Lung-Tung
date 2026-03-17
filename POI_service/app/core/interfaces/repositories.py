@@ -5,7 +5,7 @@ from typing import TypeVar, Generic, List, Optional
 from httpx import delete
 
 from app.core.base.repository import BaseRepository
-from app.db.models.Graph_Entities import (
+from app.core.domain.Graph_Entities import (
     POI, 
     Itinerary, 
     Category,
