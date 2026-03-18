@@ -97,10 +97,7 @@ class UserPreference(BaseModel):
 
 
 
-# 1. Flattened Address for pristine data ingestion
 class Address(BaseModel):
-    # I've made street_name and ward Optional here as they were in your previous
-    # setup, since many rural Vietnamese POIs lack strict street/ward designations.
     street_name: Optional[str] = None
     district: str = Field(..., min_length=1)
     ward: Optional[str] = None
@@ -158,7 +155,7 @@ class Product(BaseModel):
 class ContactInfo(BaseModel):
     # Required fields
     phone_number: str
-    email: EmailStr
+    email: EmailStr | None = None
     
     # Optional fields
     fanpage: Optional[HttpUrl] = None

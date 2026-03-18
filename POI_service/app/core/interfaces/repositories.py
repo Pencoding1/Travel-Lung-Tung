@@ -2,11 +2,10 @@ from abc import abstractmethod, ABC
 from typing import List, Optional
 
 from app.core.base.repository import BaseRepository
-from POI_service.app.core.domain.graph_entities import (
+from app.core.domain.graph_entities import (
     POI, 
     Category,
     Tag, 
-    Description
 )
 
 
@@ -16,6 +15,10 @@ class IPOIRepository(BaseRepository[POI]):
     """
     @abstractmethod
     def create(self, entity: POI) -> POI: 
+        pass
+
+    @abstractmethod
+    def batch_create(self, poi_batch: list[dict]) -> int:
         pass
 
     @abstractmethod
@@ -51,12 +54,6 @@ class ITagRepository(BaseRepository[Tag]):
         pass
 
 
-class IDescriptionRepository(BaseRepository[Description]):
-    @abstractmethod
-    def get_by_poi_id(self, poi_id: str) -> Optional[Description]:
-        pass
-
-
 class IUserBehaviorRepository(BaseRepository):
     @abstractmethod
     def set_preference(self, user_id: str, category_id: str, weight: float) -> None:
@@ -71,7 +68,8 @@ class IUserBehaviorRepository(BaseRepository):
 
 class AbstractUnitOfWork(ABC):
     pois: IPOIRepository
-    
+    cats: ICategoryRepository
+
     def __enter__(self):
         return self
 

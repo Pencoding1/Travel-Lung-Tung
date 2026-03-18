@@ -3,12 +3,12 @@ from typing import List, LiteralString, Optional, cast, Dict, Any
 
 from app.core.base.repository import BaseMemgraphRepository
 
-from POI_service.app.core.domain.graph_entities import POI, UserPreference, Category, Tag
+from app.core.domain.graph_entities import POI, UserPreference, Category, Tag
 
 from app.core.interfaces.repositories import IPOIRepository
 from app.core.interfaces.repositories import IUserBehaviorRepository
 from shared_lib.travel_shared.exceptions import IntentedNotImplementedException
-from POI_service.app.core.interfaces.repositories import ICategoryRepository, ITagRepository
+from app.core.interfaces.repositories import ICategoryRepository, ITagRepository
 
 
 
@@ -175,6 +175,47 @@ class MemgraphPOIRepository(BaseMemgraphRepository[POI], IPOIRepository):
     def __init__(self, tx: Transaction):
         super().__init__(tx)
     
+    def batch_create(self, poi_batch: list[dict]) -> int:
+        query = """
+        UNWIND $batch AS poi
+        
+        // 1. Defensively Merge POI
+        MERGE (p:POI {id: poi.id})
+        SET p += {
+            name: poi.name,
+            longitude: poi.longitude,
+            latitude: poi.latitude,
+            operation_time: poi.operation_time,
+            
+            // Using dot notation is fine if the parent (address) exists
+            addr_street: poi.address.street_name,
+            addr_district: poi.address.district,
+            addr_city: poi.address.city,
+            addr_nation: poi.address.nation,
+            
+            contact_phone: poi.contact_info.phone_number,
+            contact_website: poi.contact_info.website
+        }
+        
+        // 2. Tags (Ensure tag exists)
+        WITH p, poi
+        WHERE poi.tag IS NOT NULL
+        MERGE (t:Tag {id: poi.tag.id})
+        ON CREATE SET t.name = poi.tag.name
+        MERGE (p)-[:HAS_TAG]->(t)
+        
+        // 3. Categories (FOREACH is null-safe for empty lists)
+        WITH p, poi
+        FOREACH (cat IN poi.poi_categories |
+            MERGE (c:Category {id: cat.id})
+            ON CREATE SET c.name = cat.name, c.context = cat.context
+            MERGE (p)-[:HAS_CATEGORY]->(c)
+        )
+        """
+        # Ensure we use the active transaction from the UoW
+        self._execute_write(query, {"batch": poi_batch})
+        return len(poi_batch)
+
     def create(self, entity: POI) -> POI:
         query = """
         // 1. Create/Merge the core POI node and flatten Value Objects
@@ -213,7 +254,7 @@ class MemgraphPOIRepository(BaseMemgraphRepository[POI], IPOIRepository):
         
         RETURN p.id AS id
         """
-        self._execute_write(query, {"poi": entity.model_dump()})
+        self._execute_write(query, {"poi": entity.model_dump(mode='json')})
         return entity
 
     # ---------------------------------------------------------

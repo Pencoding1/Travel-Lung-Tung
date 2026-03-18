@@ -219,26 +219,26 @@ class Crawler:
             return json.dumps(result, indent=4)
 
 
-if __name__ == "__main__":
-    from app.core.config.settings import CrawlerSetting, DiscoverSettings, ExtractorSettings, ParserSettings
-    url = "https://www.traveloka.com/vi-vn/destination/area/ho-chi-minh-city-10009794"
+# if __name__ == "__main__":
+#     from app.core.config.settings import CrawlerSetting, DiscoverSettings, ExtractorSettings, ParserSettings
+#     url = "https://www.traveloka.com/vi-vn/destination/area/ho-chi-minh-city-10009794"
     
-    load = LoadPipelineSetting(
-        crawler_cfg=CrawlerSetting(),
-        extractor_cfg=ExtractorSettings(),
-        discover_cfg=DiscoverSettings()
-    )
-    extract = ExtractPipelineSetting(
-        pipeline_cfg=ParserSettings()
-    )
-    app_settings = AppSettings(
-        load_settings=[load],
-        extract_settings=[extract],
-    )
+#     load = LoadPipelineSetting(
+#         crawler_cfg=CrawlerSetting(),
+#         extractor_cfg=ExtractorSettings(),
+#         discover_cfg=DiscoverSettings()
+#     )
+#     extract = ExtractPipelineSetting(
+#         pipeline_cfg=ParserSettings()
+#     )
+#     app_settings = AppSettings(
+#         load_settings=[load],
+#         extract_settings=[extract],
+#     )
     
-    crawler = Crawler(app_settings, seed_url=url)
+#     crawler = Crawler(app_settings, seed_url=url)
     
-    # TEMPORARY WRITE CHANGE CACHE FLAG
-    crawler.cfg.load_settings[0].cache_mode=CACHE_MODE.WRITE
+#     # TEMPORARY WRITE CHANGE CACHE FLAG
+#     crawler.cfg.load_settings[0].cache_mode=CACHE_MODE.WRITE
 
-    asyncio.run(crawler.pipeline(service=True))
+#     asyncio.run(crawler.pipeline(service=True))

@@ -1,0 +1,65 @@
+services:
+  memgraph:
+    image: memgraph/memgraph-mage:latest
+    container_name: memgraph-db
+    ports:
+      - "7687:7687"
+      - "7444:7444"
+    volumes:
+      - mg_lib:/var/lib/memgraph
+      - mg_log:/var/log/memgraph
+    environment:
+      - MEMGRAPH_HOST=memgraph-db
+      - MEMGRAPH_USER=${MEMGRAPH_USER}
+      - MEMGRAPH_PASSWORD=${MEMGRAPH_PASSWORD}
+    command: ["--log-level=TRACE"]
+ 
+  lab:
+    image: memgraph/lab:latest
+    container_name: lab
+    ports:
+      - "3000:3000"
+    depends_on:
+      - memgraph
+
+  graphhopper:
+    image: israelhikingmap/graphhopper:latest
+    ports:
+      - "8989:8989"
+
+  poi_api:
+    build: 
+      context: .
+      dockerfile: POI_service/Dockerfile
+    volumes:
+      - ./POI_service:/workspace/POI_service
+      - ./shared_lib:/workspace/shared_lib
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONPATH=/workspace
+    env_file:
+      - ./POI_service/.env
+    depends_on:
+      - memgraph
+
+  poi_mcp:
+    build: 
+      context: .
+      dockerfile: POI_service/Dockerfile
+    command: uv run python -m app.api.mcp.tools
+    ports:
+      - "8001:8001"
+    environment:
+      - PYTHONPATH=/workspace
+      - HOST=memgraph-db
+      - PORT=7687
+    env_file:
+      - ./POI_service/.env
+    depends_on:
+      - memgraph
+volumes:
+  mg_lib:
+  mg_log:
+  mg_etc:

@@ -1,13 +1,15 @@
 import os
+import time
 import firebase_admin
 
+from pathlib import Path
 from logging import getLogger
 
 
 from neo4j import GraphDatabase
 from firebase_admin import credentials, firestore, _apps, initialize_app, delete_app
 
-from app.core.config.settings import MemgraphDB
+from app.core.config.settings import MemgraphDB, db_settings
 
 
 base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -27,10 +29,7 @@ class FireStoreConnector:
         if self._initialized:
             return
             
-        key_path = os.getenv("FIREBASE_KEY_PATH")
-        if not key_path:
-            raise ValueError("FIREBASE_KEY_PATH is not set")
-        
+        key_path = Path(__file__).parent.parent.parent.parent.parent / "secrets/serviceAccountKey.json"
         try:
             if not _apps:
                 cred = credentials.Certificate(key_path)
@@ -49,6 +48,7 @@ class FireStoreConnector:
                 delete_app(app)
             logger.info("FIREBASE CONNECTION CLOSED")
 
+
 class MemgraphConnector:
     _instance = None
 
@@ -63,19 +63,43 @@ class MemgraphConnector:
             return
 
         self.setting = db_settings
-        try:
-            self.driver = GraphDatabase.driver(
-                self.setting.memgraph_uri, 
-                auth=(self.setting.memgraph_user, self.setting.memgraph_password)
-            )
-            self.driver.verify_connectivity()
-            self._initialized = True
-            logger.info("MEMGRAPH CONNECTED!")
-        except Exception as e:
-            logger.error(f"MEMGRAPH CONNECTION ERROR: {e}")
-            raise e
+        print(self.setting.memgraph_uri)
+        self.driver = GraphDatabase.driver(
+            self.setting.memgraph_uri, 
+            auth=(self.setting.MEMGRAPH_USER, self.setting.MEMGRAPH_PASSWORD)
+        )
+        retries = 5
+        while retries > 0:
+            try:
+                self.driver.verify_connectivity()
+                self._initialized = True
+                logger.info("Successfully connected to Memgraph!")
+                break
+            except Exception as e:
+                print(f"DEBUG: Connecting to {db_settings.MEMGRAPH_HOST} on port {db_settings.MEMGRAPH_PORT}")
+                retries -= 1
+                logger.warning(f"⏳ Memgraph network not ready. Retrying in 3 seconds... ({retries} left)")
+                if retries == 0:
+                    logger.error("Failed to connect to Memgraph after multiple attempts.")
+                    raise e
+                time.sleep(3)
+
 
     def close(self):
         if hasattr(self, 'driver') and self.driver:
             self.driver.close()
             logger.info("MEMGRAPH CONNECTION CLOSED")
+
+
+
+firestore_db = FireStoreConnector()
+print(f"DEBUG: Connecting to {db_settings.MEMGRAPH_HOST} on port {db_settings.MEMGRAPH_PORT}")
+memgraph_db  = MemgraphConnector(db_settings=db_settings)
+
+
+def get_memgraph_connector() -> MemgraphConnector:
+    """FastAPI Dependency to yield the active database connector."""
+    return memgraph_db
+
+def get_firestore_connector() -> FireStoreConnector:
+    return firestore_db

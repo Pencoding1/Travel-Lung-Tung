@@ -14,7 +14,11 @@ NOTE: Will be filled later
 - [ ] Multi-agent system: the back-bone of the AI features. The goal is a system could query from RAG database with travel data gathering during the crawling process to answer user's questions:
     - [x] Crawling module
     - [ ] **Relationship Modeling**
-    - [ ] **Ingestion Module**
+    - [ ] **Ingestion Module**:
+        + [x] Build the batch ingestion for POI data.
+        + [ ] Verify logic of AI's code.
+        + [ ] Build ingestion pipeline for the geojson file.
+        + [ ] Routing service.
     - [ ] RAG database module
     - [x] Agent system architecture (draft)
     - [ ] The system
