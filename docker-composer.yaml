@@ -8,3 +8,7 @@ services:
       - MEMGRAPH_PASSWORD=${MEMGRAPH_PASSWORD}
     volumes:
       - ./mg_lib:/var/lib/memgraph
+  graphhopper:
+    image: israelhikingmap/graphhopper:latest
+    ports:
+      - "8989:8989"

@@ -1,14 +1,14 @@
 from datetime import datetime
 from typing import List, Optional, Any
 
-from app.core.infrastructure.db.database.connector import FireStoreConnector
+from app.core.infrastructure.database.connector import FireStoreConnector
 from app.core.base.repository import BaseFirebaseRepository
 
-from app.core.domain.Graph_Entities import Stop, Itinerary
+from app.core.domain.Itinerary import Itinerary
+from app.core.domain.Stops import Stop
 
-
-from app.core.interfaces.repositories import IStopRepository
-from app.core.interfaces.repositories import IItineraryRepository
+from app.core.interfaces.stop import IStopRepository
+from app.core.interfaces.itinerary import IItineraryRepository
 
 
 
@@ -31,7 +31,6 @@ class FirebaseItineraryRepository(BaseFirebaseRepository[Itinerary], IItineraryR
             return itinerary.stops
         return []
     
-
 
 
 class FirebaseStopRepository(BaseFirebaseRepository[Stop], IStopRepository):

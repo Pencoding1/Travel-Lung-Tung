@@ -1,13 +1,14 @@
 from pydantic import BaseModel
+from neo4j import Transaction
 from abc import ABC, abstractmethod
 
-from typing import Any, LiteralString, Type, TypeVar, Generic, List, Optional
+from typing import Any, LiteralString, Type, TypeVar, Generic, List, Optional, Dict
 
-from app.db.database.connector import MemgraphConnector, FireStoreConnector
+from app.core.infrastructure.db.database.connector import FireStoreConnector
 
 T = TypeVar('T', bound=BaseModel)
 
-class BaseRepository(Generic[T], ABC):
+class BaseRepository(ABC, Generic[T]):
     @abstractmethod
     def get_by_id(self, id: str) -> Optional[T]:
         pass
@@ -28,21 +29,19 @@ class BaseRepository(Generic[T], ABC):
     def delete(self, id: str) -> bool:
         pass
 
-class BaseMemgraphRepository(BaseRepository[T]):
-    def __init__(self, connector: MemgraphConnector):
-        self.driver = connector.driver
+class BaseMemgraphRepository(Generic[T]):
+    def __init__(self, tx: Transaction):
+        self.tx = tx
 
-    def _execute_read(self, query: LiteralString, parameters: Optional[dict] = None) -> List[dict]:
-        """Helper to execute read transactions and return raw dictionaries."""
-        with self.driver.session() as session:
-            result = session.run(query, parameters or {})
-            return [record.data() for record in result]
+    def _execute_write(self, query: LiteralString, parameters: Optional[dict] = None) -> List[Dict[str, Any]]:
+        # No session.begin_transaction() here! 
+        # We just run the query on the active transaction.
+        result = self.tx.run(query, parameters or {})
+        return [record.data() for record in result]
 
-    def _execute_write(self, query: LiteralString, parameters: Optional[dict]  = None) -> List[dict]:
-        """Helper to execute write transactions."""
-        with self.driver.session() as session:
-            result = session.run(query, parameters or {})
-            return [record.data() for record in result]
+    def _execute_read(self, query: LiteralString, parameters: Optional[dict] = None) -> List[Dict[str, Any]]:
+        result = self.tx.run(query, parameters or {})
+        return [record.data() for record in result]
         
 
 class BaseFirebaseRepository(BaseRepository[T]):

@@ -14,6 +14,8 @@ from datetime import datetime
 from typing import List, Dict, Optional
 from pathlib import Path
 
+from torch import Value
+
 from app.core.config.settings import AppSettings, ExtractPipelineSetting, LoadPipelineSetting
 
 from app.pipelines.crawling.discover.discoverer import Discoverer
@@ -210,7 +212,10 @@ class Crawler:
             return await self.batch_detail_crawl(classified_urls, service) # return json string of batch results
         else:
             self.logger.info(f"Beginning crawling phase with detail crawling\ntype:{crawl_type}....")
-            result = await self.__detail_crawl(self.url, crawl_type),
+            if crawl_type:
+                result = await self.__detail_crawl(self.url, crawl_type)
+            else:
+                raise ValueError("The crawling type should be defined to extract correctly.")
             return json.dumps(result, indent=4)
 
 

@@ -1,0 +1,21 @@
+{
+    "cities": {
+        "HCMC": ["saigon", "hochiminh", "hcmc", "hochiminhcity", "tphcm", "thanhphohochiminh"],
+        "Hanoi": ["hanoi", "hanoicity", "hn", "thudohanoi"],
+        "DaNang": ["danang", "tpdn", "danangcity"]
+    },
+    "districts": {
+        "HCMC": {
+            "D1": ["quan1", "district1", "q1", "d1", "quanmot"],
+            "D2": ["quan2", "district2", "q2", "d2", "quanhai", "thaodien", "thuthiem"],
+            "D3": ["quan3", "district3", "q3", "d3", "quanba"],
+            "BinhThanh": ["binhthanh", "quanbinhthanh", "qbinhthanh"],
+            "PhuNhuan": ["phunhuan", "quanphunhuan", "qphunhuan"]
+        },
+        "Hanoi": {
+            "HoanKiem": ["hoankiem", "quanhoankiem"],
+            "TayHo": ["tayho", "quantayho"],
+            "BaDinh": ["badinh", "quanbadinh"]
+        }
+    }
+}

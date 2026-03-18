@@ -1,15 +1,10 @@
-from abc import abstractmethod
-from datetime import datetime
-from typing import TypeVar, Generic, List, Optional
-
-from httpx import delete
+from abc import abstractmethod, ABC
+from typing import List, Optional
 
 from app.core.base.repository import BaseRepository
-from app.core.domain.Graph_Entities import (
+from POI_service.app.core.domain.graph_entities import (
     POI, 
-    Itinerary, 
     Category,
-    Stop, 
     Tag, 
     Description
 )
@@ -42,27 +37,6 @@ class IPOIRepository(BaseRepository[POI]):
     @abstractmethod
     def get_by_category_id(self, category_id: str) -> List[POI]:
         pass
-        
-    @abstractmethod
-    def get_by_tag_id(self, tag_id: str) -> List[POI]:
-        pass
-
-
-class IItineraryRepository(BaseRepository[Itinerary]):
-    """
-    Handles Itinerary and its nested list of Stops.
-    """
-    @abstractmethod
-    def get_by_start_poi(self, poi_id: str) -> List[Itinerary]:
-        pass
-
-    @abstractmethod
-    def get_by_end_poi(self, poi_id: str) -> List[Itinerary]:
-        pass
-    
-    @abstractmethod
-    def get_stops_list(self, id) -> List[Stop]:
-        pass
 
 
 class ICategoryRepository(BaseRepository[Category]):
@@ -83,23 +57,6 @@ class IDescriptionRepository(BaseRepository[Description]):
         pass
 
 
-class IStopRepository(BaseRepository[Stop]):
-    """
-    Interface for Stop repository containing specific analytical/UI query methods.
-    """
-    @abstractmethod
-    def get_by_budget(self, max_budget: float, skip: int = 0, limit: int = 100) -> List[Stop]:
-        pass
-
-    @abstractmethod
-    def get_by_date(self, target_date: datetime, skip: int = 0, limit: int = 100) -> List[Stop]:
-        pass
-
-    @abstractmethod
-    def get_by_duration_bucket(self, bucket_index: int, skip: int = 0, limit: int = 100) -> List[Stop]:
-        pass
-
-
 class IUserBehaviorRepository(BaseRepository):
     @abstractmethod
     def set_preference(self, user_id: str, category_id: str, weight: float) -> None:
@@ -109,4 +66,25 @@ class IUserBehaviorRepository(BaseRepository):
     @abstractmethod
     def get_preferred_pois(self, user_id: str, city: str, province: Optional[str] = None, street: Optional[str] = None, limit: int = 10) -> List[POI]:
         """Traverses User -> Category -> POI to return recommendations."""
+        pass
+
+
+class AbstractUnitOfWork(ABC):
+    pois: IPOIRepository
+    
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, traceback):
+        if exc_type:
+            self.rollback()
+        else:
+            self.commit()
+
+    @abstractmethod
+    def commit(self):
+        pass
+
+    @abstractmethod
+    def rollback(self):
         pass

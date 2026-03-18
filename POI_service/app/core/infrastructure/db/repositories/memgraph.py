@@ -1,40 +1,41 @@
-from typing import List, LiteralString, Optional, cast
+from neo4j import Transaction
+from typing import List, LiteralString, Optional, cast, Dict, Any
 
 from app.core.base.repository import BaseMemgraphRepository
 
-from app.core.domain.Graph_Entities import POI, UserPreference
+from POI_service.app.core.domain.graph_entities import POI, UserPreference, Category, Tag
 
-from app.core.infrastructure.db.database.connector import MemgraphConnector
-
-from shared_lib.travel_shared.exceptions import IntentedNotImplementedException
 from app.core.interfaces.repositories import IPOIRepository
 from app.core.interfaces.repositories import IUserBehaviorRepository
+from shared_lib.travel_shared.exceptions import IntentedNotImplementedException
+from POI_service.app.core.interfaces.repositories import ICategoryRepository, ITagRepository
 
 
 
 class MemgraphUserBehaviorRepository(BaseMemgraphRepository[UserPreference], IUserBehaviorRepository):
-    def __init__(self, connector: MemgraphConnector):
-        super().__init__(connector)
+    def __init__(self, tx: Transaction):
+        # Pass the transaction up to the base class
+        super().__init__(tx)
 
     # ---------------------------------------------------------
     # STAGE 1 ROUTING ENGINE: CYPHER CLUSTERING
     # ---------------------------------------------------------
-    def get_preferred_pois(self, user_id: str, city: str, province: Optional[str] = None, street: Optional[str] = None, limit: int = 10) -> List[POI]:
+    def get_preferred_pois(self, user_id: str, city: str, district: Optional[str] = None, street: Optional[str] = None, limit: int = 10) -> List[POI]:
         """
         Traverses the graph to find POIs that match the user's PREFERS edges,
         enforcing a strict hierarchical location query (City -> Province -> Street).
         """
         city = city.strip() if city else ""
-        province = province.strip() if province else None
+        district = district.strip() if district else None
         street = street.strip() if street else None
 
         if not city:
             raise ValueError("Hierarchical location query failed: 'city' is required as the base level.")
             
-        if street and not province:
+        if street and not district:
             raise ValueError("Hierarchical location query failed: 'province' must be provided if 'street' is queried.")
             
-        if province and not city:
+        if district and not city:
             raise ValueError("Hierarchical location query failed: 'city' must be provided if 'province' is queried.")
         
         query_lines = [
@@ -50,9 +51,9 @@ class MemgraphUserBehaviorRepository(BaseMemgraphRepository[UserPreference], IUs
         }
 
         # Dynamically append hierarchical WHERE clauses
-        if province:
+        if district:
             query_lines.append("  AND p.addr_district = $province")
-            params["province"] = province
+            params["province"] = district
         
         if street:
             query_lines.append("  AND p.addr_street = $street")
@@ -171,6 +172,8 @@ class MemgraphUserBehaviorRepository(BaseMemgraphRepository[UserPreference], IUs
 
 
 class MemgraphPOIRepository(BaseMemgraphRepository[POI], IPOIRepository):
+    def __init__(self, tx: Transaction):
+        super().__init__(tx)
     
     def create(self, entity: POI) -> POI:
         query = """
@@ -371,4 +374,121 @@ class MemgraphPOIRepository(BaseMemgraphRepository[POI], IPOIRepository):
         return [POI(**record["poi_data"]) for record in records if record.get("poi_data")]
     
 
+class MemgraphCategoryRepository(BaseMemgraphRepository[Category], ICategoryRepository):
+    def __init__(self, tx):
+        super().__init__(tx)
 
+    def _map_dict_to_entity(self, data: Dict[str, Any], node_key: str = "c") -> Category:
+        node_props = data.get(node_key, {})
+        return Category(id=node_props.get("id"), name=node_props.get("name"), context=node_props.get("context"))
+
+    def get_by_name(self, name: str) -> Optional[Category]:
+        query = "MATCH (c:Category {name: $name}) RETURN c"
+        results = self._execute_read(query, {"name": name})
+        if not results:
+            return None
+        return self._map_dict_to_entity(results[0], "c")
+
+    def create(self, entity: Category) -> Category:
+        query = "CREATE (c:Category {id: $id, name: $name}) RETURN c"
+        results = self._execute_write(query, {"id": entity.id, "name": entity.name})
+        if not results:
+            raise RuntimeError(f"Failed to create Category: {entity.name}")
+        return self._map_dict_to_entity(results[0], "c")
+
+    def get_by_id(self, id: str) -> Optional[Category]:
+        query = "MATCH (c:Category {id: $id}) RETURN c"
+        results = self._execute_read(query, {"id": id})
+        if not results:
+            return None
+        return self._map_dict_to_entity(results[0], "c")
+
+    def get_all(self, skip: int = 0, limit: int = 100) -> List[Category]:
+        query = """
+        MATCH (c:Category) 
+        RETURN c 
+        SKIP $skip LIMIT $limit
+        """
+        results = self._execute_read(query, {"skip": skip, "limit": limit})
+        return [self._map_dict_to_entity(record, "c") for record in results]
+
+    def update(self, id: str, entity: Category) -> Category:
+        query = """
+        MATCH (c:Category {id: $id})
+        SET c.name = $name
+        RETURN c
+        """
+        # We use 'id' from the parameter to find the node, and update properties from the 'entity'
+        results = self._execute_write(query, {"id": id, "name": entity.name})
+        if not results:
+            raise ValueError(f"Category with id {id} not found for update.")
+        return self._map_dict_to_entity(results[0], "c")
+
+    def delete(self, id: str) -> bool:
+        query = """
+        MATCH (c:Category {id: $id})
+        DETACH DELETE c
+        RETURN count(c) AS deleted_count
+        """
+        results = self._execute_write(query, {"id": id})
+        return results[0].get("deleted_count", 0) > 0
+
+
+class MemgraphTagRepository(BaseMemgraphRepository[Tag], ITagRepository):
+    def __init__(self, tx):
+        super().__init__(tx)
+
+    def _map_dict_to_entity(self, data: Dict[str, Any], node_key: str = "t") -> Tag:
+        node_props = data.get(node_key, {})
+        return Tag(id=node_props.get("id"), name=node_props.get("name"))
+
+    def get_by_name(self, name: str) -> Optional[Tag]:
+        query = "MATCH (t:Tag {name: $name}) RETURN t"
+        results = self._execute_read(query, {"name": name})
+        if not results:
+            return None
+        return self._map_dict_to_entity(results[0], "t")
+
+
+    def create(self, entity: Tag) -> Tag:
+        query = "CREATE (t:Tag {id: $id, name: $name}) RETURN t"
+        results = self._execute_write(query, {"id": entity.id, "name": entity.name})
+        if not results:
+            raise RuntimeError(f"Failed to create Tag: {entity.name}")
+        return self._map_dict_to_entity(results[0], "t")
+
+    def get_by_id(self, id: str) -> Optional[Tag]:
+        query = "MATCH (t:Tag {id: $id}) RETURN t"
+        results = self._execute_read(query, {"id": id})
+        if not results:
+            return None
+        return self._map_dict_to_entity(results[0], "t")
+
+    def get_all(self, skip: int = 0, limit: int = 100) -> List[Tag]:
+        query = """
+        MATCH (t:Tag) 
+        RETURN t 
+        SKIP $skip LIMIT $limit
+        """
+        results = self._execute_read(query, {"skip": skip, "limit": limit})
+        return [self._map_dict_to_entity(record, "t") for record in results]
+
+    def update(self, id: str, entity: Tag) -> Tag:
+        query = """
+        MATCH (t:Tag {id: $id})
+        SET t.name = $name
+        RETURN t
+        """
+        results = self._execute_write(query, {"id": id, "name": entity.name})
+        if not results:
+            raise ValueError(f"Tag with id {id} not found for update.")
+        return self._map_dict_to_entity(results[0], "t")
+
+    def delete(self, id: str) -> bool:
+        query = """
+        MATCH (t:Tag {id: $id})
+        DETACH DELETE t
+        RETURN count(t) AS deleted_count
+        """
+        results = self._execute_write(query, {"id": id})
+        return results[0].get("deleted_count", 0) > 0

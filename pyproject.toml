@@ -5,10 +5,13 @@ description="Smart Travel Assistant Agent"
 readme="README.md"
 requires-python=">=3.11"
 package=false
+dependencies = [
+    "phonenumbers>=9.0.26",
+]
 [tool.uv.workspace]
 members = [
     "shared_lib",
-    "crawler_service",
+    "backend_service",
     "POI_service",
     "ai_service"
 ]

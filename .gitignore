@@ -12,6 +12,9 @@ secrets/
 serviceAccountKey.json
 .python-version
 
+#ignore Graphhopper cache
+*-gh/
+
 # --- Python & Environment ---
 __pycache__/
 *.pyc
