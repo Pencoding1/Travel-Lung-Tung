@@ -12,6 +12,12 @@ services:
       - MEMGRAPH_HOST=memgraph-db
       - MEMGRAPH_USER=${MEMGRAPH_USER}
       - MEMGRAPH_PASSWORD=${MEMGRAPH_PASSWORD}
+    healthcheck:
+      test: ["CMD", "mgconsole", "--host", "127.0.0.1", "--port", "7687", "--username", "${MEMGRAPH_USER}", "--password", "${MEMGRAPH_PASSWORD}", "-e", "RETURN 1;"]      
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 0s
     command: ["--log-level=TRACE"]
  
   lab:

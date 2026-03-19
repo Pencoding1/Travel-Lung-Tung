@@ -5,7 +5,7 @@ from app.core.services.management import POIManagementService
 from app.core.services.ingestion import POIIngestionService
 
 # 1. Provide the Concrete UoW
-def get_unit_of_work(connector: MemgraphConnector = Depends(get_memgraph_connector)):
+def get_unit_of_work(connector: MemgraphConnector=Depends(get_memgraph_connector)):
     """
     Instantiates the MemgraphUnitOfWork. 
     Notice how it returns the concrete class, which perfectly satisfies 

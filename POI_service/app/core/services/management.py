@@ -6,7 +6,7 @@ class POIManagementService(BaseManagementService[POI]):
     """
     Concrete implementation of the management flow strictly for POIs.
     """
-    
+
     def _validate_payload(self, payload: Dict[str, Any]) -> POI:
         # Pydantic handles the location mapping and ID generation via the model_validator
         return POI.model_validate(payload)

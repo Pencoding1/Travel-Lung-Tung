@@ -1,21 +1,70 @@
-from fastapi import APIRouter, Depends, status, BackgroundTasks
-from typing import List, Dict, Any
+import uuid
+import json
 
+from typing import List, Dict, Any
+from sse_starlette.sse import EventSourceResponse
+from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
+
+
+from app.core.security.auth import verify_jwt_token
+from app.core.utils.broadcaster import broadcaster
 from app.api.dependencies.services import get_poi_ingestion_service
 from app.core.services.ingestion import POIIngestionService
 
-router = APIRouter(prefix="/ingestion", tags=["Data Ingestion"])
+# Initialize the router ONLY ONCE
+router = APIRouter(prefix="/ingestion", tags=["Data Ingestion"], dependencies=[Depends(verify_jwt_token)])
+
+@router.get("/", status_code=status.HTTP_200_OK)
+def health_check():
+    return {"status": "online", "message": "POI Ingestion Service is reachable"}
 
 @router.post("/batch", status_code=status.HTTP_202_ACCEPTED)
-def ingest_poi_batch(
+async def start_ingestion(
     payload: List[Dict[str, Any]], 
-    background_tasks: BackgroundTasks, # Run massive jobs in the background!
+    background_tasks: BackgroundTasks,
     service: POIIngestionService = Depends(get_poi_ingestion_service)
 ):
-    background_tasks.add_task(service.process_ota_batch, payload)
+    # 1. Generate a unique tracking ID
+    job_id = str(uuid.uuid4())
+    canary_result, remainder = service.process_canary_and_split(payload, limit=10)
     
+    # 3. Fast-fail: Expose the actual error details to the client
+    if not canary_result["is_success"]:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, 
+            detail={
+                "message": "Canary validation failed. The entire batch was rejected.",
+                "errors": canary_result["payload"]
+            }
+        )
+
+    # 4. Hand off the heavy items to the background (if any remain)
+    if remainder:
+        background_tasks.add_task(service.process_background_remainder, remainder, job_id)
+
+    # 5. Return the tracking info
     return {
-        "status": "Processing initiated",
-        "batch_size": len(payload),
-        "message": "The graph is currently unrolling and merging your data."
+        "is_success": True, 
+        "job_id": job_id, 
+        "message": f"Canary passed. {len(remainder)} items are processing in the background.",
+        "canary_summary": canary_result["payload"].get("summary", {})
     }
+
+@router.get("/stream/{job_id}")
+async def stream_updates(job_id: str):
+    """The SSE umbilical cord."""
+    async def event_generator():
+        queue = broadcaster.get_queue(job_id)
+        try:
+            while True:
+                data = await queue.get()
+                # Safely convert the dictionary to a JSON string for the SSE stream
+                yield {"event": "message", "data": json.dumps(data)}
+                
+                if data.get("type") == "complete":
+                    break
+        finally:
+            # Clean up the memory once the stream finishes or the client disconnects!
+            broadcaster.remove_queue(job_id)
+
+    return EventSourceResponse(event_generator())
