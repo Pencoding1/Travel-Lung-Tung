@@ -1,8 +1,26 @@
 from fastapi import Depends
+
 from app.core.infrastructure.db.database.connector import MemgraphConnector, get_memgraph_connector
+from app.core.interfaces.repositories import IDocumentRepository
 from app.core.infrastructure.db.uow import MemgraphUnitOfWork
 from app.core.services.management import POIManagementService
 from app.core.services.ingestion import POIIngestionService
+
+from travel_shared.exceptions import IntentedNotImplementedException
+
+
+
+class PendingDocumentRepository(IDocumentRepository):
+    def get_poi_documents(self, poi_id: str) -> dict:
+        # 2. Raise the exception ONLY when the method is actually called
+        # by the POIManagementService, inside its safe try/except block.
+        raise IntentedNotImplementedException(
+            "The Document Repository isn't implemented yet. Further development for RAG database is required."
+        )
+
+
+
+
 
 # 1. Provide the Concrete UoW
 def get_unit_of_work(connector: MemgraphConnector=Depends(get_memgraph_connector)):
@@ -23,3 +41,7 @@ def get_poi_management_service(uow: MemgraphUnitOfWork = Depends(get_unit_of_wor
 def get_poi_ingestion_service(uow: MemgraphUnitOfWork = Depends(get_unit_of_work)):
     """Injects the UoW into the Ingestion Service."""
     return POIIngestionService(uow)
+
+# Dummy class and require implement
+def get_document_repository() -> IDocumentRepository:
+    return PendingDocumentRepository()

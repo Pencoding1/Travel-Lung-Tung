@@ -169,96 +169,185 @@ class MemgraphUserBehaviorRepository(BaseMemgraphRepository[UserPreference], IUs
     from typing import List, Optional
 
 
-
-
 class MemgraphPOIRepository(BaseMemgraphRepository[POI], IPOIRepository):
-    def __init__(self, tx: Transaction):
+    def __init__(self, tx: 'Transaction'):
         super().__init__(tx)
     
+    # ---------------------------------------------------------
+    # BATCH CREATE (Highly Optimized for Ingestion)
+    # ---------------------------------------------------------
     def batch_create(self, poi_batch: list[dict]) -> int:
         query = """
         UNWIND $batch AS poi
-        
-        // 1. Defensively Merge POI
+
+        // 1. Flatten Address: Filter out nulls/empty strings and join with commas
+        WITH poi, [
+            poi.address.street_name, 
+            poi.address.ward, 
+            poi.address.district, 
+            poi.address.city, 
+            poi.address.nation
+        ] AS addr_parts
+        WITH poi, [part IN addr_parts WHERE part IS NOT NULL AND part <> ""] AS valid_parts
+        WITH poi, reduce(s = head(valid_parts), x IN tail(valid_parts) | s + ", " + x) AS full_addr
+
+        // 2. Defensively Merge Core POI
         MERGE (p:POI {id: poi.id})
         SET p += {
             name: poi.name,
             longitude: poi.longitude,
             latitude: poi.latitude,
             operation_time: poi.operation_time,
-            
-            // Using dot notation is fine if the parent (address) exists
-            addr_street: poi.address.street_name,
-            addr_district: poi.address.district,
-            addr_city: poi.address.city,
-            addr_nation: poi.address.nation,
-            
+            full_address: full_addr,
             contact_phone: poi.contact_info.phone_number,
             contact_website: poi.contact_info.website
         }
-        
-        // 2. Tags (Ensure tag exists)
-        WITH p, poi
-        WHERE poi.tag IS NOT NULL
-        MERGE (t:Tag {id: poi.tag.id})
-        ON CREATE SET t.name = poi.tag.name
-        MERGE (p)-[:HAS_TAG]->(t)
-        
-        // 3. Categories (FOREACH is null-safe for empty lists)
-        WITH p, poi
+
+        // 3. Generate Deterministic Spatial IDs (Lowercased and Trimmed)
+        WITH p, poi, full_addr,
+             toLower(trim(poi.address.nation)) AS n_id,
+             toLower(trim(poi.address.city)) + "_" + toLower(trim(poi.address.nation)) AS c_id,
+             toLower(trim(poi.address.district)) + "_" + toLower(trim(poi.address.city)) AS d_id,
+             toLower(trim(poi.address.street_name)) + "_" + toLower(trim(poi.address.district)) AS s_id
+
+        // 4. Establish Spatial Hierarchy using the Strict IDs
+        MERGE (n:Nation {id: n_id})
+        ON CREATE SET n.name = trim(poi.address.nation)
+
+        MERGE (c:City {id: c_id})
+        ON CREATE SET c.name = trim(poi.address.city), c.nation = trim(poi.address.nation)
+        MERGE (c)-[:IN_NATION]->(n)
+
+        MERGE (d:District {id: d_id})
+        ON CREATE SET d.name = trim(poi.address.district), d.city = trim(poi.address.city)
+        MERGE (d)-[:IN_CITY]->(c)
+
+        // 5. Conditional LOCATE_AT Fallback using Strict IDs
+        CALL {
+            WITH p, poi, d, s_id
+            WITH p, poi, d, s_id WHERE poi.address.street_name IS NOT NULL AND trim(poi.address.street_name) <> ""
+            MERGE (s:Street {id: s_id})
+            ON CREATE SET s.name = trim(poi.address.street_name), s.district = trim(poi.address.district)
+            MERGE (s)-[:IN_DISTRICT]->(d)
+            MERGE (p)-[:LOCATE_AT]->(s)
+        }
+        CALL {
+            WITH p, poi, d
+            WITH p, poi, d WHERE poi.address.street_name IS NULL OR trim(poi.address.street_name) = ""
+            MERGE (p)-[:LOCATE_AT]->(d)
+        }
+
+        // 5. Tags (Using FOREACH as a null-safe conditional)
+        FOREACH (ignoreMe IN CASE WHEN poi.tag IS NOT NULL THEN [1] ELSE [] END |
+            MERGE (t:Tag {name: poi.tag.name}) // Merge on Name to avoid duplicates
+            ON CREATE SET t.id = poi.tag.id
+            MERGE (p)-[:HAS_TAG]->(t)
+        )
+
+        // 6. Categories (FOREACH handles the list naturally without UNWINDing)
         FOREACH (cat IN poi.poi_categories |
-            MERGE (c:Category {id: cat.id})
-            ON CREATE SET c.name = cat.name, c.context = cat.context
-            MERGE (p)-[:HAS_CATEGORY]->(c)
+            MERGE (catNode:Category {name: cat.name}) // Merge on Name to avoid duplicates
+            ON CREATE SET catNode.id = cat.id, catNode.context = cat.context
+            MERGE (p)-[:HAS_CATEGORY]->(catNode)
         )
         """
         # Ensure we use the active transaction from the UoW
         self._execute_write(query, {"batch": poi_batch})
         return len(poi_batch)
 
+    # ---------------------------------------------------------
+    # SINGLE CREATE
+    # ---------------------------------------------------------
     def create(self, entity: POI) -> POI:
         query = """
-        // 1. Create/Merge the core POI node and flatten Value Objects
-        MERGE (p:POI {id: $poi.id})
+        WITH $poi AS poi, [
+            $poi.address.street_name, 
+            $poi.address.ward, 
+            $poi.address.district, 
+            $poi.address.city, 
+            $poi.address.nation
+        ] AS addr_parts
+        WITH poi, [part IN addr_parts WHERE part IS NOT NULL AND part <> ""] AS valid_parts
+        WITH poi, reduce(s = head(valid_parts), x IN tail(valid_parts) | s + ", " + x) AS full_addr
+
+        // 1. Create the core POI node
+        MERGE (p:POI {id: poi.id})
         SET p += {
-            name: $poi.name,
-            longitude: $poi.longitude,
-            latitude: $poi.latitude,
-            operation_time: $poi.operation_time,
-            rating: $poi.rating,
-            menu: $poi.menu,
-            
-            addr_street: $poi.address.street_name,
-            addr_ward: $poi.address.ward,
-            addr_district: $poi.address.district,
-            addr_city: $poi.address.city,
-            addr_nation: $poi.address.nation,
-            
-            contact_phone: $poi.contact_info.phone_number,
-            contact_fanpage: $poi.contact_info.fanpage,
-            contact_website: $poi.contact_info.website
+            name: poi.name,
+            longitude: poi.longitude,
+            latitude: poi.latitude,
+            operation_time: poi.operation_time,
+            rating: poi.rating,
+            menu: poi.menu,
+            full_address: full_addr,
+            contact_phone: poi.contact_info.phone_number,
+            contact_fanpage: poi.contact_info.fanpage,
+            contact_website: poi.contact_info.website
+        }
+
+        // 2. Establish Spatial Hierarchy
+        MERGE (n:Nation {name: poi.address.nation})
+        MERGE (c:City {name: poi.address.city, nation: poi.address.nation})
+        MERGE (c)-[:IN_NATION]->(n)
+        MERGE (d:District {name: poi.address.district, city: poi.address.city})
+        MERGE (d)-[:IN_CITY]->(c)
+
+        // 3. Generate Deterministic Spatial IDs (Lowercased and Trimmed)
+        WITH p, poi, full_addr,
+             toLower(trim(poi.address.nation)) AS n_id,
+             toLower(trim(poi.address.city)) + "_" + toLower(trim(poi.address.nation)) AS c_id,
+             toLower(trim(poi.address.district)) + "_" + toLower(trim(poi.address.city)) AS d_id,
+             toLower(trim(poi.address.street_name)) + "_" + toLower(trim(poi.address.district)) AS s_id
+
+        // 4. Establish Spatial Hierarchy using the Strict IDs
+        MERGE (n:Nation {id: n_id})
+        ON CREATE SET n.name = trim(poi.address.nation)
+
+        MERGE (c:City {id: c_id})
+        ON CREATE SET c.name = trim(poi.address.city), c.nation = trim(poi.address.nation)
+        MERGE (c)-[:IN_NATION]->(n)
+
+        MERGE (d:District {id: d_id})
+        ON CREATE SET d.name = trim(poi.address.district), d.city = trim(poi.address.city)
+        MERGE (d)-[:IN_CITY]->(c)
+
+        // 5. Conditional LOCATE_AT Fallback using Strict IDs
+        CALL {
+            WITH p, poi, d, s_id
+            WITH p, poi, d, s_id WHERE poi.address.street_name IS NOT NULL AND trim(poi.address.street_name) <> ""
+            MERGE (s:Street {id: s_id})
+            ON CREATE SET s.name = trim(poi.address.street_name), s.district = trim(poi.address.district)
+            MERGE (s)-[:IN_DISTRICT]->(d)
+            MERGE (p)-[:LOCATE_AT]->(s)
+        }
+        CALL {
+            WITH p, poi, d
+            WITH p, poi, d WHERE poi.address.street_name IS NULL OR trim(poi.address.street_name) = ""
+            MERGE (p)-[:LOCATE_AT]->(d)
         }
         
-        // 2. Establish Tag Relationship
-        WITH p
-        MERGE (t:Tag {id: $poi.tag.id})
-        ON CREATE SET t.name = $poi.tag.name
-        MERGE (p)-[:HAS_TAG]->(t)
-        
-        // 3. Establish Category Relationships
-        WITH p
-        UNWIND $poi.poi_categories AS cat
-        MERGE (c:Category {id: cat.id})
-        ON CREATE SET c.name = cat.name, c.context = cat.context
-        MERGE (p)-[:HAS_CATEGORY]->(c)
-        
+        // 4. Establish Tag Relationship
+        WITH p, poi
+        FOREACH (ignoreMe IN CASE WHEN poi.tag IS NOT NULL THEN [1] ELSE [] END |
+            MERGE (t:Tag {id: poi.tag.id})
+            ON CREATE SET t.name = poi.tag.name
+            MERGE (p)-[:HAS_TAG]->(t)
+        )
+
+        // 5. Establish Category Relationships
+        WITH p, poi
+        UNWIND poi.poi_categories AS cat
+        MERGE (catNode:Category {id: cat.id})
+        ON CREATE SET catNode.name = cat.name, catNode.context = cat.context
+        MERGE (p)-[:HAS_CATEGORY]->(catNode)
+
         RETURN p.id AS id
         """
         self._execute_write(query, {"poi": entity.model_dump(mode='json')})
         return entity
 
     # ---------------------------------------------------------
-    # READ
+    # READ OPERATIONS
     # ---------------------------------------------------------
     def get_by_id(self, id: str) -> Optional[POI]:
         query = """
@@ -268,7 +357,7 @@ class MemgraphPOIRepository(BaseMemgraphRepository[POI], IPOIRepository):
         
         RETURN p {
             .id, .name, .longitude, .latitude, .operation_time, .rating, .menu,
-            address: {street_name: p.addr_street, ward: p.addr_ward, district: p.addr_district, city: p.addr_city, nation: p.addr_nation},
+            full_address: p.full_address,
             contact_info: {phone_number: p.contact_phone, fanpage: p.contact_fanpage, website: p.contact_website},
             poi_categories: collect(DISTINCT c { .id, .name, .context }),
             tag: head(collect(DISTINCT t { .id, .name }))
@@ -287,7 +376,7 @@ class MemgraphPOIRepository(BaseMemgraphRepository[POI], IPOIRepository):
         
         RETURN p {
             .id, .name, .longitude, .latitude, .operation_time, .rating, .menu,
-            address: {street_name: p.addr_street, ward: p.addr_ward, district: p.addr_district, city: p.addr_city, nation: p.addr_nation},
+            full_address: p.full_address,
             contact_info: {phone_number: p.contact_phone, fanpage: p.contact_fanpage, website: p.contact_website},
             poi_categories: collect(DISTINCT c { .id, .name, .context }),
             tag: head(collect(DISTINCT t { .id, .name }))
@@ -302,48 +391,84 @@ class MemgraphPOIRepository(BaseMemgraphRepository[POI], IPOIRepository):
     # ---------------------------------------------------------
     def update(self, id: str, entity: POI) -> POI:
         query = """
+        WITH $poi AS poi, [
+            $poi.address.street_name, 
+            $poi.address.ward, 
+            $poi.address.district, 
+            $poi.address.city, 
+            $poi.address.nation
+        ] AS addr_parts
+        WITH poi, [part IN addr_parts WHERE part IS NOT NULL AND part <> ""] AS valid_parts
+        WITH poi, reduce(s = head(valid_parts), x IN tail(valid_parts) | s + ", " + x) AS full_addr
+
         MATCH (p:POI {id: $id})
-        
-        // 1. Update all flattened properties
+
+        // 1. Update core properties
         SET p += {
-            name: $poi.name,
-            longitude: $poi.longitude,
-            latitude: $poi.latitude,
-            operation_time: $poi.operation_time,
-            rating: $poi.rating,
-            menu: $poi.menu,
-            addr_street: $poi.address.street_name,
-            addr_ward: $poi.address.ward,
-            addr_district: $poi.address.district,
-            addr_city: $poi.address.city,
-            addr_nation: $poi.address.nation,
-            contact_phone: $poi.contact_info.phone_number,
-            contact_fanpage: $poi.contact_info.fanpage,
-            contact_website: $poi.contact_info.website
+            name: poi.name,
+            longitude: poi.longitude,
+            latitude: poi.latitude,
+            operation_time: poi.operation_time,
+            rating: poi.rating,
+            menu: poi.menu,
+            full_address: full_addr,
+            contact_phone: poi.contact_info.phone_number,
+            contact_fanpage: poi.contact_info.fanpage,
+            contact_website: poi.contact_info.website
         }
-        
-        // 2. Reconcile Tag: Delete old relationship, set new one
-        WITH p
+
+        // 2. Reconcile Spatial Information: Sever old connection
+        WITH p, poi
+        OPTIONAL MATCH (p)-[old_loc:LOCATE_AT]->()
+        DELETE old_loc
+
+        // 3. Rebuild Spatial Hierarchy
+        WITH p, poi
+        MERGE (n:Nation {name: poi.address.nation})
+        MERGE (c:City {name: poi.address.city, nation: poi.address.nation})
+        MERGE (c)-[:IN_NATION]->(n)
+        MERGE (d:District {name: poi.address.district, city: poi.address.city})
+        MERGE (d)-[:IN_CITY]->(c)
+
+        // 4. Conditional LOCATE_AT Fallback
+        CALL {
+            WITH p, poi, d
+            WITH p, poi, d WHERE poi.address.street_name IS NOT NULL AND poi.address.street_name <> ""
+            MERGE (s:Street {name: poi.address.street_name, district: poi.address.district})
+            MERGE (s)-[:IN_DISTRICT]->(d)
+            MERGE (p)-[:LOCATE_AT]->(s)
+        }
+        CALL {
+            WITH p, poi, d
+            WITH p, poi, d WHERE poi.address.street_name IS NULL OR poi.address.street_name = ""
+            MERGE (p)-[:LOCATE_AT]->(d)
+        }
+
+        // 5. Reconcile Tag
+        WITH p, poi
         OPTIONAL MATCH (p)-[old_t:HAS_TAG]->()
         DELETE old_t
-        WITH p
-        MERGE (t:Tag {id: $poi.tag.id})
-        ON CREATE SET t.name = $poi.tag.name
-        MERGE (p)-[:HAS_TAG]->(t)
-        
-        // 3. Reconcile Categories: Delete old relationships, set new ones
-        WITH p
+        WITH p, poi
+        FOREACH (ignoreMe IN CASE WHEN poi.tag IS NOT NULL THEN [1] ELSE [] END |
+            MERGE (t:Tag {id: poi.tag.id})
+            ON CREATE SET t.name = poi.tag.name
+            MERGE (p)-[:HAS_TAG]->(t)
+        )
+
+        // 6. Reconcile Categories
+        WITH p, poi
         OPTIONAL MATCH (p)-[old_c:HAS_CATEGORY]->()
         DELETE old_c
-        WITH p
-        UNWIND $poi.poi_categories AS cat
-        MERGE (c:Category {id: cat.id})
-        ON CREATE SET c.name = cat.name, c.context = cat.context
-        MERGE (p)-[:HAS_CATEGORY]->(c)
-        
+        WITH p, poi
+        UNWIND poi.poi_categories AS cat
+        MERGE (catNode:Category {id: cat.id})
+        ON CREATE SET catNode.name = cat.name, catNode.context = cat.context
+        MERGE (p)-[:HAS_CATEGORY]->(catNode)
+
         RETURN p.id AS id
         """
-        self._execute_write(query, {"id": id, "poi": entity.model_dump()})
+        # Safely dump complex types using mode='json'
+        self._execute_write(query, {"id": id, "poi": entity.model_dump(mode='json')})
         return entity
 
     # ---------------------------------------------------------
@@ -357,20 +482,31 @@ class MemgraphPOIRepository(BaseMemgraphRepository[POI], IPOIRepository):
         RETURN count(p) AS deleted_count
         """
         result = self._execute_write(query, {"id": id})
-        # Return True if at least one node was deleted
         return result[0]["deleted_count"] > 0
         
-    # Implement specific declarative behaviors defined in POIRepository interface
+    # ---------------------------------------------------------
+    # SPECIFIC BEHAVIORS
+    # ---------------------------------------------------------
     def get_by_city(self, city_name: str, skip: int = 0, limit: int = 100) -> List[POI]:
         query = """
-        MATCH (p:POI {addr_city: $city})
+        // 1. Anchor on the City node to drastically reduce the search space
+        MATCH (city:City {name: $city})
+        
+        // 2. Traverse outward to find the POIs (*0..1 handles the District fallback gracefully)
+        MATCH (city)<-[:IN_CITY]-(:District)<-[:IN_DISTRICT*0..1]-(loc)<-[:LOCATE_AT]-(p:POI)
+        
+        // 3. Fetch optional entity details
         OPTIONAL MATCH (p)-[:HAS_CATEGORY]->(c:Category)
         OPTIONAL MATCH (p)-[:HAS_TAG]->(t:Tag)
         
         RETURN p {
             .id, .name, .longitude, .latitude, .operation_time, .rating, .menu,
-            address: {street_name: p.addr_street, ward: p.addr_ward, district: p.addr_district, city: p.addr_city, nation: p.addr_nation},
-            contact_info: {phone_number: p.contact_phone, fanpage: p.contact_fanpage, website: p.contact_website},
+            full_address: p.full_address,
+            contact_info: {
+                phone_number: p.contact_phone, 
+                fanpage: p.contact_fanpage, 
+                website: p.contact_website
+            },
             poi_categories: collect(DISTINCT c { .id, .name, .context }),
             tag: head(collect(DISTINCT t { .id, .name }))
         } AS poi_data
@@ -381,39 +517,92 @@ class MemgraphPOIRepository(BaseMemgraphRepository[POI], IPOIRepository):
         
     def get_by_category_id(self, category_id: str) -> List[POI]:
         query = """
-        // 1. Anchor on the specific Category and traverse inward to find matching POIs
+        // Anchor on the specific Category and traverse inward to find matching POIs
         MATCH (target_c:Category {id: $category_id})<-[:HAS_CATEGORY]-(p:POI)
         
-        // 2. Traverse outward from those POIs to collect ALL their categories and tags
         OPTIONAL MATCH (p)-[:HAS_CATEGORY]->(all_c:Category)
         OPTIONAL MATCH (p)-[:HAS_TAG]->(t:Tag)
         
-        // 3. Execute the Map Projection
         RETURN p {
             .id, .name, .longitude, .latitude, .operation_time, .rating, .menu,
-            address: {
-                street_name: p.addr_street, 
-                ward: p.addr_ward, 
-                district: p.addr_district, 
-                city: p.addr_city, 
-                nation: p.addr_nation
-            },
+            full_address: p.full_address,
             contact_info: {
                 phone_number: p.contact_phone,
                 fanpage: p.contact_fanpage,
                 website: p.contact_website
             },
-            // Group the full list of categories for the POI entity
             poi_categories: collect(DISTINCT all_c { .id, .name, .context }),
             tag: head(collect(DISTINCT t { .id, .name }))
         } AS poi_data
         """
-        
         records = self._execute_read(query, {"category_id": category_id})
+        return [POI(**record["poi_data"]) for record in records if record.get("poi_data")]    
+
+    def get_poi_graph_payload(self, id: str, radius_km: float = 3.0, limit: int = 5) -> Optional[Dict[str, Any]]:
+        """
+        Executes a fast spatial heuristic in Memgraph.
+        1 degree of latitude/longitude is roughly 111 kilometers.
+        We use the Pythagorean theorem on coordinates for a highly performant 2D distance calculation.
+        """
+        query = """
+        // 1. Anchor on the target POI
+        MATCH (p:POI {id: $id})
+        OPTIONAL MATCH (p)-[:HAS_CATEGORY]->(c:Category)
         
-        # Parse the raw nested dictionaries back into Pydantic POI models
-        return [POI(**record["poi_data"]) for record in records if record.get("poi_data")]
-    
+        // Use head(collect()) to prevent Cartesian explosion
+        WITH p, head(collect(c)) AS primary_category 
+        
+        // 2. Safe Optional Match for Nearby
+        OPTIONAL MATCH (nearby:POI)
+        WHERE nearby.id <> p.id
+          AND nearby.latitude IS NOT NULL 
+          AND nearby.longitude IS NOT NULL
+          AND abs(nearby.latitude - p.latitude) <= ($radius_km / 111.0)
+          AND abs(nearby.longitude - p.longitude) <= ($radius_km / 111.0)
+          
+        // 3. Calculate distance, filter, AND order in a single, continuous WITH block
+        WITH p, primary_category, nearby,
+             sqrt( (p.latitude - nearby.latitude)^2 + (p.longitude - nearby.longitude)^2 ) * 111.0 AS dist_km
+        WHERE nearby IS NULL OR dist_km <= $radius_km
+        ORDER BY dist_km ASC
+        
+        // 4. Collect safely
+        WITH p, primary_category, collect(
+            CASE WHEN nearby IS NOT NULL THEN {
+                POI_ID: nearby.id,
+                POI_Name: nearby.name,
+                POI_Address: nearby.full_address,
+                POI_Category: head([(nearby)-[:HAS_CATEGORY]->(nc:Category) | nc.name]),
+                distance: round(dist_km * 100) / 100.0
+            } ELSE null END
+        )[0..$limit] AS nearby_list
+        
+        // 5. Return the mapped dictionary
+        RETURN {
+            POI_ID: p.id,
+            POI_Name: p.name,
+            POI_Address: p.full_address,
+            POI_Category: CASE WHEN primary_category IS NOT NULL THEN primary_category.name ELSE "Uncategorized" END,
+            POI_Contact_Info: {
+                website: p.contact_website,
+                fanpage: p.contact_fanpage,
+                phonenumber: p.contact_phone
+            },
+            NEAR_BY: [n IN nearby_list WHERE n IS NOT NULL]
+        } AS graph_result
+        """
+        
+        records = self._execute_read(query, {
+            "id": id, 
+            "radius_km": radius_km, 
+            "limit": limit
+        })
+        
+        if not records or not records[0].get("graph_result"):
+            return None
+            
+        return records[0]["graph_result"]
+
 
 class MemgraphCategoryRepository(BaseMemgraphRepository[Category], ICategoryRepository):
     def __init__(self, tx):

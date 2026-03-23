@@ -95,8 +95,6 @@ class UserPreference(BaseModel):
                 self.budget_level = BudgetLevel.LUXURY
         return self
 
-
-
 class Address(BaseModel):
     street_name: Optional[str] = None
     district: str = Field(..., min_length=1)

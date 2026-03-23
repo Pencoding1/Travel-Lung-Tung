@@ -51,7 +51,10 @@ class BaseFirebaseRepository(BaseRepository[T]):
     """
     def __init__(self, connector: FireStoreConnector, collection_name: str, model_class: Type[T]):
         self.db = connector.db
-        self.collection = self.db.collection(collection_name)
+        if self.db:
+            self.collection = self.db.collection(collection_name)
+        else:
+            raise ConnectionRefusedError("The firebase is not properly initialized.")
         self.model_class = model_class
 
     def create(self, entity: T) -> T:

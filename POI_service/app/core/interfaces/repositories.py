@@ -1,5 +1,5 @@
 from abc import abstractmethod, ABC
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 
 from app.core.base.repository import BaseRepository
 from app.core.domain.graph_entities import (
@@ -9,10 +9,15 @@ from app.core.domain.graph_entities import (
 )
 
 
-class IPOIRepository(BaseRepository[POI]):
+class IPOIRepository(ABC):
     """
     Handles POI and its nested value objects: Address, ContactInfo, Product.
+    Strictly interfaces with the Graph Database (Memgraph).
     """
+    @abstractmethod
+    def get_by_id(self, id:str) -> Optional[POI]:
+        pass
+
     @abstractmethod
     def create(self, entity: POI) -> POI: 
         pass
@@ -26,7 +31,7 @@ class IPOIRepository(BaseRepository[POI]):
         pass
 
     @abstractmethod
-    def delete(self, id:str) -> bool:
+    def delete(self, id: str) -> bool:
         pass
 
     @abstractmethod
@@ -39,6 +44,17 @@ class IPOIRepository(BaseRepository[POI]):
 
     @abstractmethod
     def get_by_category_id(self, category_id: str) -> List[POI]:
+        pass
+
+    @abstractmethod
+    def get_poi_graph_payload(self, 
+                              id: str, 
+                              radius_km: float = 3.0, 
+                              limit: int = 5) -> Optional[Dict[str, Any]]:
+        """
+        Fetches the POI and calculates nearby locations using spatial heuristics.
+        Returns a dictionary prepared for the POIResult schema (excluding Vector DB data).
+        """
         pass
 
 
@@ -85,4 +101,10 @@ class AbstractUnitOfWork(ABC):
 
     @abstractmethod
     def rollback(self):
+        pass
+
+class IDocumentRepository(ABC):
+    @abstractmethod
+    def get_poi_documents(self, poi_id: str) -> Dict:
+        """ Should return a dict with insight, seo_article, and review """
         pass
