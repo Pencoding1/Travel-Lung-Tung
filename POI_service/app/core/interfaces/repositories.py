@@ -56,6 +56,12 @@ class IPOIRepository(ABC):
         Returns a dictionary prepared for the POIResult schema (excluding Vector DB data).
         """
         pass
+    
+    @abstractmethod
+    def build_nearby_edges_for_district(self,
+                                        district_id: str,
+                                        radius_km: float) -> int:
+        pass
 
 
 class ICategoryRepository(BaseRepository[Category]):

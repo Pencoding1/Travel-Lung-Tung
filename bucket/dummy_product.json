@@ -1,0 +1,72 @@
+{
+  "CFM": {
+    "category_name": "Cà Phê Muối",
+    "price_range": [25000, 45000],
+    "items": [
+      "Ca Phe Muoi Nong",
+      "Ca Phe Muoi Sua Nong",
+      "Ca Phe Muoi Chay",
+      "Ca Phe Muoi Da"
+    ]
+  },
+  "CFD": {
+    "category_name": "Cà Phê Đen",
+    "price_range": [20000, 35000],
+    "items": [
+      "Ca Phe Den Da",
+      "Den Da Khong Duong",
+      "Bac Xiu Bac Ha",
+      "Ca Phe Den Pha May"
+    ]
+  },
+  "CFS": {
+    "category_name": "Cà Phê Sữa",
+    "price_range": [25000, 40000],
+    "items": [
+      "Ca Phe Sua Tuoi Standard",
+      "Ca Phe Sua Dac Co Dien",
+      "Bac Xiu 3 Tang",
+      "Ca Phe Sua Cot Dua"
+    ]
+  },
+  "TTC": {
+    "category_name": "Trà Trái Cây Trendy",
+    "price_range": [30000, 55000],
+    "items": [
+      "Tra Mang Cau Chanh Day",
+      "Tra Chanh Gia Tay (Hand-pounded)",
+      "Tra Dau Tam Ket Hop Hoa Cuc",
+      "Tra Thanh Long Do Mix Hat Chia"
+    ]
+  },
+  "TSA": {
+    "category_name": "Trà Sữa & Đồ Đá Xay",
+    "price_range": [35000, 65000],
+    "items": [
+      "Tra Sua Tran Chau Duong Den",
+      "Tra Sua Oolong Dam Vi",
+      "Milo Dam Full Topping GenZ",
+      "Tra Sua Panna Cotta Khung Log"
+    ]
+  },
+  "ANV": {
+    "category_name": "Ăn Vặt Hot Trend",
+    "price_range": [15000, 55000],
+    "items": [
+      "Banh Trang Tron Full Topping",
+      "Nem Chua Ran Pho Mai",
+      "Chan Ga Rut Xuong Ngam Sa Tac",
+      "Mi Tron Indomie Trung Long Dao"
+    ]
+  },
+  "BNH": {
+    "category_name": "Bánh Ngọt & Pastry",
+    "price_range": [35000, 75000],
+    "items": [
+      "Banh Bong Lan Trung Muoi Chay",
+      "Tiramisu Hu Thuy Tinh",
+      "Banh Croissant Trung Muoi Tan Chay",
+      "Red Velvet Velvet Cake Slice"
+    ]
+  }
+}

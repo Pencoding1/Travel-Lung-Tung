@@ -6,15 +6,22 @@ from typing import List, Dict, Any, Tuple
 from tenacity import retry, stop_after_attempt, wait_exponential
 
 from app.core.interfaces.repositories import AbstractUnitOfWork
+from app.core.utils.updater import SpatialUpdater
+from app.core.interfaces.updater import ISpatialUpdate
 from app.core.utils.broadcaster import broadcaster
 from app.core.domain.graph_entities import POI
 
 logger = logging.getLogger(__name__)
 
 class POIIngestionService:
-    def __init__(self, uow: AbstractUnitOfWork):
+    def __init__(
+        self, 
+        uow: AbstractUnitOfWork, 
+        spatial_updater: ISpatialUpdate = SpatialUpdater() # <-- Inject Strategy here
+    ):
         self.uow = uow
-        self.chunk_size = 500 
+        self.chunk_size = 500
+        self.spatial_updater = spatial_updater
 
     def _validate_batch(self, raw_payloads: List[Dict[str, Any]]) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
         """Internal helper to separate valid POIs from invalid ones."""
@@ -24,7 +31,7 @@ class POIIngestionService:
         for index, raw_data in enumerate(raw_payloads):
             try:
                 poi = POI.model_validate(raw_data)
-                valid_pois.append(poi.model_dump())
+                valid_pois.append(poi.model_dump(mode="json"))
             except ValidationError as e:
                 failed_records.append({
                     "index": index,
@@ -152,4 +159,20 @@ class POIIngestionService:
     @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10))
     def _execute_chunk_with_retry(self, chunk: List[Dict[str, Any]]) -> int:
         with self.uow:
-            return self.uow.pois.batch_create(chunk)
+            self.uow.pois.batch_create(chunk)
+        
+        affected_districts = list(set([
+            poi["address"]["district"] 
+            for poi in chunk 
+            if poi.get("address") and poi["address"].get("district")
+        ]))
+        
+        if affected_districts:
+            self.spatial_updater.trigger_update(
+                affected_district=affected_districts,
+                repository=self.uow.pois,
+                # safe since the _execute_chunk() is already asyncronously run.
+                background_tasks=None 
+            )
+        
+        return len(chunk)

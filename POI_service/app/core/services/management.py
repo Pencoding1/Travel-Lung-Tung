@@ -1,3 +1,4 @@
+import json 
 from fastapi import HTTPException, status
 from typing import Dict, Any, Optional, List
 
@@ -38,19 +39,19 @@ class POIManagementService(BaseManagementService[POI]):
         """Fetchs a paginated list of all POIs."""
         with self.uow:
             pois = self.uow.pois.get_all(skip=skip, limit=limit)
-            return [poi.model_dump() for poi in pois]
+            return [json.loads(poi.model_dump_json()) for poi in pois]
 
     def get_pois_by_city(self, city_name: str, skip: int = 0, limit: int = 100) -> List[Dict[str, Any]]:
         """Fetches POIs filtered by city."""
         with self.uow:
             pois = self.uow.pois.get_by_city(city_name, skip=skip, limit=limit)
-            return [poi.model_dump() for poi in pois]
+            return [json.loads(poi.model_dump_json()) for poi in pois]
 
     def get_pois_by_category(self, category_id: str) -> List[Dict[str, Any]]:
         """Fetches POIs linked to a specific category ID."""
         with self.uow:
             pois = self.uow.pois.get_by_category_id(category_id)
-            return [poi.model_dump() for poi in pois]
+            return [json.loads(poi.model_dump_json()) for poi in pois]
     
     def get_agentic_poi_details(self, poi_id: str, doc_repo: IDocumentRepository) -> POIGetResponse:
         # 1. Graph RAG Retrieval

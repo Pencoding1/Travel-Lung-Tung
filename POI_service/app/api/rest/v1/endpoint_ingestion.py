@@ -29,15 +29,17 @@ async def start_ingestion(
     canary_result, remainder = service.process_canary_and_split(payload, limit=10)
     
     # 3. Fast-fail: Expose the actual error details to the client
-    if not canary_result["is_success"]:
+    if not canary_result.get("is_success"):
+        # We are going to dump the ENTIRE canary result straight to the terminal
+        # so nothing gets filtered out by mistake.
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, 
             detail={
-                "message": "Canary validation failed. The entire batch was rejected.",
-                "errors": canary_result["payload"]
+                "status": "failed",
+                "message": "Raw Database Exception Dump",
+                "RAW_CANARY_RESULT": canary_result 
             }
         )
-
     # 4. Hand off the heavy items to the background (if any remain)
     if remainder:
         background_tasks.add_task(service.process_background_remainder, remainder, job_id)

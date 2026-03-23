@@ -176,6 +176,75 @@ class MemgraphPOIRepository(BaseMemgraphRepository[POI], IPOIRepository):
     # ---------------------------------------------------------
     # BATCH CREATE (Highly Optimized for Ingestion)
     # ---------------------------------------------------------
+    def build_nearby_edges_for_district(self, district_id: str, radius_km: float = 3.0) -> int:
+        """
+        Materializes NEAR_BY relationships for all POIs within a specific district.
+        This prevents Cartesian explosions by bounding the math to a small geographic area.
+        
+        Args:
+            district_id: The exact deterministic ID of the district (e.g., 'quận 1_hồ chí minh_việt nam')
+            radius_km: The maximum distance to connect two POIs.
+            
+        Returns:
+            The number of NEAR_BY edges successfully created.
+        """
+        query = """
+        // 1. Anchor to the specific District
+        MATCH (d:District {id: $district_id})
+        
+        // 2. Fetch only the POIs inside this district (handles both direct and street-level links)
+        MATCH (d)<-[:IN_DISTRICT*0..1]-()<-[:LOCATE_AT]-(p:POI)
+        
+        // 3. Group them to limit the execution scope
+        WITH collect(p) AS local_pois
+        
+        // 4. Unroll into a localized Cartesian product
+        UNWIND local_pois AS p1
+        UNWIND local_pois AS p2
+        
+        // Bridge the UNWIND into the filter
+        WITH p1, p2
+        
+        // 5. THE SAFETY LOCK: No self-loops, no mirrored pairs, ignore missing coordinates
+        WHERE id(p1) < id(p2) 
+          AND p1.latitude IS NOT NULL 
+          AND p1.longitude IS NOT NULL
+          AND p2.latitude IS NOT NULL 
+          AND p2.longitude IS NOT NULL
+          
+        // 6. Calculate Memgraph native Haversine distance
+        WITH p1, p2, point.distance(
+            point({latitude: p1.latitude, longitude: p1.longitude}), 
+            point({latitude: p2.latitude, longitude: p2.longitude})
+        ) AS dist_meters
+        
+        // 7. Apply the radius filter
+        WHERE dist_meters <= ($radius_km * 1000)
+        
+        // 8. Materialize the edge!
+        MERGE (p1)-[r:NEAR_BY]->(p2)
+        // Round to 2 decimal places using Memgraph's single-argument round()
+        SET r.distance_km = round((dist_meters / 1000.0) * 100) / 100.0
+        
+        RETURN count(r) AS created_edges
+        """
+        
+        # Execute the query using your repository's write method
+        # (Adjust 'self._execute_write' if your internal method is named differently, like 'self.db.execute')
+        try:
+            parameters = {"district_id": district_id, "radius_km": radius_km}
+            records = self._execute_write(query, parameters)
+            
+            # Extract the count from the returned record
+            if records and len(records) > 0:
+                return records[0].get("created_edges", 0)
+            return 0
+            
+        except Exception as e:
+            # It's good practice to log exactly which district failed so the background task doesn't die silently
+            print(f"Graph Database Error while building NEAR_BY for {district_id}: {str(e)}")
+            raise e
+        
     def batch_create(self, poi_batch: list[dict]) -> int:
         query = """
         UNWIND $batch AS poi
@@ -191,7 +260,7 @@ class MemgraphPOIRepository(BaseMemgraphRepository[POI], IPOIRepository):
         WITH poi, [part IN addr_parts WHERE part IS NOT NULL AND part <> ""] AS valid_parts
         WITH poi, reduce(s = head(valid_parts), x IN tail(valid_parts) | s + ", " + x) AS full_addr
 
-        // 2. Defensively Merge Core POI
+        // 2. Defensively Merge Core POI (Removed Dict/List properties)
         MERGE (p:POI {id: poi.id})
         SET p += {
             name: poi.name,
@@ -237,18 +306,25 @@ class MemgraphPOIRepository(BaseMemgraphRepository[POI], IPOIRepository):
             MERGE (p)-[:LOCATE_AT]->(d)
         }
 
-        // 5. Tags (Using FOREACH as a null-safe conditional)
+        // 6. Tags (Using FOREACH as a null-safe conditional)
         FOREACH (ignoreMe IN CASE WHEN poi.tag IS NOT NULL THEN [1] ELSE [] END |
-            MERGE (t:Tag {name: poi.tag.name}) // Merge on Name to avoid duplicates
+            MERGE (t:Tag {name: poi.tag.name})
             ON CREATE SET t.id = poi.tag.id
             MERGE (p)-[:HAS_TAG]->(t)
         )
 
-        // 6. Categories (FOREACH handles the list naturally without UNWINDing)
-        FOREACH (cat IN poi.poi_categories |
-            MERGE (catNode:Category {name: cat.name}) // Merge on Name to avoid duplicates
+        // 7. Categories
+        FOREACH (cat IN CASE WHEN poi.poi_categories IS NOT NULL THEN poi.poi_categories ELSE [] END |
+            MERGE (catNode:Category {name: cat.name})
             ON CREATE SET catNode.id = cat.id, catNode.context = cat.context
             MERGE (p)-[:HAS_CATEGORY]->(catNode)
+        )
+        
+        // 8. Menu Products (NEW: Unrolling list of dicts into linked Nodes)
+        FOREACH (product IN CASE WHEN poi.menu IS NOT NULL THEN poi.menu ELSE [] END |
+            MERGE (prod:Product {id: product.id})
+            ON CREATE SET prod.product_name = product.product_name, prod.price = product.price
+            MERGE (p)-[:OFFER]->(prod)
         )
         """
         # Ensure we use the active transaction from the UoW
@@ -270,15 +346,14 @@ class MemgraphPOIRepository(BaseMemgraphRepository[POI], IPOIRepository):
         WITH poi, [part IN addr_parts WHERE part IS NOT NULL AND part <> ""] AS valid_parts
         WITH poi, reduce(s = head(valid_parts), x IN tail(valid_parts) | s + ", " + x) AS full_addr
 
-        // 1. Create the core POI node
+        // 1. Create the core POI node (Removed direct menu assignment!)
         MERGE (p:POI {id: poi.id})
         SET p += {
             name: poi.name,
             longitude: poi.longitude,
             latitude: poi.latitude,
             operation_time: poi.operation_time,
-            rating: poi.rating,
-            menu: poi.menu,
+            rating: poi.rating, // This is now safe because we json.dumped it in Python
             full_address: full_addr,
             contact_phone: poi.contact_info.phone_number,
             contact_fanpage: poi.contact_info.fanpage,
@@ -326,7 +401,7 @@ class MemgraphPOIRepository(BaseMemgraphRepository[POI], IPOIRepository):
             MERGE (p)-[:LOCATE_AT]->(d)
         }
         
-        // 4. Establish Tag Relationship
+        // 6. Establish Tag Relationship
         WITH p, poi
         FOREACH (ignoreMe IN CASE WHEN poi.tag IS NOT NULL THEN [1] ELSE [] END |
             MERGE (t:Tag {id: poi.tag.id})
@@ -334,14 +409,22 @@ class MemgraphPOIRepository(BaseMemgraphRepository[POI], IPOIRepository):
             MERGE (p)-[:HAS_TAG]->(t)
         )
 
-        // 5. Establish Category Relationships
+        // 7. Establish Category Relationships
         WITH p, poi
         UNWIND poi.poi_categories AS cat
         MERGE (catNode:Category {id: cat.id})
         ON CREATE SET catNode.name = cat.name, catNode.context = cat.context
         MERGE (p)-[:HAS_CATEGORY]->(catNode)
-
-        RETURN p.id AS id
+        
+        // 8. Menu Products (UPDATED: [:OFFER] relationship with price property)
+        FOREACH (product IN CASE WHEN poi.menu IS NOT NULL THEN poi.menu ELSE [] END |
+            MERGE (prod:Product {id: product.id})
+            ON CREATE SET prod.product_name = product.product_name
+            
+            // Create the specific OFFER relationship and assign the price to the edge
+            MERGE (p)-[r:OFFER]->(prod)
+            SET r.price = product.price
+        )
         """
         self._execute_write(query, {"poi": entity.model_dump(mode='json')})
         return entity
