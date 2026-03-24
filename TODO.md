@@ -41,15 +41,15 @@
             - ~~[x] **SELF-POINTED OF POI**~~
         - ~~[x] Hierachical address aggretion for geometry POI clustering.~~
         ~~- [x] As the Routing ready add NEAR_BY path with distance propetry using Haversine formula.~~
-    - [ ] Product (menu's product) Ingestion
-        - [ ] Add a dummy product with id marked as fake to create a based schema with OFFER
-        - [ ] Handle duplicate product.
+    - ~~[x] Product (menu's product) Ingestion~~
+        - ~~[x] Add a dummy product with id marked as fake to create a based schema with OFFER~~
+        - ~~[x] Handle duplicate product.~~
     - [ ] USER_BEHAVIOR Relationships: 
-        - [ ] LIKE for POI and PRODUCT with weighting property
-        - [ ] VISITED for POI with rating property
+        - **[ ] LIKE for POI and PRODUCT with weighting property**
+        - **[ ] VISITED for POI with rating property**
     - [ ] SIMILAR relationship using Jaccard Similarity.
     - [ ] OFTEN_VISITED_AFTER with probility property
     - [ ] Data from the Traveloka Ingestion (Actually can skip for now).
-- [ ] Routing Service: Implement the service that connect to Graphhopper server to get the route.
-- [ ] **BUG: GET POI still has Neo4j BUG with the log contain the ORDER thing.**
+- [ ] **Routing Service: Implement the service that connect to Graphhopper server to get the route.**
+- ~~[x] **BUG: GET POI still has Neo4j BUG with the log contain the ORDER thing.**~~
 </font>

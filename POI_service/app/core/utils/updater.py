@@ -1,43 +1,52 @@
 import logging
-from typing import List, Optional
+from typing import List, Optional, Callable
 
-from app.core.interfaces.updater import ISpatialUpdate
-from app.core.interfaces.repositories import IPOIRepository
 from fastapi import BackgroundTasks
+from tenacity import retry, stop_after_attempt, wait_exponential
+
+from app.core.base.service import AbstractUnitOfWork
+from app.core.interfaces.updater import ISpatialUpdate
 
 logger = logging.getLogger(__file__)
 
 class SpatialUpdater(ISpatialUpdate):
-    """
-    Fires off a non-blocking background thread using FastAPI's native capabilities.
-    Perfect for quick implementation without external infrastructure.
-    """
     
     def trigger_update(self, 
                        affected_districts: List[str], 
-                       repository: IPOIRepository, 
-                       background_tasks: Optional[BackgroundTasks] = None
-                    ):
+                       uow_factory: Callable[[], AbstractUnitOfWork], 
+                       background_tasks: Optional[BackgroundTasks] = None):
         if not background_tasks:
-            logger.warning("No BackgroundTasks provided. Spatial update will run synchronously, which may cause latency.")
-            self._execute_update(affected_districts, repository)
+            logger.warning("No BackgroundTasks provided. Spatial update will run synchronously.")
+            self._execute_update(affected_districts, uow_factory)
             return
 
-        # Hand the execution off to FastAPI's background thread pool
-        background_tasks.add_task(self._execute_update, affected_districts, repository)
+        background_tasks.add_task(self._execute_update, affected_districts, uow_factory)
 
-    def _execute_update(self, districts: List[str], repository: IPOIRepository):
-        """The actual work performed in the background."""
-        logger.info(f"Background Task Started: Updating NEAR_BY edges for districts: {districts}")
+    def _execute_update(self, districts: List[str], uow_factory: Callable[[], AbstractUnitOfWork]):
+        print(f"🔥 DEBUG: _execute_update triggered for districts: {districts}")
         total_edges = 0
         
         for district_id in districts:
             try:
-                # This calls the Memgraph script we wrote earlier
-                edges = repository.build_nearby_edges_for_district(district_id, radius_km=3.0)
+                # Call the retryable method!
+                edges = self._build_district_with_retry(district_id, uow_factory)
                 total_edges += edges
-                logger.info(f"District {district_id} complete. {edges} edges generated.")
             except Exception as e:
-                logger.error(f"Failed to update spatial edges for {district_id}: {str(e)}")
+                # If it permanently fails after 5 retries, log it and move to the next district
+                print(f"❌ DEBUG: Permanently failed spatial edges for {district_id}: {str(e)}")
                 
-        logger.info(f"Background Task Complete. Total new spatial edges: {total_edges}")
+        print(f"🔥 DEBUG: Background Task Complete. Total new spatial edges: {total_edges}")
+
+    # ---> THE 50N42 SHIELD <---
+    @retry(stop=stop_after_attempt(5), wait=wait_exponential(multiplier=1, min=2, max=10), reraise=True)
+    def _build_district_with_retry(self, district_id: str, uow_factory: Callable[[], AbstractUnitOfWork]) -> int:
+        print(f"🔥 DEBUG: Calling repository for {district_id}...")
+        
+        # Instantiate a fresh, living connection using the factory
+        uow = uow_factory() 
+        
+        # Open the clean transaction
+        with uow:
+            edges = uow.pois.build_nearby_edges_for_district(district_id, radius_km=3.0)
+            print(f"✅ DEBUG: District {district_id} complete. {edges} edges generated.")
+            return edges

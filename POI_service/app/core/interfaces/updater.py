@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Callable
 
 from fastapi import BackgroundTasks
-from app.core.interfaces.repositories import IPOIRepository
+from app.core.interfaces.repositories import AbstractUnitOfWork, IPOIRepository
 
 class ISpatialUpdate(ABC):
     """
@@ -11,7 +11,7 @@ class ISpatialUpdate(ABC):
     """
     @abstractmethod
     def trigger_update(self, 
-                       affected_district: List[str],
-                       repository: IPOIRepository,
+                       affected_districts: List[str],
+                       repository: Callable[[], AbstractUnitOfWork],
                        background_tasks: Optional[BackgroundTasks] = None):
         pass

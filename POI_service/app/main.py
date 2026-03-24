@@ -17,7 +17,7 @@ from app.core.infrastructure.db.database.connector import memgraph_db, firestore
 from app.api.rest.v1.endpoint_ingestion import router as ingestion_router
 from app.api.rest.v1.endpoint_management import router as management_router
 from app.api.rest.v1.endpoint_poi_router import router as poi_router
-
+from app.api.rest.v1.endpoint_spatial_rebuild import router as spatial_router
 
 # ---------------------------------------------------------
 # LIFECYCLE MANAGEMENT (The "Heartbeat")
@@ -100,3 +100,4 @@ def root():
 app.include_router(ingestion_router)
 app.include_router(management_router)
 app.include_router(poi_router)
+app.include_router(spatial_router)

@@ -1,3 +1,5 @@
+from venv import logger
+
 from neo4j import Transaction
 from typing import List, LiteralString, Optional, cast, Dict, Any
 
@@ -177,71 +179,56 @@ class MemgraphPOIRepository(BaseMemgraphRepository[POI], IPOIRepository):
     # BATCH CREATE (Highly Optimized for Ingestion)
     # ---------------------------------------------------------
     def build_nearby_edges_for_district(self, district_id: str, radius_km: float = 3.0) -> int:
-        """
-        Materializes NEAR_BY relationships for all POIs within a specific district.
-        This prevents Cartesian explosions by bounding the math to a small geographic area.
-        
-        Args:
-            district_id: The exact deterministic ID of the district (e.g., 'quận 1_hồ chí minh_việt nam')
-            radius_km: The maximum distance to connect two POIs.
-            
-        Returns:
-            The number of NEAR_BY edges successfully created.
-        """
         query = """
-        // 1. Anchor to the specific District
-        MATCH (d:District {id: $district_id})
+        // 1. Anchor to the District and stream p1 nodes ONE AT A TIME
+        MATCH (d:District {id: $district_id})<-[:IN_DISTRICT*0..1]-()<-[:LOCATE_AT]-(p1:POI)
+        WHERE p1.latitude IS NOT NULL AND p1.longitude IS NOT NULL
         
-        // 2. Fetch only the POIs inside this district (handles both direct and street-level links)
-        MATCH (d)<-[:IN_DISTRICT*0..1]-()<-[:LOCATE_AT]-(p:POI)
+        // 2. Open an isolated subquery. This prevents the memory matrix from building up.
+        CALL {
+            WITH d, p1
+            
+            // Match potential p2 neighbors in the same district
+            MATCH (d)<-[:IN_DISTRICT*0..1]-()<-[:LOCATE_AT]-(p2:POI)
+            
+            // 3. THE BOUNDING BOX PRE-FILTER (The Memory Saver)
+            // 1 degree of lat/lng is roughly 111km. We draw a rough "Square" around p1.
+            // This drops 99% of combinations instantly using simple math before the heavy Haversine calculation.
+            WHERE id(p1) < id(p2)
+              AND p2.latitude IS NOT NULL 
+              AND p2.longitude IS NOT NULL
+              AND abs(p1.latitude - p2.latitude) <= ($radius_km / 111.0)
+              AND abs(p1.longitude - p2.longitude) <= ($radius_km / 111.0)
+              
+            // 4. Calculate the exact, circular Haversine distance only on the survivors
+            WITH p1, p2, point.distance(
+                point({latitude: p1.latitude, longitude: p1.longitude}), 
+                point({latitude: p2.latitude, longitude: p2.longitude})
+            ) AS dist_meters
+            
+            // 5. Final radius filter
+            WHERE dist_meters <= ($radius_km * 1000)
+            
+            // 6. Materialize the edge
+            MERGE (p1)-[r:NEAR_BY]->(p2)
+            SET r.distance_km = round((dist_meters / 1000.0) * 100) / 100.0
+            
+            RETURN count(r) AS edges
+        }
         
-        // 3. Group them to limit the execution scope
-        WITH collect(p) AS local_pois
-        
-        // 4. Unroll into a localized Cartesian product
-        UNWIND local_pois AS p1
-        UNWIND local_pois AS p2
-        
-        // Bridge the UNWIND into the filter
-        WITH p1, p2
-        
-        // 5. THE SAFETY LOCK: No self-loops, no mirrored pairs, ignore missing coordinates
-        WHERE id(p1) < id(p2) 
-          AND p1.latitude IS NOT NULL 
-          AND p1.longitude IS NOT NULL
-          AND p2.latitude IS NOT NULL 
-          AND p2.longitude IS NOT NULL
-          
-        // 6. Calculate Memgraph native Haversine distance
-        WITH p1, p2, point.distance(
-            point({latitude: p1.latitude, longitude: p1.longitude}), 
-            point({latitude: p2.latitude, longitude: p2.longitude})
-        ) AS dist_meters
-        
-        // 7. Apply the radius filter
-        WHERE dist_meters <= ($radius_km * 1000)
-        
-        // 8. Materialize the edge!
-        MERGE (p1)-[r:NEAR_BY]->(p2)
-        // Round to 2 decimal places using Memgraph's single-argument round()
-        SET r.distance_km = round((dist_meters / 1000.0) * 100) / 100.0
-        
-        RETURN count(r) AS created_edges
+        // 7. Sum up the results from all the isolated subqueries
+        RETURN sum(edges) AS created_edges
         """
         
-        # Execute the query using your repository's write method
-        # (Adjust 'self._execute_write' if your internal method is named differently, like 'self.db.execute')
         try:
             parameters = {"district_id": district_id, "radius_km": radius_km}
             records = self._execute_write(query, parameters)
             
-            # Extract the count from the returned record
             if records and len(records) > 0:
                 return records[0].get("created_edges", 0)
             return 0
             
         except Exception as e:
-            # It's good practice to log exactly which district failed so the background task doesn't die silently
             print(f"Graph Database Error while building NEAR_BY for {district_id}: {str(e)}")
             raise e
         
@@ -320,11 +307,15 @@ class MemgraphPOIRepository(BaseMemgraphRepository[POI], IPOIRepository):
             MERGE (p)-[:HAS_CATEGORY]->(catNode)
         )
         
-        // 8. Menu Products (NEW: Unrolling list of dicts into linked Nodes)
+       // 8. Menu Products (NEW: Unrolling list of dicts into linked Nodes)
         FOREACH (product IN CASE WHEN poi.menu IS NOT NULL THEN poi.menu ELSE [] END |
             MERGE (prod:Product {id: product.id})
-            ON CREATE SET prod.product_name = product.product_name, prod.price = product.price
-            MERGE (p)-[:OFFER]->(prod)
+            ON CREATE SET prod.canonical_name = product.product_name
+            
+            // Draw the edge and put the price on the edge!
+            MERGE (p)-[r:OFFER]->(prod)
+            SET r.price = product.price,
+                r.shop_specific_name = product.product_name
         )
         """
         # Ensure we use the active transaction from the UoW
