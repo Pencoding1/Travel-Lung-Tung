@@ -89,7 +89,7 @@ def get_poi_details(poi_id: str) -> str:
         return json.dumps(error_payload, indent=2)
 
 @mcp.tool(
-    name="get_route_details",
+    name="get_itinerary_route",
     description=GET_ITINERARY_ROUTE_DESC
 )
 def get_itinerary_route(ordered_poi_ids: List[str], vehicle: str="car") -> str:
@@ -97,7 +97,7 @@ def get_itinerary_route(ordered_poi_ids: List[str], vehicle: str="car") -> str:
     AI Agent Tool: Pass an array of exact POI_IDs in the order they should be visited.
     Valid vehicles: 'car', 'foot', 'bike'.
     """
-    GRAPHHOPPER_URL = "http://localhost:8989/route"
+    GRAPHHOPPER_URL = "http://graphhopper:8989/route"
     
     if len(ordered_poi_ids) < 2:
         return json.dumps({
@@ -113,12 +113,13 @@ def get_itinerary_route(ordered_poi_ids: List[str], vehicle: str="car") -> str:
     
     # 2. Extract Coordinates safely
     for poi in ordered_poi_ids:
+        with uow:
         # We use the wired poi_service, NOT the FastAPI dependency injection
-        poi_data = poi_service.get_poi(poi) 
-        if poi_data and poi_data.latitude and poi_data.longitude:
-            waypoints.append((poi_data.latitude, poi_data.longitude))
-        else:
-            logger.warning(f"Could not find coordinates for POI {poi}") # NO BACKSLASH HERE!
+            poi_data = poi_service.get_poi(poi) 
+            if poi_data and poi_data.latitude and poi_data.longitude:
+                waypoints.append((poi_data.latitude, poi_data.longitude))
+            else:
+                logger.warning(f"Could not find coordinates for POI {poi}") # NO BACKSLASH HERE!
             
     if len(waypoints) < 2:
         return json.dumps({"success": False, "error": "Not enough valid coordinates to calculate a route."})
@@ -168,4 +169,9 @@ def get_itinerary_route(ordered_poi_ids: List[str], vehicle: str="car") -> str:
         
 
 if __name__ == "__main__":
+    import asyncio
+    
+    
+    logger.info("Initializing Memgraph connection for MCP Server...")
+    asyncio.run(memgraph_db.connect())
     mcp.run(transport="sse")

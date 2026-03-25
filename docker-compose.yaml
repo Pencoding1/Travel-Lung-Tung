@@ -70,35 +70,41 @@ services:
       - ./POI_service/.env
     depends_on:
       - memgraph
-  # route_api:
-  #   build: 
-  #     context: ./route_service
-  #     dockerfile: Dockerfile
-  #   container_name: route_api
-  #   ports:
-  #     - "8002:8002" # Using 8002 so it doesn't clash with your POI API on 8000
-  #   environment:
-  #     - PYTHONPATH=/workspace
-  #   depends_on:
-  #     graphhopper:
-  #       condition: service_healthy # Wait for GraphHopper to finish booting!
-  #     memgraph:
-  #       condition: service_healthy
+  ollama:
+    image: ollama/ollama:latest
+    container_name: travel_ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      # CRITICAL: Persist data so you don't re-download 9GB of weights on every restart
+      - ./ollama_data:/root/.ollama
+    environment:
+      # Hardware isolation at the environment level
+      - CUDA_VISIBLE_DEVICES=0 
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: ['0'] # Pins strictly to GPU 0
+              capabilities: [gpu]
+    networks:
+      - travel_net
 
-  # route_mcp:
-  #   build: 
-  #     context: ./route_service
-  #     dockerfile: Dockerfile
-  #   container_name: route_mcp
-  #   command: python -m app.mcp_server
-  #   environment:
-  #     - PYTHONPATH=/workspace
-  #   depends_on:
-  #     graphhopper:
-  #       condition: service_healthy
-
-
-
+  ai_service:
+    build: 
+      context: ./ai_service
+      dockerfile: Dockerfile
+    container_name: travel_ai_hub
+    ports:
+      - "8002:8002"
+    volumes:
+      - ./ai_service/mcp_config.json:/app/mcp_config.json
+    environment:
+      - OLLAMA_HOST=http://travel_ollama:11434
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    depends_on:
+      - ollama
 volumes:
   mg_lib:
   mg_log:

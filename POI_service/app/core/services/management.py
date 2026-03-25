@@ -43,7 +43,7 @@ class POIManagementService(BaseManagementService[POI]):
         with self.uow:
             pois = self.uow.pois.get_all(skip=skip, limit=limit)
             return [json.loads(poi.model_dump_json()) for poi in pois]
-
+    
     def get_pois_by_city(self, city_name: str, skip: int = 0, limit: int = 100) -> List[Dict[str, Any]]:
         """Fetches POIs filtered by city."""
         with self.uow:
