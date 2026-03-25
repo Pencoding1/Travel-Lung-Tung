@@ -28,7 +28,7 @@ services:
       - memgraph
   graphhopper:
     build: 
-      context: ./route_service/app/graphhopper
+      context: ./graphhopper
       dockerfile: Dockerfile
     container_name: graphhopper
     ports:

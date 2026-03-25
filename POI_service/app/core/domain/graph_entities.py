@@ -223,14 +223,17 @@ class POI(BaseModel):
         
         id_parts = [primary_category, province, district]
         
-        # 4. Resolve optional Street
         if self.address.street_name:
-            id_parts.append(normalize_for_id(self.address.street_name))
+            street_id = normalize_for_id(self.address.street_name)
+            if street_id: # Only append if it's a valid string
+                id_parts.append(street_id)
             
         creation_date = datetime.now().strftime("%Y%m%d")
         id_parts.append(creation_date)
         
-        expected_prefix = "_".join(id_parts)
+        # Filter out any empty strings or Nones before joining!
+        valid_parts = [str(part) for part in id_parts if part]
+        expected_prefix = "_".join(valid_parts)
         
         # 5. UUID generation/reconciliation
         if not self.id:

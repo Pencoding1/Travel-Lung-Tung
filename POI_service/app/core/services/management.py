@@ -35,6 +35,9 @@ class POIManagementService(BaseManagementService[POI]):
     def _execute_delete(self, entity_id: str) -> bool:
         return self.uow.pois.delete(entity_id)
     
+    def get_poi(self, id: str) -> Optional[POI]:
+        return self._get_existing(id)
+
     def get_all(self, skip:int=0, limit:int=20) -> List[Dict[str, Any]]:
         """Fetchs a paginated list of all POIs."""
         with self.uow:
@@ -72,6 +75,7 @@ class POIManagementService(BaseManagementService[POI]):
                 "seo_article": "",
                 "review": {"rating": 0.0, "review": ""}
             }
+            
         except Exception:
             # Catch unexpected Vector DB connection drops in the future
             doc_data = {
