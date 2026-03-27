@@ -6,6 +6,8 @@ from typing import List, LiteralString, Optional, cast, Dict, Any
 from app.core.base.repository import BaseMemgraphRepository
 
 from app.core.domain.graph_entities import POI, UserPreference, Category, Tag
+from app.core.domain.get_payload import OfferLite, POILite
+
 
 from app.core.interfaces.repositories import IPOIRepository
 from app.core.interfaces.repositories import IUserBehaviorRepository
@@ -614,68 +616,266 @@ class MemgraphPOIRepository(BaseMemgraphRepository[POI], IPOIRepository):
 
     def get_poi_graph_payload(self, id: str, radius_km: float = 3.0, limit: int = 5) -> Optional[Dict[str, Any]]:
         """
-        Executes a fast spatial heuristic in Memgraph.
-        1 degree of latitude/longitude is roughly 111 kilometers.
-        We use the Pythagorean theorem on coordinates for a highly performant 2D distance calculation.
+        Retrieves the exact graph context, including latitude and longitude.
         """
         query = """
-        // 1. Anchor on the target POI
         MATCH (p:POI {id: $id})
+        
+        // 1. Fetch Categories and Offers
         OPTIONAL MATCH (p)-[:HAS_CATEGORY]->(c:Category)
+        OPTIONAL MATCH (p)-[o:OFFER]->(:Product)
+        WITH p, 
+             collect(DISTINCT c.name) AS categories,
+             collect(DISTINCT {name: o.shop_specific_name, price: o.price}) AS menu
+             
+        // 2. Fetch Pre-calculated Nearby POIs
+        OPTIONAL MATCH (p)-[nb:NEAR_BY]->(nearby:POI)
+        WHERE nb.distance_km <= $radius_km
         
-        // Use head(collect()) to prevent Cartesian explosion
-        WITH p, head(collect(c)) AS primary_category 
+        // 3. Order and format the nearby list
+        WITH p, categories, menu, nearby, nb
+        ORDER BY nb.distance_km ASC
         
-        // 2. Safe Optional Match for Nearby
-        OPTIONAL MATCH (nearby:POI)
-        WHERE nearby.id <> p.id
-          AND nearby.latitude IS NOT NULL 
-          AND nearby.longitude IS NOT NULL
-          AND abs(nearby.latitude - p.latitude) <= ($radius_km / 111.0)
-          AND abs(nearby.longitude - p.longitude) <= ($radius_km / 111.0)
-          
-        // 3. Calculate distance, filter, AND order in a single, continuous WITH block
-        WITH p, primary_category, nearby,
-             sqrt( (p.latitude - nearby.latitude)^2 + (p.longitude - nearby.longitude)^2 ) * 111.0 AS dist_km
-        WHERE nearby IS NULL OR dist_km <= $radius_km
-        ORDER BY dist_km ASC
-        
-        // 4. Collect safely
-        WITH p, primary_category, collect(
-            CASE WHEN nearby IS NOT NULL THEN {
-                POI_ID: nearby.id,
-                POI_Name: nearby.name,
-                POI_Address: nearby.full_address,
-                POI_Category: head([(nearby)-[:HAS_CATEGORY]->(nc:Category) | nc.name]),
-                distance: round(dist_km * 100) / 100.0
-            } ELSE null END
-        )[0..$limit] AS nearby_list
-        
-        // 5. Return the mapped dictionary
+        WITH p, categories, menu,
+             collect(DISTINCT CASE WHEN nearby IS NOT NULL THEN {
+                 POI_ID: nearby.id,
+                 POI_Name: nearby.name,
+                 POI_Address: nearby.full_address,
+                 distance: nb.distance_km
+             } ELSE null END)[0..$limit] AS nearby_list
+             
+        // 4. Return the assembled JSON with COORDINATES
         RETURN {
             POI_ID: p.id,
             POI_Name: p.name,
             POI_Address: p.full_address,
-            POI_Category: CASE WHEN primary_category IS NOT NULL THEN primary_category.name ELSE "Uncategorized" END,
+            POI_Category: CASE WHEN size(categories) > 0 THEN categories[0] ELSE "Uncategorized" END,
+            
+            // THE FIX: Using double slashes for Cypher comments instead of a hashtag!
+            latitude: p.latitude,
+            longitude: p.longitude,
+            
             POI_Contact_Info: {
-                website: p.contact_website,
-                fanpage: p.contact_fanpage,
-                phonenumber: p.contact_phone
+                phonenumber: p.contact_phone,
+                website: p.contact_website
             },
+            Offers: menu,
             NEAR_BY: [n IN nearby_list WHERE n IS NOT NULL]
         } AS graph_result
         """
         
-        records = self._execute_read(query, {
-            "id": id, 
-            "radius_km": radius_km, 
-            "limit": limit
-        })
+        records = self._execute_read(query, {"id": id, "radius_km": radius_km, "limit": limit})
         
         if not records or not records[0].get("graph_result"):
             return None
             
         return records[0]["graph_result"]
+
+    def get_by_city_lite(self, city_name: str, skip: int = 0, limit: int = 15) -> List[POILite]:
+        query = """
+        MATCH (c:City {name: $city})<-[:IN_CITY]-(:District)<-[:IN_DISTRICT*0..1]-()<-[:LOCATE_AT]-(p:POI)
+        OPTIONAL MATCH (p)-[:HAS_CATEGORY]->(cat:Category)
+        OPTIONAL MATCH (p)-[r:OFFER]->(:Product)
+        
+        RETURN p {
+            .id, 
+            .name, 
+            .operation_time,
+            full_address: p.full_address,
+            categories: [x IN collect(DISTINCT cat) WHERE x IS NOT NULL | x.name],
+            offers: [x IN collect(DISTINCT {n: r.shop_specific_name, p: r.price}) WHERE x.n IS NOT NULL | x.n + " (" + toString(x.p) + ")"]
+        } AS poi_data
+        SKIP $skip LIMIT $limit
+        """
+        records = self._execute_read(query, {"city": city_name, "skip": skip, "limit": limit})
+        return [POILite(**record["poi_data"]) for record in records if record.get("poi_data")]
+
+    def get_by_district_lite(self, district_name: str, skip: int = 0, limit: int = 15) -> List[POILite]:
+        query = """
+        MATCH (d:District {name: $district_name})<-[:IN_DISTRICT*0..1]-()<-[:LOCATE_AT]-(p:POI)
+        OPTIONAL MATCH (p)-[:HAS_CATEGORY]->(cat:Category)
+        OPTIONAL MATCH (p)-[r:OFFER]->(:Product)
+        
+        RETURN p {
+            .id, .name, .operation_time,
+            full_address: p.full_address,
+            categories: [x IN collect(DISTINCT cat) WHERE x IS NOT NULL | x.name],
+            offers: [x IN collect(DISTINCT {n: r.shop_specific_name, p: r.price}) WHERE x.n IS NOT NULL | x.n + " (" + toString(x.p) + ")"]
+        } AS poi_data
+        SKIP $skip LIMIT $limit
+        """
+        records = self._execute_read(query, {"district_name": district_name, "skip": skip, "limit": limit})
+        return [POILite(**record["poi_data"]) for record in records if record.get("poi_data")]
+
+    def get_by_street_lite(self, street_name: str, skip: int = 0, limit: int = 15) -> List[POILite]:
+        """Upgraded to use the strict Street nodes defined in your batch_create."""
+        query = """
+        MATCH (s:Street)
+        WHERE toLower(s.name) CONTAINS toLower($street_name)
+        MATCH (s)<-[:LOCATE_AT]-(p:POI)
+        OPTIONAL MATCH (p)-[:HAS_CATEGORY]->(cat:Category)
+        
+        RETURN p {
+            .id, .name, .operation_time,
+            full_address: p.full_address,
+            categories: [x IN collect(DISTINCT cat) WHERE x IS NOT NULL | x.name]
+        } AS poi_data
+        SKIP $skip LIMIT $limit
+        """
+        records = self._execute_read(query, {"street_name": street_name, "skip": skip, "limit": limit})
+        return [POILite(**record["poi_data"]) for record in records if record.get("poi_data")]
+
+    # ---------------------------------------------------------
+    # NEW: HIERARCHICAL DISCOVERY (For Agent Drill-Down)
+    # ---------------------------------------------------------
+    def get_all_cities(self) -> List[Dict[str, str]]:
+        """Returns all cities that actually contain POIs."""
+        query = """
+        MATCH (c:City)
+        // Safety check: Only return cities that have actual POIs connected downstream
+        WHERE EXISTS { MATCH (c)<-[:IN_CITY]-(:District)<-[:IN_DISTRICT*0..1]-()<-[:LOCATE_AT]-(:POI) }
+        RETURN c.id AS id, c.name AS name
+        ORDER BY c.name ASC
+        """
+        records = self._execute_read(query)
+        return [{"id": r["id"], "name": r["name"]} for r in records if r.get("id")]
+
+    def get_districts_by_city(self, city_id: str) -> List[Dict[str, str]]:
+        """Returns all districts within a specific city_id."""
+        query = """
+        MATCH (d:District)-[:IN_CITY]->(c:City {id: $city_id})
+        WHERE EXISTS { MATCH (d)<-[:IN_DISTRICT*0..1]-()<-[:LOCATE_AT]-(:POI) }
+        RETURN d.id AS id, d.name AS name
+        ORDER BY d.name ASC
+        """
+        records = self._execute_read(query, {"city_id": city_id})
+        return [{"id": r["id"], "name": r["name"]} for r in records if r.get("id")]
+
+    def get_streets_by_district(self, district_id: str) -> List[Dict[str, str]]:
+        """Returns all streets within a specific district_id."""
+        query = """
+        MATCH (s:Street)-[:IN_DISTRICT]->(d:District {id: $district_id})
+        WHERE EXISTS { MATCH (s)<-[:LOCATE_AT]-(:POI) }
+        RETURN s.id AS id, s.name AS name
+        ORDER BY s.name ASC
+        """
+        records = self._execute_read(query, {"district_id": district_id})
+        return [{"id": r["id"], "name": r["name"]} for r in records if r.get("id")]
+
+    # ---------------------------------------------------------
+    # STRICT ID-BASED EXPLORATION ("Lite" Payload)
+    # ---------------------------------------------------------
+    def get_by_city_id_lite(self, city_id: str, skip: int = 0, limit: int = 15) -> List[POILite]:
+        query = """
+        // Anchor firmly on the ID, not the string name
+        MATCH (c:City {id: $city_id})<-[:IN_CITY]-(:District)<-[:IN_DISTRICT*0..1]-()<-[:LOCATE_AT]-(p:POI)
+        OPTIONAL MATCH (p)-[:HAS_CATEGORY]->(cat:Category)
+        OPTIONAL MATCH (p)-[r:OFFER]->(:Product)
+        
+        RETURN p {
+            .id, .name, .operation_time,
+            full_address: p.full_address,
+            categories: [x IN collect(DISTINCT cat) WHERE x IS NOT NULL | x.name],
+            offers: [x IN collect(DISTINCT {n: r.shop_specific_name, p: r.price}) WHERE x.n IS NOT NULL | x.n + " (" + toString(x.p) + ")"]
+        } AS poi_data
+        SKIP $skip LIMIT $limit
+        """
+        records = self._execute_read(query, {"city_id": city_id, "skip": skip, "limit": limit})
+        return [POILite(**record["poi_data"]) for record in records if record.get("poi_data")]
+
+    def get_by_district_id_lite(self, district_id: str, skip: int = 0, limit: int = 15) -> List[POILite]:
+        query = """
+        MATCH (d:District {id: $district_id})<-[:IN_DISTRICT*0..1]-()<-[:LOCATE_AT]-(p:POI)
+        OPTIONAL MATCH (p)-[:HAS_CATEGORY]->(cat:Category)
+        OPTIONAL MATCH (p)-[r:OFFER]->(:Product)
+        
+        RETURN p {
+            .id, .name, .operation_time,
+            full_address: p.full_address,
+            categories: [x IN collect(DISTINCT cat) WHERE x IS NOT NULL | x.name],
+            offers: [x IN collect(DISTINCT {n: r.shop_specific_name, p: r.price}) WHERE x.n IS NOT NULL | x.n + " (" + toString(x.p) + ")"]
+        } AS poi_data
+        SKIP $skip LIMIT $limit
+        """
+        records = self._execute_read(query, {"district_id": district_id, "skip": skip, "limit": limit})
+        return [POILite(**record["poi_data"]) for record in records if record.get("poi_data")]
+
+    def get_by_street_id_lite(self, street_id: str, skip: int = 0, limit: int = 15) -> List[POILite]:
+        query = """
+        MATCH (s:Street {id: $street_id})<-[:LOCATE_AT]-(p:POI)
+        OPTIONAL MATCH (p)-[:HAS_CATEGORY]->(cat:Category)
+        OPTIONAL MATCH (p)-[r:OFFER]->(:Product)
+        
+        RETURN p {
+            .id, .name, .operation_time,
+            full_address: p.full_address,
+            categories: [x IN collect(DISTINCT cat) WHERE x IS NOT NULL | x.name],
+            offers: [x IN collect(DISTINCT {n: r.shop_specific_name, p: r.price}) WHERE x.n IS NOT NULL | x.n + " (" + toString(x.p) + ")"]
+        } AS poi_data
+        SKIP $skip LIMIT $limit
+        """
+        records = self._execute_read(query, {"street_id": street_id, "skip": skip, "limit": limit})
+        return [POILite(**record["poi_data"]) for record in records if record.get("poi_data")]
+
+    def get_by_offered_products_lite(self, product_keyword: str, skip: int = 0, limit: int = 15) -> List[POILite]:
+        query = """
+        MATCH (p:POI)-[r:OFFER]->(prod:Product)
+        WHERE toLower(prod.canonical_name) CONTAINS toLower($product_keyword)
+           OR toLower(r.shop_specific_name) CONTAINS toLower($product_keyword)
+           
+        OPTIONAL MATCH (p)-[:HAS_CATEGORY]->(cat:Category)
+        
+        RETURN p {
+            .id, .name, .operation_time,
+            full_address: p.full_address,
+            categories: [x IN collect(DISTINCT cat) WHERE x IS NOT NULL | x.name],
+            offers: [r.shop_specific_name + " (" + toString(r.price) + ")"]
+        } AS poi_data
+        SKIP $skip LIMIT $limit
+        """
+        records = self._execute_read(query, {"product_keyword": product_keyword, "skip": skip, "limit": limit})
+        return [POILite(**record["poi_data"]) for record in records if record.get("poi_data")]
+
+    def get_all_categories(self) -> List[Dict[str, str]]:
+        query = """
+        MATCH (c:Category)
+        WHERE EXISTS { MATCH (:POI)-[:HAS_CATEGORY]->(c) } 
+        RETURN c.id AS id, c.name AS name
+        ORDER BY c.name ASC
+        """
+        records = self._execute_read(query)
+        return [{"id": r["id"], "name": r["name"]} for r in records if r.get("id")]
+
+    def get_by_category_id_lite(self, category_id: str, skip: int = 0, limit: int = 100) -> List[POILite]:
+        query = """
+        MATCH (target_c:Category {id: $category_id})<-[:HAS_CATEGORY]-(p:POI)
+        OPTIONAL MATCH (p)-[:HAS_CATEGORY]->(all_c:Category)
+        OPTIONAL MATCH (p)-[r:OFFER]->(:Product)
+        
+        RETURN p {
+            .id, .name, .operation_time,
+            full_address: p.full_address,
+            categories: [cat IN collect(DISTINCT all_c) WHERE cat IS NOT NULL | cat.name],
+            offers: [x IN collect(DISTINCT {n: r.shop_specific_name, p: r.price}) WHERE x.n IS NOT NULL | x.n + " (" + toString(x.p) + ")"]
+        } AS poi_data
+        SKIP $skip LIMIT $limit
+        """
+        records = self._execute_read(query, {"category_id": category_id, "skip": skip, "limit": limit})
+        return [POILite(**record["poi_data"]) for record in records if record.get("poi_data")]
+    
+    def search_location_id(self, keyword: str, limit: int=15) -> List[Dict[str, str]]:
+        """Instantly resolves English/Vietnamese names to strict Graph IDs."""
+        query = """
+        WITH toLower(trim($keyword)) AS kw,
+             replace(toLower(trim($keyword)), 'district', 'quan') AS kw_vn
+             
+        MATCH (n) WHERE (n:City OR n:District OR n:Street) 
+        AND (toLower(n.name) CONTAINS kw OR toLower(n.name) CONTAINS kw_vn)
+        
+        RETURN labels(n)[0] AS type, n.id AS id, n.name AS name 
+        LIMIT $limit
+        """
+        return self._execute_read(query, {"keyword": keyword, "limit": limit})
 
 
 class MemgraphCategoryRepository(BaseMemgraphRepository[Category], ICategoryRepository):

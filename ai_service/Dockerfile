@@ -11,11 +11,11 @@ WORKDIR /workspace
 COPY pyproject.toml uv.lock ./
 COPY --parents */pyproject.toml ./
 
-# Export ONLY the AI service's dependencies (e.g., torch, transformers, datasketch)
+# THE FIX: Export ONLY the ai_service dependencies
 RUN uv export --package ai_service --no-emit-workspace --no-dev --locked -o /requirements.txt
 
 # ==========================================
-# STAGE 2: The Production GPU Image
+# STAGE 2: The Production Image
 # ==========================================
 FROM python:3.12-slim-bookworm
 
@@ -28,7 +28,7 @@ ENV UV_CACHE_DIR=/root/.cache/uv
 
 WORKDIR /workspace
 
-# 1. Cache-Mounted Dependency Layer (Crucial for PyTorch)
+# 1. Cache-Mounted Dependency Layer
 COPY --from=builder /requirements.txt ./
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv pip install -r requirements.txt
@@ -42,8 +42,7 @@ COPY ai_service/ ./ai_service/
 
 RUN uv pip install -e ./shared_lib -e ./ai_service
 
-# 3. Execution
 WORKDIR /workspace/ai_service
+EXPOSE 8002
 
-EXPOSE 8003
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8003"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8002"]

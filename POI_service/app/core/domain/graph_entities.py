@@ -226,3 +226,10 @@ class Description(BaseModel):
     summary_id: str
     seo_doc_id: str
     faq: Dict
+
+class POILite(BaseModel):
+    id: str
+    name: str
+    full_address: Optional[str] = "Address not specified"
+    categories: List[str] = []
+    operation_time: Optional[str] = "Hours not specified"

@@ -19,6 +19,7 @@ services:
       retries: 5
       start_period: 0s
     command: ["--log-level=TRACE"]
+    
   lab:
     image: memgraph/lab:latest
     container_name: lab
@@ -26,6 +27,7 @@ services:
       - "3000:3000"
     depends_on:
       - memgraph
+      
   graphhopper:
     build: 
       context: ./graphhopper
@@ -39,6 +41,7 @@ services:
       timeout: 5s
       retries: 5
       start_period: 30s
+      
   poi_api:
     build: 
       context: .
@@ -55,6 +58,7 @@ services:
       - ./POI_service/.env
     depends_on:
       - memgraph
+      
   poi_mcp:
     build: 
       context: .
@@ -70,41 +74,49 @@ services:
       - ./POI_service/.env
     depends_on:
       - memgraph
-  ollama:
-    image: ollama/ollama:latest
-    container_name: travel_ollama
-    ports:
-      - "11434:11434"
-    volumes:
-      # CRITICAL: Persist data so you don't re-download 9GB of weights on every restart
-      - ./ollama_data:/root/.ollama
-    environment:
-      # Hardware isolation at the environment level
-      - CUDA_VISIBLE_DEVICES=0 
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              device_ids: ['0'] # Pins strictly to GPU 0
-              capabilities: [gpu]
-    networks:
-      - travel_net
-
+      
+  # ollama:
+  #   image: ollama/ollama:latest
+  #   container_name: travel_ollama
+  #   ports:
+  #     - "11435:11434"
+  #   volumes:
+  #     - /usr/share/ollama/.ollama:/root/.ollama
+  #   environment:
+  #     - CUDA_VISIBLE_DEVICES=0 
+  #   deploy:
+  #     resources:
+  #       reservations:
+  #         devices:
+  #           - driver: nvidia
+  #             device_ids: ['0']
+  #             capabilities: [gpu]
   ai_service:
     build: 
-      context: ./ai_service
-      dockerfile: Dockerfile
+      context: .                          
+      dockerfile: ai_service/Dockerfile
     container_name: travel_ai_hub
     ports:
       - "8002:8002"
     volumes:
       - ./ai_service/mcp_config.json:/app/mcp_config.json
+      - ./ai_service/agent_thoughts:/workspace/ai_service/agent_thoughts
     environment:
       - OLLAMA_HOST=http://travel_ollama:11434
       - GEMINI_API_KEY=${GEMINI_API_KEY}
+  ngrok:
+    image: ngrok/ngrok:latest
+    restart: unless-stopped
+    command:
+      - "http"
+      - "http://travel_ai_hub:8002"
+      - "--url=neonatal-martin-unregulated.ngrok-free.dev"
+    environment:
+      - NGROK_AUTHTOKEN=3BVb6Vh7qzIXS9DLjz3BYfYgfL5_2Mqh7v1aKBfzgMP1sEhrQ
+    ports:
+      - "4041:4040"
     depends_on:
-      - ollama
+      - ai_service
 volumes:
   mg_lib:
   mg_log:

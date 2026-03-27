@@ -1,19 +1,9 @@
 {
   "mcpServers": {
-    "poi_backend": {
+    "tvlt_pois_tools": {
       "command": "http",
-      "args": ["http://host.docker.internal:8000/mcp/sse"],
-      "description": "Primary database access for querying Points of Interest."
-    },
-    "poi_tools": {
-      "command": "http",
-      "args": ["http://host.docker.internal:8001/mcp/sse"],
-      "description": "Execution tools for POI data manipulation and external fetching."
-    },
-    "routing_engine": {
-      "command": "http",
-      "args": ["http://host.docker.internal:8989/mcp/sse"],
-      "description": "Graphhopper engine for calculating travel times and routes between locations."
+      "args": ["http://poi_mcp:8001/mcp/sse"],
+      "description": "The core toolset for Travel Lung Tung, containing POI retrieval and Graphhopper routing capabilities."
     }
   }
 }
