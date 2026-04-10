@@ -1,0 +1,30 @@
+[project]
+name = "backend_service"
+version = "0.1.0"
+description = "Business Logic"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.128.0",
+    "datasketch>=1.9.0",
+    "firebase-admin>=7.1.0",
+    "dotenv==0.9.9",
+    "uvicorn>=0.40.0",
+    "requests==2.32.5",
+    "urllib3==2.6.3",
+    "pydantic==2.12.5",
+    "pydantic-settings>=2.12.0",
+    "loguru>=0.7.3",
+    "phonenumbers==9.0.26",
+    "travel-shared",
+]
+
+[tool.uv.sources]
+travel-shared = { workspace = true }
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]
+

@@ -1,0 +1,11 @@
+# Handle line endings automatically for text files
+* text=auto
+
+# Force LF for specific config files (best for cross-platform tools)
+*.toml text eol=lf
+*.lock text eol=lf
+*.json text eol=lf
+.python-version text eol=lf
+
+# Ensure setup.bat always uses CRLF (Windows scripts need this)
+*.bat text eol=crlf

@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "tvlt_pois_tools": {
+      "command": "http",
+      "args": ["http://poi_mcp:8001/mcp/sse"],
+      "description": "The core toolset for Travel Lung Tung, containing POI retrieval and Graphhopper routing capabilities."
+    }
+  }
+}

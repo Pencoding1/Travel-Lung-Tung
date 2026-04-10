@@ -1,0 +1,44 @@
+﻿# --- Project Specifics ---
+/Experiments/
+.ipynb_checkpoints/
+*.ipynb
+
+# --- Secrets & Configs (CRITICAL) ---
+.env
+# This covers the file inside your secrets folder
+secrets/*.json
+secrets/
+# This covers the file if it's in the root
+serviceAccountKey.json
+.python-version
+
+#ignore Graphhopper cache
+*-gh/
+
+# --- Python & Environment ---
+__pycache__/
+*.pyc
+.venv/
+.uv_cache/
+venv/
+env/
+
+# --- IDE & OS ---
+.DS_Store
+.vscode/
+.idea/
+
+# --- Large Data / Binary ---
+*.h5
+*.pt
+*.pkl
+*.csv
+*.bin
+
+chromium_profile/
+
+mg_lib/
+mg_log/
+**/__pycache__/
+.venv/
+.git/

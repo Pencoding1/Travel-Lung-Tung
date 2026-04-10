@@ -1,0 +1,20 @@
+[project]
+name="tvlt-2026"
+version="0.2.0"
+description="Smart Travel Assistant Agent"
+readme="README.md"
+requires-python=">=3.11"
+package=false
+dependencies = [
+    "fastmcp>=3.1.1",
+    "mcp>=1.26.0",
+    "phonenumbers>=9.0.26",
+    "tenacity>=9.1.4",
+]
+[tool.uv.workspace]
+members = [
+    "shared_lib",
+    "backend_service",
+    "POI_service",
+    "ai_service"
+]

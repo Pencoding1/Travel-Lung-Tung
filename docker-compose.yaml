@@ -1,0 +1,123 @@
+services:
+  memgraph:
+    image: memgraph/memgraph-mage:latest
+    container_name: memgraph-db
+    ports:
+      - "7687:7687"
+      - "7444:7444"
+    volumes:
+      - mg_lib:/var/lib/memgraph
+      - mg_log:/var/log/memgraph
+    environment:
+      - MEMGRAPH_HOST=memgraph-db
+      - MEMGRAPH_USER=${MEMGRAPH_USER}
+      - MEMGRAPH_PASSWORD=${MEMGRAPH_PASSWORD}
+    healthcheck:
+      test: ["CMD", "mgconsole", "--host", "127.0.0.1", "--port", "7687", "--username", "${MEMGRAPH_USER}", "--password", "${MEMGRAPH_PASSWORD}", "-e", "RETURN 1;"]      
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 0s
+    command: ["--log-level=TRACE"]
+    
+  lab:
+    image: memgraph/lab:latest
+    container_name: lab
+    ports:
+      - "3000:3000"
+    depends_on:
+      - memgraph
+      
+  graphhopper:
+    build: 
+      context: ./graphhopper
+      dockerfile: Dockerfile
+    container_name: graphhopper
+    ports:
+      - "8989:8989"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8989/info || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+      
+  poi_api:
+    build: 
+      context: .
+      dockerfile: POI_service/Dockerfile
+    volumes:
+      - ./POI_service:/workspace/POI_service
+      - ./shared_lib:/workspace/shared_lib
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONPATH=/workspace
+    env_file:
+      - ./POI_service/.env
+    depends_on:
+      - memgraph
+      
+  poi_mcp:
+    build: 
+      context: .
+      dockerfile: POI_service/Dockerfile
+    command: uv run python -m app.api.mcp.tools
+    ports:
+      - "8001:8001"
+    environment:
+      - PYTHONPATH=/workspace
+      - HOST=memgraph-db
+      - PORT=7687
+    env_file:
+      - ./POI_service/.env
+    depends_on:
+      - memgraph
+      
+  # ollama:
+  #   image: ollama/ollama:latest
+  #   container_name: travel_ollama
+  #   ports:
+  #     - "11435:11434"
+  #   volumes:
+  #     - /usr/share/ollama/.ollama:/root/.ollama
+  #   environment:
+  #     - CUDA_VISIBLE_DEVICES=0 
+  #   deploy:
+  #     resources:
+  #       reservations:
+  #         devices:
+  #           - driver: nvidia
+  #             device_ids: ['0']
+  #             capabilities: [gpu]
+  ai_service:
+    build: 
+      context: .                          
+      dockerfile: ai_service/Dockerfile
+    container_name: travel_ai_hub
+    ports:
+      - "8002:8002"
+    volumes:
+      - ./ai_service/mcp_config.json:/app/mcp_config.json
+      - ./ai_service/agent_thoughts:/workspace/ai_service/agent_thoughts
+    environment:
+      - OLLAMA_HOST=http://travel_ollama:11434
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+  ngrok:
+    image: ngrok/ngrok:latest
+    restart: unless-stopped
+    command:
+      - "http"
+      - "http://travel_ai_hub:8002"
+      - "--url=neonatal-martin-unregulated.ngrok-free.dev"
+    environment:
+      - NGROK_AUTHTOKEN=3BVb6Vh7qzIXS9DLjz3BYfYgfL5_2Mqh7v1aKBfzgMP1sEhrQ
+    ports:
+      - "4041:4040"
+    depends_on:
+      - ai_service
+volumes:
+  mg_lib:
+  mg_log:
+  mg_etc:

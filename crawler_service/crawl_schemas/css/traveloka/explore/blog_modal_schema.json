@@ -1,0 +1,23 @@
+{
+            "name": "Traveloka Blog Complete Extraction",
+            "baseSelector": "html",
+            "fields": [
+                {
+                    "name": "title",
+                    "selector": "head meta[property='og:title']",
+                    "type": "attribute",
+                    "attribute": "content"
+                },
+                {
+                    "name": "canonical_url",
+                    "selector": "head link[rel='canonical']",
+                    "type": "attribute",
+                    "attribute": "href"
+                },
+                {
+                    "name": "parsed_blog_data",
+                    "selector": "#injected_blog_data",
+                    "type": "text"
+                }
+            ]
+        }
