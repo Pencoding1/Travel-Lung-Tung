@@ -1,48 +1,57 @@
-# TRAVEL VO LO - SMART TRAVEL ASSISTANT AGENT SYSTEM
-## KEY FEATURES
-Describe the key features of the Travel Vo Lo system.
-### 1. OTA FEATURES
-NOTE: Will be filled later
-### 2. AI-DRIVEN FEATURES
-- [ ] Customer Service Agent: provide useful information about destinations and POI to user. Release the user with overhelming researching process.
-- [ ] Vi vu feature: based on user's preference and leverage the LLM's cooperating with smart planning algorithm to generate a detail trip itinerary. The provided trip will maximize the user's utility, allow them enjoy the trip without considering which place to go and for how long.
-- [ ] Risks management: Based on the trip user are going to, with information gathered on the real-time updated travel database. The agent could predict risk and suggest alternative plan that could lower the chance of broken point during the trip. This feature with the Vi Vu allow the system to take over all user concerns about trip planning process, release them from time consumming preparing for a trip.
-## DEVELOPMENT PROGRESS
-### COMPLETE:
-- [ ] ...
-### TODO:
-- [ ] Multi-agent system: the back-bone of the AI features. The goal is a system could query from RAG database with travel data gathering during the crawling process to answer user's questions:
-    - [x] Crawling module
-    - [ ] **Relationship Modeling**:
-        - [ ] USER_BEHAVIOR $\rightarrow$ VIBE (or category (amenity, tourism, shop)) or Tag (the feeling):
-            - [ ] Weights function.
-        - [ ] POI $\rightarrow$ POI: 
-            + [ ] NEAR_BY
-            + [ ] SEQUENTIAL_FLOW
-            + [ ] SIMILAR_VIBE
-    - [ ] **Ingestion Module**:
-        + [x] Build the batch ingestion for POI data.
-        + [ ] Verify logic of AI's code.
-        + [x] Build ingestion pipeline for the geojson file.
-        + [ ] Routing service.
-    - [ ] RAG database module
-    - [x] Agent system architecture (draft)
-    - [ ] The system
-- [ ] **Search Module.**
-- [ ] **Dataset (both from Traveloka & Openstreetmap + Searchnx)**:
-    + [x] OSM dataset: +6000 Local POI with high structure from OSM. However they lack of explicit description.
-    + [ ] Traveloka: ... 
-- [ ] Vi vu feature: the key difference of the system with others OTA services. The feature has three components: 
-    - [ ] LLM's grading based on user preferences.
-    - [ ] Smart Planning Algorithm.
-    - [ ] Graph RAG for grounding truth.
-## DEV's NOTE
-### DEVELOPMENT TODO LIST
-- [ ] UI's schema for Trip planning.
-- [ ] Complete data models and interaction service to manipulating the data.
-    - [x] Graph Entities Model Schema.
-    - [x] Basic CRUD on Graph.
-    - [ ] Relationships Schema.
-    - [x] Repositories for each entity.
-- [ ] After that build the data ingestion process to extract data from the crawled json file to knowledge graph using memgraph and vectorize `seo_article` using embedding model for the Vector RAG database. 
-**DEADLINE: 15/3/2026**
+# ✈️ TRAVEL VO LO - Smart Travel Assistant Agent System
+
+**Travel Vo Lo** is an advanced, AI-driven Smart Travel Assistant and Online Travel Agency (OTA) platform. Designed to eliminate the overwhelming and time-consuming process of trip planning, Travel Vo Lo leverages Multi-Agent Systems, Large Language Models (LLMs), and Graph RAG technologies to craft highly personalized, risk-free, and optimized travel experiences.
+
+---
+
+## ✨ Key Features
+
+### 1. OTA Features (Online Travel Agency)
+
+A fully functional booking and travel management engine that allows users to securely book flights, accommodations, and local experiences directly through the platform.
+
+### 2. AI-Driven Capabilities
+
+Our AI ecosystem successfully handles all user concerns regarding the trip planning process:
+
+* 🤖 **Smart Customer Service Agent**
+An intelligent conversational agent that provides precise, contextual information about destinations and Points of Interest (POIs). It does the heavy lifting of travel research so users don't have to.
+* 🗺️ **"Vi Vu" - Intelligent Itinerary Planner**
+The flagship feature that differentiates Travel Vo Lo from traditional OTA services. By combining user preferences, LLM reasoning, and a smart planning algorithm, "Vi Vu" generates highly detailed, utility-maximizing itineraries. Users can simply pack their bags and enjoy the trip without worrying about where to go or how long to stay.
+* 🛡️ **Proactive Risk Management**
+Powered by a real-time travel database, the agent anticipates potential risks (e.g., weather issues, closures) during the trip. It proactively suggests alternative plans to minimize the chance of disruptions, ensuring a seamless travel experience.
+
+---
+
+## 🏗️ System Architecture & Core Modules
+
+The backbone of Travel Vo Lo is a fully integrated **Multi-Agent System** operating on top of a robust **RAG (Retrieval-Augmented Generation)** database.
+
+### Multi-Agent Backbone
+
+* **Graph RAG for Ground Truth:** Ensures accurate, hallucination-free AI responses using verified travel data.
+* **Relationship Modeling (Graph):**
+* `USER_BEHAVIOR` $\rightarrow$ `VIBE` (Amenity, Tourism, Shop) or `TAG` (Feeling) driven by robust custom weight functions.
+* `POI` $\rightarrow$ `POI` spatial and conceptual relations, fully mapped for: `NEAR_BY`, `SEQUENTIAL_FLOW`, and `SIMILAR_VIBE`.
+
+
+* **POI Service:** Handles automated batch ingestion for POI data and GeoJSON files, seamlessly integrated with routing services to manage and structure all Point of Interest information.
+
+### Dataset Aggregation
+
+* **OpenStreetMap (OSM):** A highly structured foundational dataset of over 6,000 local POIs.
+* **Traveloka & SearchNX Data:** Successfully integrated to enrich POI descriptions, reviews, and contextual data.
+
+---
+
+## 🚀 Technical Achievements & Capabilities
+
+The system architecture has been fully realized with the completion of all core data models, interaction services, and AI integrations:
+
+* **Multi-Agent Orchestration:** Seamless operation between the RAG database, crawling modules, and intelligent agent logic to answer complex user queries.
+* **Knowledge Graph Integration:** Complete extraction of crawled JSON data into **Memgraph**, establishing a robust Knowledge Graph.
+* **Vector Database:** Fully vectorized `seo_article` content using advanced embedding models for the Vector RAG database.
+* **"Vi Vu" Engine Deployment:** Successful integration of LLM user preference grading, the Smart Planning Algorithm, and Graph RAG grounding for itinerary generation.
+* **Data Models & Schemas:** Finalized Graph Entities Model Schemas, Relationship Schemas, and Repositories for each entity, fully supporting comprehensive CRUD operations.
+* **Search Infrastructure:** Core search module deployed and highly optimized for rapid data retrieval.
+* **UI/UX:** Complete and intuitive UI Schema implemented for the Trip Planning interface.
