@@ -1,8 +1,9 @@
 # Test plan — Agent Chat MVP (`FT-CHAT-MVP-001`)
 
-- **ID:** `TP-CHAT-001` · **Version:** `0.3` · **Status:** `READY TO IMPLEMENT` (chờ chủ dự án quyết viết test ngay hay chờ brief)
+- **ID:** `TP-CHAT-001` · **Version:** `0.4` · **Status:** `READY TO IMPLEMENT` (chờ chủ dự án quyết viết test ngay hay chờ brief)
 - **0.2:** thêm schema mock Knowledge Database lấy từ dataset thật (§2.1) và cặp đối chứng tồn tại / không tồn tại ở B3 theo yêu cầu chủ dự án.
 - **0.3:** sáu quyết định đã chốt (§2.2–§2.5, Q1–Q6); không còn case nào phải chờ để viết assert.
+- **0.4:** bộ case trong tệp này trở thành **tầng T1 (20 spec test)** của kiến trúc 120 test; 8 case còn lại làm hạt giống cho tầng T2. Xem `F-CHAT_MVP_TEST_ARCHITECTURE.md`.
 - **Dựa trên:** `docs/contracts/F-CHAT_MVP_CONTRACT.md` v1.0 (APPROVED, chủ dự án định nghĩa)
 - **Ngày:** 2026-10-22 · **Người soạn:** Hermes
 - **Trạng thái thực thi:** chưa viết test, chưa chạy. Tệp này là **đề xuất** test.

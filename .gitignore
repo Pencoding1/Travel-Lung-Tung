@@ -63,6 +63,11 @@ events*.log
 # handoff reports/evidence under docs/project/handoffs/ remain tracked.
 .qa-tmp*/
 
+# --- Hidden developer test suite (must not be readable by the building agent) ---
+# The 100 anti-overfit tests live outside version control on purpose; the owner
+# cuts the folder out and runs it manually after the feature is built.
+tests/ai_chat_mvp_hidden/
+
 # --- Isolated workspace-native runtime binaries/state (OC-041) ---
 # Downloaded packages, extracted Memgraph runtime, fresh data dir and logs stay
 # machine-local; reproducible helpers and the written report remain tracked.
