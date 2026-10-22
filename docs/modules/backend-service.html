@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>backend_service — Travel Lung Tung</title>
+<link rel="stylesheet" href="../assets/docs.css">
+</head>
+<body>
+<header class="top">
+  <div class="bar">
+    <div class="brand">backend_service<small>Lịch trình trên Firestore</small></div>
+    <div class="spacer"></div>
+    <a class="btn" href="../index.html">Trang chủ</a>
+    <button class="btn" id="theme-toggle">Nền tối</button>
+  </div>
+</header>
+
+<div class="wrap">
+<nav class="toc">
+  <h4>Tổng quan</h4>
+  <a href="../index.html">Trang chủ</a>
+  <a href="../diagrams/index.html">Thư viện sơ đồ</a>
+  <h4>Module</h4>
+  <a href="crawler-service.html">crawler_service</a>
+  <a href="poi-service.html">POI_service</a>
+  <a href="ai-service.html">ai_service</a>
+  <a href="shared-lib.html">shared_lib</a>
+  <h4>Trên trang này</h4>
+  <a href="#vai-tro">Vai trò và trạng thái</a>
+  <a href="#cau-truc">Cấu trúc gói</a>
+  <a href="#mo-hinh">Mô hình miền</a>
+  <a href="#nen">Lớp repository nền</a>
+  <a href="#lich-trinh">Hai repository lịch trình</a>
+  <a href="#use-case">Ca sử dụng</a>
+  <a href="#khoang-trong">Khoảng trống</a>
+</nav>
+
+<main>
+<section id="vai-tro">
+  <h1>backend_service</h1>
+  <p class="lead">Đây là nơi dự kiến giữ lịch trình và điểm dừng của người dùng trên Firestore. Hiện tại gói này mới có mô hình miền và tầng repository — chưa có tiến trình nào chạy nó.</p>
+
+  <div class="callout gap">
+    <p><strong>Đọc phần này trước khi tin vào sơ đồ.</strong> Gói <code>backend_service</code> không có <code>main.py</code>, tệp endpoint duy nhất rỗng 0 dòng, và <code>docker-compose.yaml</code> không khai báo container cho nó. Nghĩa là trong đường chạy thật, lịch trình do ai_service sinh ra chưa được ghi xuống Firestore ở đâu cả.</p>
+  </div>
+
+  <h3>Nó sinh ra để làm gì</h3>
+  <p>Tách việc lưu trữ lịch trình ra khỏi vùng AI. Vùng AI không giữ dữ liệu người dùng và không có thông tin đăng nhập lưu trữ; vùng này sở hữu dữ liệu đó. Ranh giới ấy đúng về thiết kế, chỉ là phần hiện thực còn dở.</p>
+  <table>
+    <thead><tr><th>Thành phần</th><th>Trạng thái thực tế</th><th>Bằng chứng</th></tr></thead>
+    <tbody>
+      <tr><td>Ứng dụng FastAPI</td><td><span class="badge gap">không có</span></td><td>không có tệp <code>main.py</code> trong gói</td></tr>
+      <tr><td>Endpoint lịch trình</td><td><span class="badge gap">rỗng 0 dòng</span></td><td><code>app/api/rest/v1/endpoint_itinerary.py</code></td></tr>
+      <tr><td>Giao diện người dùng</td><td><span class="badge gap">rỗng 0 dòng</span></td><td><code>app/core/interfaces/user.py</code></td></tr>
+      <tr><td>Ngoại lệ riêng của gói</td><td><span class="badge gap">rỗng 0 dòng</span></td><td><code>app/core/exceptions.py</code></td></tr>
+      <tr><td>Mô hình miền</td><td><span class="badge ok">có</span></td><td><code>app/core/domain/</code></td></tr>
+      <tr><td>Tầng repository Firestore</td><td><span class="badge ok">có</span></td><td><code>app/core/infrastructure/repository/firebase.py</code></td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="cau-truc">
+  <h2>Cấu trúc gói</h2>
+  <table>
+    <thead><tr><th>Đường dẫn</th><th>Vai trò</th></tr></thead>
+    <tbody>
+      <tr><td><code>app/core/domain/Itinerary.py</code></td><td><code>Itinerary</code>: mã, điểm đầu, điểm cuối, danh sách điểm dừng</td></tr>
+      <tr><td><code>app/core/domain/Stops.py</code></td><td><code>Stop</code>: POI tham chiếu, ảnh, ngày, mô tả, giờ tới, giờ rời, ngân sách</td></tr>
+      <tr><td><code>app/core/domain/POI.py</code></td><td>Bản sao mô hình POI của riêng gói này</td></tr>
+      <tr><td><code>app/core/domain/user.py</code></td><td><code>User</code> với kiểm tra tuổi từ 18 và số điện thoại chuẩn hoá</td></tr>
+      <tr><td><code>app/core/domain/enum.py</code></td><td>Mức ngân sách và nhịp đi, bản sao của POI_service</td></tr>
+      <tr><td><code>app/core/interfaces/</code></td><td>Hợp đồng cho lịch trình và điểm dừng</td></tr>
+      <tr><td><code>app/core/base/repository.py</code></td><td>Repository nền cho Firestore</td></tr>
+      <tr><td><code>app/core/infrastructure/repository/firebase.py</code></td><td>Hai repository cụ thể</td></tr>
+      <tr><td><code>app/core/infrastructure/database/connector.py</code></td><td>Bộ kết nối Firestore, đọc khoá từ biến môi trường</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="mo-hinh">
+  <h2>Mô hình miền</h2>
+
+  <h3>Itinerary và Stop</h3>
+  <div class="sig">class Itinerary(BaseModel) — id, start_poi_id, end_poi_id, stops: list[Stop]</div>
+  <details class="params">
+    <summary>Trường của Stop <span class="count">7 trường</span></summary>
+    <div class="inner">
+      <table>
+        <thead><tr><th>Trường</th><th>Kiểu</th><th>Ý nghĩa</th></tr></thead>
+        <tbody>
+          <tr><td><code>poi_id</code></td><td>str</td><td>Tham chiếu tới nút POI, không nhúng cả đối tượng vào lịch trình.</td></tr>
+          <tr><td><code>image</code></td><td>str</td><td>Ảnh của điểm dừng, dạng chuỗi nên không kiểm tra định dạng URL.</td></tr>
+          <tr><td><code>date</code></td><td>datetime</td><td>Ngày diễn ra.</td></tr>
+          <tr><td><code>description</code></td><td>str</td><td>Mô tả do mô hình sinh.</td></tr>
+          <tr><td><code>visit_time</code></td><td>datetime</td><td>Giờ tới.</td></tr>
+          <tr><td><code>end_visit_time</code></td><td>datetime</td><td>Giờ rời. Hiệu số hai trường này là độ dài lượt ghé.</td></tr>
+          <tr><td><code>budget</code></td><td>float</td><td>Chi phí dự kiến cho điểm dừng này.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+  <p class="evidence">Nguồn: <code>app/core/domain/Itinerary.py:5-9</code>; <code>app/core/domain/Stops.py:8-15</code>.</p>
+
+  <h3>Hai mô hình POI trong cùng một kho mã</h3>
+  <p>POI_service và backend_service mỗi bên định nghĩa một lớp POI riêng, và chúng khác nhau ở mức ràng buộc:</p>
+  <table>
+    <thead><tr><th>Khía cạnh</th><th><code>POI_service</code></th><th><code>backend_service</code></th></tr></thead>
+    <tbody>
+      <tr><td>Địa chỉ</td><td>Tuỳ chọn, có phường và tên đường tự do</td><td>Bắt buộc, có <code>province</code> tách riêng</td></tr>
+      <tr><td>Danh mục</td><td>Danh sách, được phép rỗng</td><td>Danh sách bắt buộc</td></tr>
+      <tr><td>Thẻ</td><td>Tuỳ chọn</td><td>Bắt buộc</td></tr>
+      <tr><td>Thực đơn</td><td>Danh sách, mặc định rỗng, tự đổi <code>null</code> thành rỗng</td><td>Danh sách, mặc định rỗng</td></tr>
+      <tr><td>Liên hệ</td><td>Tuỳ chọn, số điện thoại được kiểm tra và chuẩn hoá E.164</td><td>Tuỳ chọn, nhưng fanpage và website phải là URL hợp lệ</td></tr>
+    </tbody>
+  </table>
+  <div class="callout warn">
+    <p>Cùng một bản ghi POI có thể qua được kiểm tra ở gói này nhưng hỏng ở gói kia, hoặc ngược lại. Khi nối hai đường dữ liệu, phải chốt một mô hình làm chuẩn — nếu không, lỗi sẽ xuất hiện ở bước ghi Firestore sau khi lịch trình đã sinh xong.</p>
+  </div>
+  <p class="evidence">Nguồn: <code>POI_service/app/core/domain/graph_entities.py:154-220</code>; <code>backend_service/app/core/domain/POI.py:40-53</code>.</p>
+
+  <h3>User</h3>
+  <div class="sig">class User(BaseModel) — id, dob, email, phone_number, user_preference</div>
+  <p>Hai bộ kiểm tra: tuổi phải từ 18 trở lên (tính theo ngày hiện tại), và số điện thoại phải là số hợp lệ quốc tế rồi được chuẩn hoá về dạng E.164. Lưu ý trường <code>id</code> và <code>phone_number</code> dùng bí danh <code>ID</code> và <code>PhoneNumber</code>, nên tài liệu Firestore phải có đúng tên viết hoa đó.</p>
+  <p class="evidence">Nguồn: <code>app/core/domain/user.py:8-43</code>.</p>
+</section>
+
+<section id="nen">
+  <h2>Lớp repository nền</h2>
+  <div class="sig">class BaseFirebaseRepository(connector: FireStoreConnector, collection_name: str, model_class: Type[T])</div>
+  <details class="params">
+    <summary>Năm phương thức và hành vi của chúng <span class="count">5 mục</span></summary>
+    <div class="inner">
+      <table>
+        <thead><tr><th>Phương thức</th><th>Hành vi</th><th>Điểm cần biết</th></tr></thead>
+        <tbody>
+          <tr><td><code>create(entity)</code></td><td>Có <code>id</code> thì ghi đè theo mã đó; không có thì để Firestore sinh mã rồi gán ngược lại vào dữ liệu</td><td>Ghi theo mã cố định nghĩa là tạo trùng mã sẽ ghi đè, không báo lỗi</td></tr>
+          <tr><td><code>get_by_id(id)</code></td><td>Đọc một tài liệu, không có thì trả <code>None</code></td><td>Không ném lỗi khi thiếu</td></tr>
+          <tr><td><code>get_all(skip, limit)</code></td><td>Dùng phân trang gốc của Firestore</td><td>Thứ tự không được chỉ định, nên kết quả có thể đổi giữa các lần gọi</td></tr>
+          <tr><td><code>update(id, entity)</code></td><td>Chỉ gửi các trường được đặt tường minh</td><td>Cập nhật tài liệu không tồn tại thì Firestore tạo mới</td></tr>
+          <tr><td><code>delete(id)</code></td><td>Kiểm tra tồn tại trước rồi mới xoá để trả về đúng đúng sai</td><td>Cần đọc trước khi xoá nên tốn thêm một lượt gọi</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+  <p class="evidence">Nguồn: <code>app/core/base/repository.py:32-90</code>.</p>
+
+  <div class="callout warn">
+    <p><strong>Khác biệt so với bản của POI_service.</strong> Bản ở POI_service kiểm tra bộ kết nối trước khi lấy bộ sưu tập và ném <code>ConnectionRefusedError</code> nếu chưa kết nối (<code>POI_service/app/core/base/repository.py:53-57</code>). Bản ở đây không kiểm tra: chưa kết nối thì lỗi rơi xuống tận lời gọi Firestore với thông báo khó đọc hơn. Ngoài ra tệp này nhập bằng đường dẫn tuyệt đối <code>backend_service.app...</code>, nên chỉ chạy được khi gốc kho mã nằm trên đường dẫn tìm gói.</p>
+  </div>
+</section>
+
+<section id="lich-trinh">
+  <h2>Hai repository lịch trình</h2>
+
+  <h3>FirebaseItineraryRepository</h3>
+  <div class="sig">class FirebaseItineraryRepository(BaseFirebaseRepository[Itinerary]) — bộ sưu tập <code>itineraries</code></div>
+  <details class="params">
+    <summary>Phương thức riêng <span class="count">3</span></summary>
+    <div class="inner">
+      <table>
+        <thead><tr><th>Phương thức</th><th>Trả về</th><th>Ý nghĩa</th></tr></thead>
+        <tbody>
+          <tr><td><code>get_by_start_poi(poi_id)</code></td><td><code>list[Itinerary]</code></td><td>Truy vấn theo trường <code>start_poi_id</code>.</td></tr>
+          <tr><td><code>get_by_end_poi(poi_id)</code></td><td><code>list[Itinerary]</code></td><td>Truy vấn theo trường <code>end_poi_id</code>.</td></tr>
+          <tr><td><code>get_stops_list(id)</code></td><td><code>list[Stop]</code></td><td>Đọc cả lịch trình rồi trả danh sách điểm dừng đã lồng sẵn; không có thì trả danh sách rỗng.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+  <p class="evidence">Nguồn: <code>app/core/infrastructure/repository/firebase.py:15-32</code>.</p>
+
+  <h3>FirebaseStopRepository</h3>
+  <div class="sig">class FirebaseStopRepository(BaseFirebaseRepository[Stop]) — bộ sưu tập <code>stops</code></div>
+  <details class="params">
+    <summary>Phương thức riêng <span class="count">5</span></summary>
+    <div class="inner">
+      <table>
+        <thead><tr><th>Phương thức</th><th>Trả về</th><th>Ý nghĩa và chi phí</th></tr></thead>
+        <tbody>
+          <tr><td><code>get_by_id(id)</code></td><td><code>Stop | None</code></td><td>Ghi đè lớp cha: tra theo <code>poi_id</code> chứ không theo mã tài liệu.</td></tr>
+          <tr><td><code>update(id, entity)</code></td><td><code>Stop</code></td><td>Cũng tra theo <code>poi_id</code>; không thấy thì ném <code>ValueError</code>.</td></tr>
+          <tr><td><code>delete(id)</code></td><td>bool</td><td>Tra theo <code>poi_id</code> rồi xoá tài liệu đầu tiên khớp.</td></tr>
+          <tr><td><code>get_by_budget(max_budget, skip, limit)</code></td><td><code>list[Stop]</code></td><td>Lọc ngay trên Firestore theo ngân sách, có phân trang.</td></tr>
+          <tr><td><code>get_by_date(target_date, skip, limit)</code></td><td><code>list[Stop]</code></td><td>Dựng khoảng chuỗi ISO từ đầu ngày tới cuối ngày để lọc.</td></tr>
+          <tr><td><code>get_by_duration_bucket(bucket_index, skip, limit)</code></td><td><code>list[Stop]</code></td><td>Mỗi nhóm là 15 phút. Vì Firestore không tính được hiệu hai trường, hàm đọc cả bộ sưu tập rồi lọc trong bộ nhớ — chi phí tăng theo số điểm dừng.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+  <p class="evidence">Nguồn: <code>firebase.py:36-103</code>; ghi chú chi phí ở <code>:82-88</code>.</p>
+</section>
+
+<section id="use-case">
+  <h2>Ca sử dụng</h2>
+  <div class="grid two">
+    <div class="uc">
+      <h4>Lưu một lịch trình vừa sinh</h4>
+      <p>Hiện phải gọi từ mã vì chưa có endpoint. Đây là việc cần làm đầu tiên để nối vùng AI với vùng lưu trữ.</p>
+      <pre><code>from app.core.infrastructure.database.connector import FireStoreConnector
+from app.core.infrastructure.repository.firebase import FirebaseItineraryRepository
+
+repo = FirebaseItineraryRepository(FireStoreConnector())
+repo.create(itinerary)          # id có sẵn thì ghi theo id đó
+repo.get_by_start_poi(poi_id)</code></pre>
+    </div>
+    <div class="uc">
+      <h4>Lọc điểm dừng theo ngân sách</h4>
+      <p>Dùng bộ lọc ngay trên Firestore nên rẻ; ngược lại, lọc theo độ dài lượt ghé phải quét cả bộ sưu tập.</p>
+      <pre><code>stops = repo.get_by_budget(max_budget=150000, limit=20)
+bucket = repo.get_by_duration_bucket(bucket_index=2)  # 30–45 phút</code></pre>
+    </div>
+    <div class="uc">
+      <h4>Đối chiếu lịch trình theo điểm đầu</h4>
+      <p>Câu hỏi “những lịch trình nào bắt đầu từ địa điểm này” dùng được ngay, miễn là chỉ mục cho trường đó tồn tại.</p>
+      <pre><code>repo.get_by_end_poi("cafe_hochiminh_quan1_...")</code></pre>
+    </div>
+    <div class="uc">
+      <h4>Chạy repository khi chưa kết nối</h4>
+      <p>Khác bản của POI_service, lớp nền ở đây không kiểm tra kết nối — thông báo lỗi sẽ khó đọc. Nên gọi hàm kết nối trước.</p>
+      <pre><code>FireStoreConnector().connect()   # bắt buộc, nếu không sẽ lỗi ở tầng Firestore</code></pre>
+    </div>
+  </div>
+</section>
+
+<section id="khoang-trong">
+  <h2>Khoảng trống</h2>
+  <table>
+    <thead><tr><th>Điểm</th><th>Hệ quả</th><th>Bằng chứng</th></tr></thead>
+    <tbody>
+      <tr><td>Không có <code>main.py</code>; tệp endpoint rỗng 0 dòng; không có container trong compose</td><td>Không có đường HTTP nào để lưu hoặc đọc lịch trình</td><td><code>backend_service/app/api/rest/v1/endpoint_itinerary.py</code>; <code>docker-compose.yaml</code></td></tr>
+      <tr><td>Dockerfile của gói lại xuất phụ thuộc và sao chép mã của POI_service, chạy <code>app.main:app</code> ở cổng 8002</td><td>Dựng ảnh backend ra đúng ảnh của POI_service; đây là lỗi sao chép cần sửa</td><td><code>backend_service/Dockerfile:15</code>, <code>:41</code>, <code>:49</code></td></tr>
+      <tr><td>Không có đường nào từ ai_service gọi tới đây</td><td>Lịch trình sinh ra bị mất khi client đóng kết nối</td><td><code>ai_service/main.py:464-467</code></td></tr>
+      <tr><td>Repository nền không kiểm tra kết nối trước khi dùng</td><td>Chưa kết nối là lỗi khó đọc ở tầng dưới</td><td><code>app/core/base/repository.py:37-40</code></td></tr>
+      <tr><td>Nhập bằng đường dẫn tuyệt đối <code>backend_service.app...</code></td><td>Phụ thuộc vào gốc kho mã nằm trên đường dẫn tìm gói; chạy trong Docker theo bố cục hiện tại sẽ lệch</td><td><code>app/core/base/repository.py:6</code></td></tr>
+      <tr><td>Hai mô hình POI khác nhau, hai bản enum khác nhau trong cùng kho mã</td><td>Dễ lệch ràng buộc khi nối hai đường dữ liệu</td><td><code>POI_service/app/core/domain/</code> đối chiếu <code>backend_service/app/core/domain/</code></td></tr>
+      <tr><td><code>get_by_duration_bucket</code> đọc cả bộ sưu tập rồi lọc trong bộ nhớ</td><td>Chi phí tăng tuyến tính theo số điểm dừng</td><td><code>firebase.py:82-103</code></td></tr>
+      <tr><td><code>get_all</code> không chỉ định thứ tự</td><td>Kết quả phân trang có thể đổi giữa các lần gọi, gây trùng hoặc sót bản ghi</td><td><code>app/core/base/repository.py:68-73</code></td></tr>
+    </tbody>
+  </table>
+  <footer class="foot">Đối chiếu bản mã <code>1d18ac3</code> ngày 04-10-2026.</footer>
+</section>
+</main>
+</div>
+<script src="../assets/docs.js"></script>
+</body>
+</html>

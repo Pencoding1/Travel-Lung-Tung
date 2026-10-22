@@ -1,0 +1,95 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Sơ đồ lớp POI_service: CQRS, Unit of Work, mô hình miền",
+    "output": "docs/diagrams/class-poi-service.architecture.html",
+    "viewBox": [1240, 660],
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/Pencoding1/Travel-Lung-Tung",
+      "provider": "github",
+      "revision": "1d18ac30140dfe36335fadf49abe7c6177a19a60"
+    },
+    "views": [
+      {
+        "id": "write-path",
+        "label": "Đường ghi dữ liệu",
+        "focus": ["api_rest", "ingest_svc", "iface_uow", "uow_memgraph", "repo_memgraph", "domain_models"],
+        "note": "Nạp POI đi từ router tới transaction rồi mới tới câu lệnh Cypher."
+      },
+      {
+        "id": "read-path",
+        "label": "Đường đọc cho agent",
+        "focus": ["mcp_tools", "mgmt_svc", "iface_repo", "repo_memgraph", "domain_payload"],
+        "note": "MCP dùng lại đúng service quản lý, không viết truy vấn riêng."
+      },
+      {
+        "id": "contracts",
+        "label": "Hợp đồng và hiện thực",
+        "focus": ["base_svc", "iface_repo", "iface_uow", "iface_doc", "uow_memgraph", "repo_memgraph", "connector"],
+        "note": "Phụ thuộc đi qua giao diện, hiện thực nằm ở tầng hạ tầng."
+      }
+    ]
+  },
+  "components": [
+    { "id": "api_rest", "type": "backend", "label": "REST routers", "sublabel": "4 endpoint", "tag": "FastAPI", "pos": [40, 60], "size": [230, 76], "sources": [{ "path": "POI_service/app/api/rest/v1/endpoint_ingestion.py", "line": 15, "label": "router /ingestion" }] },
+    { "id": "mcp_tools", "type": "backend", "label": "FastMCP tools", "sublabel": "5 tool cho agent", "pos": [40, 190], "size": [230, 76], "sources": [{ "path": "POI_service/app/api/mcp/tools.py", "line": 26, "label": "FastMCP :8001" }] },
+    { "id": "mgmt_svc", "type": "backend", "label": "POIManagementService", "sublabel": "CRUD và payload", "pos": [340, 60], "size": [230, 76], "sources": [{ "path": "POI_service/app/core/services/management.py", "line": 20, "label": "dịch vụ quản lý" }] },
+    { "id": "base_svc", "type": "backend", "label": "BaseManagementService", "sublabel": "khuôn mẫu CRUD", "pos": [340, 190], "size": [230, 76], "sources": [{ "path": "POI_service/app/core/base/service.py", "line": 19, "label": "lớp cơ sở" }] },
+    { "id": "ingest_svc", "type": "backend", "label": "POIIngestionService", "sublabel": "canary và SSE", "pos": [340, 320], "size": [230, 76], "sources": [{ "path": "POI_service/app/core/services/ingestion.py", "line": 16, "label": "dịch vụ nạp" }] },
+    { "id": "iface_repo", "type": "backend", "label": "IPOIRepository", "sublabel": "18 phương thức", "tag": "giao diện", "pos": [660, 60], "size": [230, 76], "sources": [{ "path": "POI_service/app/core/interfaces/repositories.py", "line": 13, "label": "hợp đồng repo" }] },
+    { "id": "iface_uow", "type": "backend", "label": "AbstractUnitOfWork", "sublabel": "commit và rollback", "tag": "giao diện", "pos": [660, 190], "size": [230, 76], "sources": [{ "path": "POI_service/app/core/interfaces/repositories.py", "line": 138, "label": "hợp đồng UoW" }] },
+    { "id": "domain_models", "type": "backend", "label": "POI, Category, Tag", "sublabel": "Address và Product", "tag": "pydantic", "pos": [660, 320], "size": [230, 76], "sources": [{ "path": "POI_service/app/core/domain/graph_entities.py", "line": 154, "label": "mô hình POI" }] },
+    { "id": "domain_payload", "type": "backend", "label": "POIResult", "sublabel": "payload cho agent", "pos": [660, 450], "size": [230, 76], "sources": [{ "path": "POI_service/app/core/domain/get_payload.py", "line": 36, "label": "schema đầu ra" }] },
+    { "id": "uow_memgraph", "type": "database", "label": "MemgraphUnitOfWork", "sublabel": "mở transaction", "pos": [980, 190], "size": [230, 76], "sources": [{ "path": "POI_service/app/core/infrastructure/db/uow.py", "line": 13, "label": "hiện thực UoW" }] },
+    { "id": "repo_memgraph", "type": "database", "label": "MemgraphPOIRepository", "sublabel": "batch_create UNWIND", "pos": [980, 60], "size": [230, 76], "sources": [{ "path": "POI_service/app/core/infrastructure/db/repositories/memgraph.py", "line": 176, "label": "repo Memgraph" }] },
+    { "id": "connector", "type": "database", "label": "MemgraphConnector", "sublabel": "neo4j driver", "pos": [980, 320], "size": [230, 76], "sources": [{ "path": "POI_service/app/core/infrastructure/db/database/connector.py", "line": 67, "label": "vòng đời kết nối" }] },
+    { "id": "iface_doc", "type": "backend", "label": "IDocumentRepository", "sublabel": "chưa hiện thực", "pos": [980, 450], "size": [230, 76], "sources": [{ "path": "POI_service/app/core/interfaces/repositories.py", "line": 159, "label": "document RAG" }] }
+  ],
+  "boundaries": [
+    { "kind": "region", "label": "Tầng giao diện", "wraps": ["api_rest", "mcp_tools"] },
+    { "kind": "region", "label": "Tầng ứng dụng", "wraps": ["mgmt_svc", "base_svc", "ingest_svc"] },
+    { "kind": "region", "label": "Tầng miền và hợp đồng", "wraps": ["iface_repo", "iface_uow", "domain_models", "domain_payload"] },
+    { "kind": "security-group", "label": "Tầng hạ tầng Memgraph", "wraps": ["repo_memgraph", "uow_memgraph", "connector"] }
+  ],
+  "connections": [
+    { "id": "rest-ingest", "from": "api_rest", "to": "ingest_svc", "variant": "emphasis", "fromSide": "right", "toSide": "top" },
+    { "id": "mgmt-base", "from": "mgmt_svc", "to": "base_svc", "label": "kế thừa", "labelDy": 22, "variant": "dashed", "fromSide": "bottom", "toSide": "top" },
+    { "id": "mgmt-repo", "from": "mgmt_svc", "to": "iface_repo", "fromSide": "right", "toSide": "left" },
+    { "id": "ingest-uow", "from": "ingest_svc", "to": "iface_uow", "fromSide": "right", "toSide": "left" },
+    { "id": "ingest-domain", "from": "ingest_svc", "to": "domain_models", "fromSide": "right", "toSide": "left" },
+    { "id": "iface-repo-impl", "from": "iface_repo", "to": "repo_memgraph", "label": "hiện thực", "variant": "dashed", "fromSide": "right", "toSide": "left" },
+    { "id": "iface-uow-impl", "from": "iface_uow", "to": "uow_memgraph", "label": "hiện thực", "variant": "dashed", "fromSide": "right", "toSide": "left" },
+    { "id": "uow-repo", "from": "uow_memgraph", "to": "repo_memgraph", "fromSide": "top", "toSide": "bottom" }
+  ],
+  "cards": [
+    {
+      "dot": "violet",
+      "title": "Vì sao tách service khỏi repository",
+      "items": [
+        "Service chỉ biết giao diện, đổi store khác không phải sửa nghiệp vụ",
+        "Unit of Work gom repository và transaction vào một ngữ cảnh, thoát khối with là chốt giao dịch",
+        "BaseManagementService giữ một luồng duy nhất: kiểm tra dữ liệu, kiểm tra tồn tại, rồi mới ghi"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Hai lối vào, một nghiệp vụ",
+      "items": [
+        "REST và MCP đều dùng lại POIManagementService, không có truy vấn song song nào khác",
+        "Nhờ vậy quy tắc làm sạch dữ liệu chỉ tồn tại ở một chỗ",
+        "MCP tự tạo UoW riêng nên không dùng chung transaction với REST"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Chỗ còn hở",
+      "items": [
+        "IDocumentRepository có mặt nhưng chưa có đường nối vì lớp hiện thực còn rỗng",
+        "SpatialUpdater chỉ chạy khi được gọi tay, không tự kích hoạt sau khi nạp POI",
+        "Crawler là dịch vụ duy nhất gọi REST vào đây, phần còn lại đi qua MCP"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+SYNTHETIC EVALUATOR TEST
+========================
+
+The output in this directory was produced by the OC-018 evaluator running on
+hand-authored synthetic fixtures. It is an ENGINEERING SMOKE TEST of the
+evaluator code, NOT a real H2/H3 study result and NOT the original dataset.
+Synthetic output must never be reported as a thesis conclusion.

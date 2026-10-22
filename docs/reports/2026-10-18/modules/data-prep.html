@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Chuẩn bị dữ liệu chính — Travel AI</title>
+<style>
+:root{--bg:#f5f3ee;--surface:#fffdf8;--surface2:#eeeae0;--ink:#17201d;--muted:#5c665f;--line:#d8d3c7;--accent:#0f6b57;--accent2:#b4562b;--ok:#18794e;--warn:#9a5b00;--bad:#a12b2b;--shadow:0 12px 34px rgba(23,32,29,.08);--radius:18px}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{scroll-behavior:smooth}
+body{margin:0;background:radial-gradient(1200px 600px at 8% -10%,#e7efe9 0,transparent 55%),radial-gradient(900px 500px at 100% 0,#f3e7db 0,transparent 50%),var(--bg);color:var(--ink);font-family:"Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;line-height:1.6}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+button{font:inherit;color:inherit}
+.wrap{max-width:1180px;margin:0 auto;padding:26px 22px 56px}
+.top{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;flex-wrap:wrap;margin-bottom:22px}
+.brand{display:flex;gap:13px;align-items:center}
+.mark{width:46px;height:46px;border-radius:14px;background:linear-gradient(135deg,var(--accent),#2a9278);color:#fff;display:grid;place-items:center;font-weight:800;letter-spacing:-.04em;box-shadow:var(--shadow)}
+.brand h1{font-size:clamp(20px,2.6vw,28px);line-height:1.15;margin:0;letter-spacing:-.02em}
+.brand p{margin:3px 0 0;color:var(--muted);font-size:13px}
+.top-actions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+.pill{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 12px;font-size:12.5px;color:var(--muted);white-space:nowrap}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--ok);flex:0 0 auto}
+.dot.warn{background:var(--warn)}.dot.bad{background:var(--bad)}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:11px;padding:8px 12px;cursor:pointer;transition:.15s}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--ink);color:#fff;border-color:var(--ink)}
+.btn.primary:hover{background:var(--accent);border-color:var(--accent);color:#fff}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+.hero{padding:clamp(22px,3vw,34px);display:grid;grid-template-columns:1.55fr .95fr;gap:26px;align-items:start}
+.eyebrow{font-size:12px;text-transform:uppercase;letter-spacing:.13em;color:var(--accent);font-weight:700;margin:0 0 8px}
+.hero h2{font-size:clamp(26px,3.6vw,42px);line-height:1.08;letter-spacing:-.035em;margin:0 0 12px;max-width:20ch}
+.hero .lead{font-size:clamp(15px,1.5vw,17px);color:#37423c;margin:0 0 14px;max-width:68ch}
+.hero .lead b{color:var(--ink)}
+.quick{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}
+.quick div{background:var(--surface2);border-radius:13px;padding:12px 14px}
+.quick strong{display:block;font-size:13px;color:var(--muted);font-weight:600;margin-bottom:2px}
+.quick span{font-size:13.5px;line-height:1.4}
+.now{background:linear-gradient(160deg,#11362d,#0c241e);color:#eaf3ee;border-radius:15px;padding:20px;min-width:0}
+.now .k{font-size:11.5px;text-transform:uppercase;letter-spacing:.14em;color:#9ecbb9;font-weight:700}
+.now h3{font-size:21px;margin:7px 0 9px;letter-spacing:-.02em}
+.now p{margin:0;color:#c9ded6;font-size:13.5px}
+.now ol{margin:14px 0 0;padding-left:19px;color:#dcebe5;font-size:13px}
+.now li{margin:7px 0}
+.phasebar{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:18px 0 0}
+.phase{text-align:left;border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:14px;cursor:pointer;transition:.18s;position:relative;min-height:98px}
+.phase:hover{border-color:#9bb7ac;transform:translateY(-1px)}
+.phase[aria-selected="true"]{border-color:var(--accent);background:#eef6f1;box-shadow:inset 0 0 0 1px var(--accent)}
+.phase .n{font-size:11px;font-weight:800;letter-spacing:.12em;color:var(--accent);text-transform:uppercase}
+.phase strong{display:block;font-size:15px;margin:4px 0 3px;letter-spacing:-.01em}
+.phase small{color:var(--muted);font-size:12.5px;line-height:1.35;display:block}
+.phase .state{margin-top:8px;font-size:11.5px;color:var(--warn);font-weight:700}
+.phase.current .state{color:var(--accent)}
+.phase-panel{margin-top:12px;padding:18px 20px;border-left:4px solid var(--accent);background:#fbfaf5;border-radius:0 14px 14px 0}
+.phase-panel h3{margin:0 0 6px;font-size:17px}
+.phase-panel p{margin:0;color:#3c4741;font-size:14px;max-width:90ch}
+.phase-panel ul{margin:10px 0 0;padding-left:20px;color:var(--muted);font-size:13.5px}
+.phase-panel li{margin:4px 0}
+.section-head{display:flex;align-items:end;justify-content:space-between;gap:16px;margin:30px 0 12px;flex-wrap:wrap}
+.section-head h2{font-size:21px;margin:0;letter-spacing:-.02em}
+.section-head p{margin:3px 0 0;color:var(--muted);font-size:13.5px}
+.metrics{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+.metric{padding:15px 14px;border:1px solid var(--line);background:var(--surface);border-radius:14px}
+.metric .v{font-size:clamp(17px,1.8vw,23px);font-weight:800;letter-spacing:-.03em;line-height:1.15;color:var(--ink)}
+.metric .l{font-size:12.5px;font-weight:600;margin-top:4px;line-height:1.3}
+.metric .n{font-size:11.5px;color:var(--muted);margin-top:5px;line-height:1.35}
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin:14px 0 0;font-size:12px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:14px 0}
+.search{flex:1;min-width:220px;max-width:380px;border:1px solid var(--line);background:var(--surface);border-radius:11px;padding:10px 12px;font:inherit;color:var(--ink)}
+.search:focus{outline:2px solid #b9d4c8;outline-offset:1px;border-color:var(--accent)}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:7px 12px;font-size:12.5px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.module-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:11px}
+.empty{margin:12px 0 0;padding:14px 16px;border:1px dashed var(--line);border-radius:12px;color:var(--muted);font-size:13.5px;background:var(--surface)}
+.mod{text-align:left;padding:15px;border:1px solid var(--line);background:var(--surface);border-radius:15px;cursor:pointer;transition:.16s;min-height:126px;display:flex;flex-direction:column;gap:6px}
+.mod:hover{border-color:#9bb7ac;transform:translateY(-1px);box-shadow:var(--shadow)}
+.mod[aria-selected="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);background:#f7fbf8}
+.mod .k{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-weight:700}
+.mod strong{font-size:15.5px;letter-spacing:-.01em;line-height:1.25}
+.mod p{font-size:12.5px;color:var(--muted);margin:0;line-height:1.4}
+.mod .foot{margin-top:auto;display:flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700}
+.st{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:700;white-space:nowrap}
+.st.verified{color:var(--ok)}.st.pending{color:var(--warn)}.st.incomplete{color:var(--bad)}
+.st .dot{width:7px;height:7px}
+.st.verified .dot{background:var(--ok)}.st.pending .dot{background:var(--warn)}.st.incomplete .dot{background:var(--bad)}
+.detail{margin-top:14px;padding:20px}
+.detail h3{margin:0 0 4px;font-size:19px;letter-spacing:-.02em}
+.detail .sub{color:var(--muted);font-size:12.5px;margin:0 0 12px}
+.detail .cols{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.detail h4{margin:14px 0 5px;font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--accent)}
+.detail ul{margin:0;padding-left:18px;color:#3e4842;font-size:13px}
+.detail li{margin:4px 0}
+.detail .purpose{font-size:14.5px;color:#35413a;margin:0 0 8px;max-width:85ch}
+.detail .next{background:#fbf4e9;border:1px solid #ebd8bb;border-radius:12px;padding:12px 14px;font-size:13px}
+.detail .next b{color:#7a4300}
+.evidence{margin-top:14px;border-top:1px solid var(--line);padding-top:10px}
+.evidence summary{cursor:pointer;font-weight:700;font-size:13px;color:var(--accent);list-style:none}
+.evidence summary::-webkit-details-marker{display:none}
+.evidence summary:before{content:"+ ";font-weight:800}
+.evidence[open] summary:before{content:"− "}
+.evidence code{background:#f0ece2;border:1px solid #e1dbce;border-radius:5px;padding:1px 5px;font-size:11.5px;word-break:break-all}
+.evidence li{font-size:12.5px;color:var(--muted);margin:6px 0}
+.arch{margin-top:30px;padding:20px;display:grid;grid-template-columns:1.4fr .8fr;gap:22px;align-items:center}
+.arch h2{margin:0 0 6px;font-size:20px}
+.arch p{margin:0;color:#3e4842;font-size:13.5px}
+.flow{display:flex;gap:7px;flex-wrap:wrap;margin:13px 0 0}
+.flow span{font-size:12px;background:var(--surface2);border:1px solid var(--line);border-radius:999px;padding:6px 10px}
+.flow span:not(:last-child):after{content:" →";color:var(--muted)}
+.arch .cta{display:flex;flex-direction:column;gap:9px}
+.arch .cta .btn{text-align:center}
+.limits{margin-top:30px;padding:20px}
+.limits h2{margin:0 0 8px;font-size:19px}
+.limits ul{margin:0;padding-left:19px;color:#3e4842;font-size:13px;columns:2;column-gap:34px}
+.limits li{break-inside:avoid;margin:0 0 7px}
+.footer{margin-top:30px;color:var(--muted);font-size:12px;display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.kbd{border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:1px 5px;font-size:11px;background:var(--surface);color:var(--muted)}
+.sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.back{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:600;margin-bottom:14px}
+.mod-page{max-width:980px;margin:0 auto}
+.mod-page .hero2{padding:26px 28px}
+.mod-page h1{font-size:clamp(24px,3vw,34px);line-height:1.12;letter-spacing:-.03em;margin:6px 0 7px}
+.mod-page .lead{font-size:15px;color:#3c4741;margin:0;max-width:75ch}
+.crumb{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;font-weight:700}
+.panel{padding:20px 22px;margin-top:13px}
+.panel h2{font-size:16px;margin:0 0 7px;letter-spacing:-.01em}
+.panel h2 .n{color:var(--accent);font-size:12px;letter-spacing:.08em;margin-right:6px}
+.panel ul{margin:0;padding-left:19px;font-size:13.5px;color:#3d4842}
+.panel li{margin:5px 0}
+.panel p{margin:0;font-size:13.5px;color:#3d4842}
+.panel .next{background:#fbf4e9;border:1px solid #ebd8bb;border-radius:12px;padding:12px 14px;font-size:13px;margin-top:4px}
+.panel .next b{color:#7a4300}
+.navmods{display:flex;justify-content:space-between;gap:10px;margin-top:16px;flex-wrap:wrap}
+.navmods a{font-size:13px;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:8px 12px}
+@media (max-width:980px){.hero{grid-template-columns:1fr}.metrics{grid-template-columns:repeat(3,1fr)}.module-grid{grid-template-columns:repeat(2,1fr)}.arch{grid-template-columns:1fr}.limits ul{columns:1}.detail .cols{grid-template-columns:1fr}}
+@media (max-width:680px){.wrap{padding:18px 14px 42px}.phasebar{grid-template-columns:1fr 1fr}.metrics{grid-template-columns:1fr 1fr}.module-grid{grid-template-columns:1fr}.quick{grid-template-columns:1fr}.top-actions{width:100%}.brand h1{font-size:20px}.limits ul{columns:1}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+
+[data-theme="dark"]{--bg:#101614;--surface:#18211d;--surface2:#202c26;--ink:#eef4f0;--muted:#a9b8b0;--line:#33423a;--accent:#7fc9b1;--accent2:#e0a27d;--ok:#78d2a4;--warn:#f1c06a;--bad:#f19b9b;--shadow:0 12px 34px rgba(0,0,0,.30)}
+[data-theme="dark"] body{background:radial-gradient(1200px 600px at 8% -10%,#173028 0,transparent 55%),radial-gradient(900px 500px at 100% 0,#2a2119 0,transparent 50%),var(--bg)}
+[data-theme="dark"] .panel p,[data-theme="dark"] .panel ul,[data-theme="dark"] .mod-page .lead{color:#cbd8d1}
+[data-theme="dark"] .panel .next{background:#2c2418;border-color:#5a462c}
+[data-theme="dark"] .evidence code{background:#22302a;border-color:#3a4a42}
+</style>
+</head>
+<body>
+<div class="wrap mod-page">
+  <a class="back" href="../index.html">← Về tổng quan</a>
+  <header class="card hero2">
+    <div class="crumb">Mô-đun 2/9 · crawler_service · POI_service</div>
+    <h1>Chuẩn bị dữ liệu chính</h1>
+    <p class="lead">6.368 điểm gốc → 6.367 bản ghi; 14 category; toàn bộ đã vào graph.</p>
+    <p style="margin-top:12px"><span class="st verified"><i class="dot"></i>Đã kiểm chứng</span> <span style="color:var(--muted);font-size:12.5px">· Snapshot 6.367 POI + graph đã QA; chưa xác minh từng venue</span></p>
+  </header>
+  <section class="card panel"><h2><span class="n">01</span>Mục đích</h2><p>Chuẩn hóa tập POI người dùng cung cấp, giữ lineage và gói graph-ready. Codex đã đối chiếu đủ 6.367 bản ghi sau restart; thông tin chưa biết vẫn giữ rõ.</p></section>
+  <section class="card panel"><h2><span class="n">02</span>Đã thay đổi gì</h2><ul><li>6.368 Point đầu vào; 1 bản ghi trùng chính xác; 6.367 bản ghi chuẩn bị.</li><li>14 category; 6.367 HAS_CATEGORY; 26 nhãn vùng nguồn.</li><li>1.055 giờ mở cửa thô; không có giá; 411 cờ cần review.</li><li>Registry giữ lịch sử phiên bản, không xóa bản ghi cũ, hỗ trợ no-op thật.</li><li>Adapter graph-ready kiểm tra hash, mô hình POI và từ chối ghi đè đích thật.</li><li>Vá QA-DATA-01: hồ sơ real bị khóa ở ranh giới API, trả real_binding_mismatch khi manifest lệch.</li></ul></section>
+  <section class="card panel"><h2><span class="n">03</span>QA hiện tại</h2><ul><li>DATA068: nhập đủ 6.367 POI; Codex đối chiếu ID, tên, tọa độ, giờ mở cửa, lineage và vùng với frozen payload sau restart. Đúng cấu trúc dữ liệu, chưa xác minh venue.</li><li>Nền tảng provenance OC038R1 đã được chấp nhận ở phạm vi giới hạn; 24 kiểm thử offline adapter đều qua.</li><li>Ca hồi quy passed=false trước vá là bằng chứng lịch sử, không phải lỗi hiện tại.</li><li>Source file không có OSM object ID/URL; nhãn vùng nguồn không phải địa giới hành chính.</li></ul></section>
+  <section class="card panel"><h2><span class="n">04</span>Còn thiếu / bước tiếp theo</h2><ul><li>Nhãn khu vực là nhãn nguồn, chưa phải địa giới hiện hành.</li><li>Không có OSM object ID/URL, giấy phép, độ mới hay xác minh từng venue; 411 review flags còn nguyên.</li><li>Không có giá; 1.055 giờ mở cửa thô chưa chuẩn hóa đầy đủ.</li></ul><div class="next"><b>Lưu ý:</b> “Đã kiểm chứng” chỉ đúng trong phạm vi ghi ở trên. Không suy rộng thành triển khai thật hoặc kết quả khoa học.</div></section>
+  <details class="card panel evidence"><summary>Bằng chứng mã và tệp liên quan</summary><p>QA-DATA-01 là lỗ hổng đã vá: trước bản vá API từng gắn real=True cho tập 3 bản ghi; nay real_binding_mismatch từ chối hồ sơ caller tự dựng trước khi đọc tệp. DATA068 đã nhập đầy đủ 6.367 bản ghi; không suy rộng số ứng viên thành xác minh chất lượng. Nguồn không có OSM object ID/URL nên không tạo lineage OSM.</p><ul><li><a href="../../../../crawler_service/app/primary_dataset/prepare.py#L159"><code>crawler_service/app/primary_dataset/prepare.py:159</code></a> — prepare_primary_dataset</li><li><a href="../../../../crawler_service/app/primary_dataset/prepare.py#L202"><code>crawler_service/app/primary_dataset/prepare.py:202</code></a> — Phát hiện trùng chính xác</li><li><a href="../../../../crawler_service/app/primary_dataset/registry.py#L247"><code>crawler_service/app/primary_dataset/registry.py:247</code></a> — plan() khóa phiên bản</li><li><a href="../../../../crawler_service/app/primary_dataset/registry.py#L385"><code>crawler_service/app/primary_dataset/registry.py:385</code></a> — preflight trước khi ghi</li><li><a href="../../../../POI_service/app/core/utils/primary_snapshot.py#L1968"><code>POI_service/app/core/utils/primary_snapshot.py:1968</code></a> — prepare_snapshot</li><li><a href="../../../../docs/project/handoffs/DATA-068/parent-post-import.json#L1"><code>docs/project/handoffs/DATA-068/parent-post-import.json:1</code></a> — Codex: QA độc lập graph đầy đủ sau restart</li><li><a href="../../../../docs/project/handoffs/DATA-068/report.md#L1"><code>docs/project/handoffs/DATA-068/report.md:1</code></a> — Snapshot 6.367/14 category/3.678.397 NEAR_BY/26 vùng</li><li><a href="../../../../docs/project/handoffs/OC-043/parent-real-profile-binding-probe.json#L9"><code>docs/project/handoffs/OC-043/parent-real-profile-binding-probe.json:9</code></a> — probe: actual accepted, real=true</li><li><a href="../../../../docs/project/handoffs/OC-043/parent-real-profile-regression-result.json#L7"><code>docs/project/handoffs/OC-043/parent-real-profile-regression-result.json:7</code></a> — ca hồi quy: passed=false (lịch sử)</li><li><a href="../../../../docs/project/handoffs/HM-054/parent-review-summary.json#L1"><code>docs/project/handoffs/HM-054/parent-review-summary.json:1</code></a> — Codex: 24 kiểm thử adapter sau vá</li></ul><p>Kiểm tra lần cập nhật này chỉ là QA tĩnh; chưa kiểm tra render hoặc tương tác trình duyệt.</p></details>
+  <nav class="navmods" aria-label="Điều hướng mô-đun"><a href="acquisition.html">← Thu thập dữ liệu</a><a href="../index.html">Tổng quan</a><a href="graph-mcp.html">Đồ thị &amp; MCP →</a></nav>
+  <footer class="footer"><span>Travel AI · Chuẩn bị dữ liệu chính</span><span>Dùng <span class="kbd">←</span> <span class="kbd">→</span> để chuyển mô-đun.</span></footer>
+</div>
+<script>
+
+const phaseButtons=[...document.querySelectorAll('.phase')];
+function showPhase(id,focus){
+  phaseButtons.forEach(b=>b.setAttribute('aria-selected',String(b.dataset.phase===id)));
+  document.querySelectorAll('.phase-panel').forEach(p=>p.hidden=p.dataset.phase!==id);
+  if(focus){const p=document.querySelector('.phase-panel:not([hidden])');if(p){p.setAttribute('tabindex','-1');p.focus({preventScroll:true});}}
+}
+phaseButtons.forEach((b,i)=>{
+  b.addEventListener('click',()=>showPhase(b.dataset.phase,false));
+  b.addEventListener('keydown',e=>{
+    if(e.key==='ArrowRight'||e.key==='ArrowLeft'){e.preventDefault();const n=(i+(e.key==='ArrowRight'?1:-1)+phaseButtons.length)%phaseButtons.length;phaseButtons[n].focus();showPhase(phaseButtons[n].dataset.phase,false);}
+  });
+});
+if(phaseButtons.length){showPhase(phaseButtons.find(b=>b.classList.contains('current'))?.dataset.phase||phaseButtons[0].dataset.phase,false);}
+const themeBtn=document.getElementById('theme');
+function applyTheme(t){document.documentElement.dataset.theme=t;try{localStorage.setItem('oc047-theme',t)}catch(e){};if(themeBtn)themeBtn.textContent=t==='dark'?'Nền sáng':'Nền tối';}
+if(themeBtn){themeBtn.addEventListener('click',()=>applyTheme(document.documentElement.dataset.theme==='dark'?'light':'dark'));try{applyTheme(localStorage.getItem('oc047-theme')||'light')}catch(e){applyTheme('light')}}
+
+document.addEventListener('keydown',e=>{if(e.key==='ArrowLeft'){location.href='acquisition.html';}if(e.key==='ArrowRight'){location.href='graph-mcp.html';}});
+</script>
+</body>
+</html>

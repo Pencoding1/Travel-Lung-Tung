@@ -1,0 +1,137 @@
+# Standalone, isolated integration stack for Travel Vo Lo.
+#
+# This file is NOT an override of docker-compose.yaml. It is a complete,
+# self-contained definition intended to run beside the local development stack
+# without touching it. Isolation is achieved by:
+#
+#   * a distinct Compose project name (`name: tvlt_integration`) so the default
+#     network and object namespace never collide;
+#   * NO `container_name` anywhere, so the engine generates project-unique names;
+#   * NO reference to any pre-existing or operator-declared volume; this stack
+#     declares and owns its own `int_*` volumes;
+#   * distinct loopback host ports (17xxx/18xxx), because the project name alone
+#     does NOT prevent host-port collisions;
+#   * no public tunnel service and no tunnel profile.
+#
+# It never clones, copies or mounts the historical graph volume. GraphHopper is
+# the only service that reads original files, and only its immutable PBF/config
+# inputs are mounted read-only; its graph cache goes to a dedicated named volume.
+#
+# SECRETS: no credential is stored here. Integration-only variables are required
+# explicitly (`:?` fails closed) and are expected from an interpolation file such
+# as docs/deployment/integration.env.example. Never meant for production.
+
+name: tvlt_integration
+
+services:
+  memgraph:
+    image: ${MEMGRAPH_IMAGE:-memgraph/memgraph-mage:latest}
+    ports:
+      - "127.0.0.1:17687:7687"
+      - "127.0.0.1:17444:7444"
+    volumes:
+      - int_mg_lib:/var/lib/memgraph
+      - int_mg_log:/var/log/memgraph
+    environment:
+      - MEMGRAPH_HOST=memgraph
+      - MEMGRAPH_USER=${INTEGRATION_MEMGRAPH_USER:?INTEGRATION_MEMGRAPH_USER is required}
+      - MEMGRAPH_PASSWORD=${INTEGRATION_MEMGRAPH_PASSWORD:?INTEGRATION_MEMGRAPH_PASSWORD is required}
+    command: ["--log-level=TRACE", "--storage-properties-on-edges=true"]
+
+  graphhopper:
+    build:
+      context: ./graphhopper
+      dockerfile: Dockerfile
+      args:
+        GRAPHHOPPER_BASE_IMAGE: ${GRAPHHOPPER_BASE_IMAGE:-israelhikingmap/graphhopper:latest}
+    ports:
+      - "127.0.0.1:18989:8989"
+    volumes:
+      - int_graphcache:/tmp/hcmc-gh
+      - ./graphhopper/data/hcmc-latest.osm.pbf:/app_data/hcmc-latest.osm.pbf:ro
+      - ./graphhopper/data/config.yml:/app_data/config.yml:ro
+
+  poi_api:
+    build:
+      context: .
+      dockerfile: POI_service/Dockerfile
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
+    ports:
+      - "127.0.0.1:18000:8000"
+    environment:
+      - PYTHONPATH=/workspace
+      - MEMGRAPH_HOST=memgraph
+      - MEMGRAPH_PORT=7687
+      - MEMGRAPH_USER=${INTEGRATION_MEMGRAPH_USER:?INTEGRATION_MEMGRAPH_USER is required}
+      - MEMGRAPH_PASSWORD=${INTEGRATION_MEMGRAPH_PASSWORD:?INTEGRATION_MEMGRAPH_PASSWORD is required}
+      - JWT_SECRET=${INTEGRATION_JWT_SECRET:?INTEGRATION_JWT_SECRET is required}
+      - JWT_ALGORITHM=${INTEGRATION_JWT_ALGORITHM:-HS256}
+      - FIRESTORE_ENABLED=${INTEGRATION_FIRESTORE_ENABLED:-false}
+    depends_on:
+      - memgraph
+
+  poi_mcp:
+    build:
+      context: .
+      dockerfile: POI_service/Dockerfile
+    command: uv run python -m app.api.mcp.tools
+    ports:
+      - "127.0.0.1:18001:8001"
+    environment:
+      - PYTHONPATH=/workspace
+      - MEMGRAPH_HOST=memgraph
+      - MEMGRAPH_PORT=7687
+      - MEMGRAPH_USER=${INTEGRATION_MEMGRAPH_USER:?INTEGRATION_MEMGRAPH_USER is required}
+      - MEMGRAPH_PASSWORD=${INTEGRATION_MEMGRAPH_PASSWORD:?INTEGRATION_MEMGRAPH_PASSWORD is required}
+      - JWT_SECRET=${INTEGRATION_JWT_SECRET:?INTEGRATION_JWT_SECRET is required}
+      - JWT_ALGORITHM=${INTEGRATION_JWT_ALGORITHM:-HS256}
+      - FIRESTORE_ENABLED=${INTEGRATION_FIRESTORE_ENABLED:-false}
+    depends_on:
+      - memgraph
+
+  ai_service:
+    build:
+      context: .
+      dockerfile: ai_service/Dockerfile
+    ports:
+      - "127.0.0.1:18002:8002"
+    volumes:
+      - int_ai_thoughts:/workspace/ai_service/agent_thoughts
+      - int_ai_memory:/var/lib/ai_memory
+    environment:
+      - MCP_SERVER_URL=${MCP_SERVER_URL:-http://poi_mcp:8001/sse}
+      - GEMINI_MODEL=${GEMINI_MODEL:-gemini-2.5-pro}
+      - GEMINI_API_KEY=${INTEGRATION_GEMINI_API_KEY:?INTEGRATION_GEMINI_API_KEY is required}
+      - JWT_SECRET=${INTEGRATION_JWT_SECRET:?INTEGRATION_JWT_SECRET is required}
+      - JWT_ALGORITHM=${INTEGRATION_JWT_ALGORITHM:-HS256}
+      - MEMORY_DB_PATH=${INTEGRATION_MEMORY_DB_PATH:-}
+    depends_on:
+      - poi_mcp
+
+  # Itinerary-draft persistence for the isolated stack. It stores the client's
+  # submitted `/generate_itinerary` response verbatim as an untrusted draft; it
+  # is deliberately NOT joined to the AI durable-memory profile (no silent chat
+  # auto-save) and holds no Firebase default. Durable storage is explicit
+  # SQLite inside its own named volume; the draft owner is always the verified
+  # JWT `sub`, signed with the same shared integration HS256 key.
+  backend_service:
+    build:
+      context: .
+      dockerfile: backend_service/Dockerfile
+    ports:
+      - "127.0.0.1:18003:8003"
+    volumes:
+      - int_backend_drafts:/var/lib/backend_drafts
+    environment:
+      - JWT_SECRET=${INTEGRATION_JWT_SECRET:?INTEGRATION_JWT_SECRET is required}
+      - JWT_ALGORITHM=${INTEGRATION_JWT_ALGORITHM:-HS256}
+      - ITINERARY_STORAGE=sqlite
+      - ITINERARY_SQLITE_PATH=/var/lib/backend_drafts/drafts.sqlite3
+
+volumes:
+  int_mg_lib:
+  int_mg_log:
+  int_graphcache:
+  int_ai_thoughts:
+  int_ai_memory:
+  int_backend_drafts:

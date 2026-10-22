@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "deliver",
+  "type": "architecture",
+  "input": "docs/reports/2026-10-18/architecture.json",
+  "output": "docs/reports/2026-10-18/architecture.html",
+  "specification": {
+    "sha256": "1ddf1352b0b12e966fa6e60af4ec2ad7a3dd5e2db9d3c5528a7b16d0c15e90d3",
+    "bytes": 5558
+  },
+  "artifact": {
+    "sha256": "b0cc4c39f010329760ddde013f3d4410f8d6edaa24444fd1b3f2675878ea08fb",
+    "bytes": 711253
+  },
+  "validation": {
+    "checksPassed": 9,
+    "checkCount": 9,
+    "compositionProfile": "showcase",
+    "compositionStatus": "pass",
+    "errors": 0,
+    "warnings": 0
+  },
+  "note": "Artifact bytes preserved at qa/archify-delivered.original.html; primary architecture.html is the disclosed offline derivative."
+}

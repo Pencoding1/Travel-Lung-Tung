@@ -1,0 +1,11 @@
+# Backend corrective review and session-transfer checkpoint
+
+Date:2026-10-16. Overall master goal ACTIVE/INCOMPLETE. This supersedes the prior checkpoint's live-worker status.
+
+OC027R1 process6785, explicit session ses_ebc0374c7ffeUjPVkplwcsyw25, is now terminal exit0. No writer remains confirmed active; backend scope released. Parent normal-host independent suite: `.venv-validation/Scripts/python.exe -m pytest tests/backend_workflows -q --basetemp .qa-tmp-oc027r1-host-independent -p no:cacheprovider` — **42passed in2.09s**. Existing34 tests retained; storage errors, deep JSON rejection, bounded Firestore fake query and direct PyJWT dependency are corrected at tested scope. No installs/rootlock/environment/live services changed in R1. Backend locked packaging, Compose, live Firebase remain unverified.
+
+Independent missing-schema probe still rejects full acceptance: drop the test-only SQLite itinerary_drafts table; health() recreates it and reports available=True. Table count0→1. Readiness should observe failure without changing schema or concealing lost storage. Evidence `handoffs/OC-027/independent-readiness-probe.json`; actual user data untouched. First probe's output confirmed same behavior but its temporary cleanup failed because the probe itself left a connection open; corrected probe closes connections and succeeds. Do not misattribute that cleanup defect to backend code.
+
+No second repair dispatched to the same executor: original task already received its one bounded corrective pass. Preserve working corrections; next session should define a bounded follow-up with explicit separation of startup schema initialization from non-mutating readiness (and tests asserting unchanged table/schema/file state), then independently review. Do not roll back unrelated fixes.
+
+Other current gates: acquisition140tests accepted locally; evaluator67/collector96 accepted offline;32actual expansion records all quarantined/0accepted; figures partial after4image review; manuscript27pages inspected but newer source requires rebuild; no successful live model observations or human studies; Docker last unavailable. Full next actions and authorizations in NEXT_SESSION_HANDOFF.md. Finish ALL master requirements and write a checkpoint after every major task/critical phase.

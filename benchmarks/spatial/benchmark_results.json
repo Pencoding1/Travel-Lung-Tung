@@ -1,0 +1,141 @@
+{
+  "task": "OC-003",
+  "data_source": "synthetic",
+  "warning": "All coordinates are synthetic (seed 20261015) and are NOT the original thesis POIs. Timings are single-run process measurements, not database runtime and not asymptotic claims. The candidate prefilter is still O(n^2) unless coordinates are indexed.",
+  "seed": 20261015,
+  "sizes": [
+    200,
+    1000
+  ],
+  "radii_km": [
+    1.0,
+    3.0,
+    5.0
+  ],
+  "cluster_centers": [
+    [
+      10.7769,
+      106.7009
+    ],
+    [
+      60.0,
+      10.0
+    ],
+    [
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      179.9
+    ],
+    [
+      80.0,
+      20.0
+    ],
+    [
+      10.0,
+      106.8
+    ]
+  ],
+  "metadata": {
+    "python_version": "3.14.0 (tags/v3.14.0:ebf955d, Oct  7 2025, 10:15:03) [MSC v.1944 64 bit (AMD64)]",
+    "python_implementation": "CPython",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "system": "Windows",
+    "release": "11",
+    "machine": "AMD64",
+    "processor": "Intel64 Family 6 Model 154 Stepping 3, GenuineIntel",
+    "node": "MoneyMakingTool",
+    "cpu_count_logical": 16,
+    "load_average": null,
+    "earth_radius_km_mean": 6371.0,
+    "earth_radius_km_lower_bound": 6300.0
+  },
+  "measurements": [
+    {
+      "n": 200,
+      "radius_km": 1.0,
+      "unordered_total_pairs": 19900,
+      "candidate_pairs": 84,
+      "exact_distance_computations": 84,
+      "accepted_edges": 69,
+      "exhaustive_accepted_edges": 69,
+      "false_negatives": 0,
+      "candidate_ratio": 0.004221105527638191,
+      "candidate_reduction_percent": 99.57788944723617,
+      "elapsed_optimized_seconds": 0.009744499999669642,
+      "elapsed_exhaustive_seconds": 0.016676700000061828
+    },
+    {
+      "n": 200,
+      "radius_km": 3.0,
+      "unordered_total_pairs": 19900,
+      "candidate_pairs": 475,
+      "exact_distance_computations": 475,
+      "accepted_edges": 394,
+      "exhaustive_accepted_edges": 394,
+      "false_negatives": 0,
+      "candidate_ratio": 0.02386934673366834,
+      "candidate_reduction_percent": 97.61306532663316,
+      "elapsed_optimized_seconds": 0.00964159999966796,
+      "elapsed_exhaustive_seconds": 0.019763599999805592
+    },
+    {
+      "n": 200,
+      "radius_km": 5.0,
+      "unordered_total_pairs": 19900,
+      "candidate_pairs": 986,
+      "exact_distance_computations": 986,
+      "accepted_edges": 843,
+      "exhaustive_accepted_edges": 843,
+      "false_negatives": 0,
+      "candidate_ratio": 0.04954773869346734,
+      "candidate_reduction_percent": 95.04522613065328,
+      "elapsed_optimized_seconds": 0.010286100000030274,
+      "elapsed_exhaustive_seconds": 0.016733299999941664
+    },
+    {
+      "n": 1000,
+      "radius_km": 1.0,
+      "unordered_total_pairs": 499500,
+      "candidate_pairs": 1625,
+      "exact_distance_computations": 1625,
+      "accepted_edges": 1293,
+      "exhaustive_accepted_edges": 1293,
+      "false_negatives": 0,
+      "candidate_ratio": 0.0032532532532532532,
+      "candidate_reduction_percent": 99.67467467467468,
+      "elapsed_optimized_seconds": 0.2507548999997198,
+      "elapsed_exhaustive_seconds": 0.4917760000003
+    },
+    {
+      "n": 1000,
+      "radius_km": 3.0,
+      "unordered_total_pairs": 499500,
+      "candidate_pairs": 11184,
+      "exact_distance_computations": 11184,
+      "accepted_edges": 9127,
+      "exhaustive_accepted_edges": 9127,
+      "false_negatives": 0,
+      "candidate_ratio": 0.02239039039039039,
+      "candidate_reduction_percent": 97.76096096096096,
+      "elapsed_optimized_seconds": 0.22519140000031257,
+      "elapsed_exhaustive_seconds": 0.5651708999998846
+    },
+    {
+      "n": 1000,
+      "radius_km": 5.0,
+      "unordered_total_pairs": 499500,
+      "candidate_pairs": 24382,
+      "exact_distance_computations": 24382,
+      "accepted_edges": 20501,
+      "exhaustive_accepted_edges": 20501,
+      "false_negatives": 0,
+      "candidate_ratio": 0.048812812812812814,
+      "candidate_reduction_percent": 95.11871871871872,
+      "elapsed_optimized_seconds": 0.24556100000017977,
+      "elapsed_exhaustive_seconds": 0.4809047999997347
+    }
+  ]
+}

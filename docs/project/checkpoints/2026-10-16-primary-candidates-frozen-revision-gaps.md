@@ -1,0 +1,11 @@
+# Frozen primary candidates and registry revision limitations
+
+Date: 2026-10-16. Full goal ACTIVE/INCOMPLETE; phase PROGRESS.
+
+OC034R1 terminal exit 0, session ses_ebbc3ff66ffeC60WVXZ9SnxwR2. Parent independently ran 169 primary/acquisition tests (8.02 seconds) and the real preparation twice. All seven generated files remain byte identical, raw hash unchanged, all 6,367 payloads validate against actual production POI model, all 6,368 indices are accounted exactly once by lineage plus duplicate ledger. Every lineage raw property/geometry block matches its original feature. Existing 6,367 internal IDs remain unchanged. Frozen prepared artifacts accepted as offline candidates for this exact raw hash, not accepted graph nodes/current administrative claims.
+
+The original direct defects are corrected: mismatched record_id rejected; accepted nonidentity revision updates hash/history/change flag. However, two new independent counterexamples keep the general registry revision capability unaccepted: an existing registry with input_sha256=null loads and bypasses unreviewed hash-change detection; explicitly returning to a prior revision creates history that fails subsequent load. Evidence: OC034/independent-r1-registry-probes.json. Genuine registry/data were never mutated by these probes (copies/in-memory only).
+
+One bounded corrective attempt is exhausted. Do not blindly rerun the same repair. Retain usable immutable snapshot outputs while withholding revision/reorder/mutable-registry acceptance. A later separate bounded implementation must either explicitly reject unsupported revision/revisit states before writes or implement a coherent revision-history contract; require nonnull valid existing hash, self-validation before saving, full-pipeline byte-preservation probes and repeat-revision tests. No claims of authenticated tamper protection.
+
+OC036 focused read-only production integration audit is active, process 65966/session ses_ebbac31b5ffeopXXQnzk9Th7F3, owns only its handoff artifacts. It will trace provenance loss, category behavior and qualified legacy-admin handling, then Codex defines the next minimal implementation. OC035 terminal/layout accepted; publication paths released. Overall graph/runtime/controlled experiments/human study/final thesis remain open. Continue all remaining tasks and checkpoint every major phase.

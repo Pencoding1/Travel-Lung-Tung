@@ -1,10 +1,16 @@
+from __future__ import annotations
+
 from pydantic import BaseModel
-from neo4j import Transaction
 from abc import ABC, abstractmethod
 
-from typing import Any, LiteralString, Type, TypeVar, Generic, List, Optional, Dict
+from typing import TYPE_CHECKING, Any, LiteralString, Type, TypeVar, Generic, List, Optional, Dict
 
-from app.core.infrastructure.db.database.connector import FireStoreConnector
+if TYPE_CHECKING:
+    # Type-only imports: these must not trigger runtime connector side effects
+    # (Firebase credential lookup, Memgraph driver creation) nor require the
+    # heavy third-party packages just to import the repository interfaces.
+    from neo4j import Transaction
+    from app.core.infrastructure.db.database.connector import FireStoreConnector
 
 T = TypeVar('T', bound=BaseModel)
 

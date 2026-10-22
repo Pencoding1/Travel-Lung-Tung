@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ai_service — Travel Lung Tung</title>
+<link rel="stylesheet" href="../assets/docs.css">
+</head>
+<body>
+<header class="top">
+  <div class="bar">
+    <div class="brand">ai_service<small>Agent và sinh lịch trình</small></div>
+    <div class="spacer"></div>
+    <a class="btn" href="../index.html">Trang chủ</a>
+    <button class="btn" id="theme-toggle">Nền tối</button>
+  </div>
+</header>
+
+<div class="wrap">
+<nav class="toc">
+  <h4>Tổng quan</h4>
+  <a href="../index.html">Trang chủ</a>
+  <a href="../diagrams/index.html">Thư viện sơ đồ</a>
+  <a href="../diagrams/api-interaction.sequence.html">Sơ đồ tương tác API</a>
+  <h4>Module</h4>
+  <a href="crawler-service.html">crawler_service</a>
+  <a href="poi-service.html">POI_service</a>
+  <a href="backend-service.html">backend_service</a>
+  <a href="shared-lib.html">shared_lib</a>
+  <h4>Trên trang này</h4>
+  <a href="#vai-tro">Vai trò</a>
+  <a href="#cau-truc">Cấu trúc gói</a>
+  <a href="#chat">POST /chat</a>
+  <a href="#sinh-lich-trinh">POST /generate_itinerary</a>
+  <a href="#persona">Nhân cách và mười luật</a>
+  <a href="#du-lieu-ra">Dữ liệu lịch trình</a>
+  <a href="#use-case">Ca sử dụng</a>
+  <a href="#khoang-trong">Khoảng trống</a>
+</nav>
+
+<main>
+<section id="vai-tro">
+  <h1>ai_service</h1>
+  <p class="lead">Sinh ra để làm phần “nói năng”: phân loại câu hỏi, gọi công cụ để lấy dữ liệu thật, và tổng hợp câu trả lời hoặc lịch trình. Nó cố tình không giữ thông tin đăng nhập cơ sở dữ liệu.</p>
+
+  <h3>Quyết định kiến trúc quan trọng nhất</h3>
+  <p>Dịch vụ này không mở kết nối tới Memgraph. Muốn biết gì về POI, nó mở một phiên MCP qua SSE tới <code>poi_mcp</code>, lấy danh sách công cụ, rồi để mô hình chọn công cụ. Nhờ vậy:</p>
+  <ul>
+    <li>Thông tin đăng nhập đồ thị chỉ nằm ở một dịch vụ.</li>
+    <li>Bộ công cụ là hợp đồng công khai, đọc được mà không cần đọc mã truy vấn.</li>
+    <li>Đổi cơ sở dữ liệu phía sau không ảnh hưởng gì tới AI Hub.</li>
+  </ul>
+  <p>Mô hình dùng Gemini qua điểm cuối tương thích OpenAI, nên phần gọi API giống hệt một máy chủ OpenAI.</p>
+  <p class="evidence">Nguồn: <code>main.py:30-33</code>; vòng lặp gọi công cụ ở <code>:91-176</code>.</p>
+</section>
+
+<section id="cau-truc">
+  <h2>Cấu trúc gói</h2>
+  <table>
+    <thead><tr><th>Đường dẫn</th><th>Vai trò</th><th>Trạng thái</th></tr></thead>
+    <tbody>
+      <tr><td><code>main.py</code></td><td>Toàn bộ logic: hai endpoint, bộ định tuyến ý định, vòng lặp agent, lời gọi tổng hợp</td><td>517 dòng</td></tr>
+      <tr><td><code>domains/payloads.py</code></td><td>Hai mô hình đầu vào: <code>ChatRequest</code>, <code>ItineraryRequest</code></td><td>19 dòng</td></tr>
+      <tr><td><code>domains/prompts.py</code></td><td>Nơi dự kiến chứa lời nhắc</td><td><span class="badge gap">rỗng 0 dòng</span></td></tr>
+      <tr><td><code>prompt.json</code></td><td>Nhân cách và mười điều luật, nạp lúc khởi động</td><td>đang dùng thật</td></tr>
+      <tr><td><code>mcp_config.json</code></td><td>Khai báo máy chủ MCP cho công cụ ngoài</td><td>địa chỉ lệch với mã</td></tr>
+      <tr><td><code>Dockerfile</code></td><td>Dựng ảnh, chạy <code>uvicorn main:app</code> ở cổng 8002</td><td>khớp compose</td></tr>
+    </tbody>
+  </table>
+  <p>Lời nhắc được ghép thành một chuỗi duy nhất: phần <code>system_prompt</code> cộng với các dòng trong mảng <code>instruction</code>, nối bằng xuống dòng.</p>
+  <p class="evidence">Nguồn: <code>main.py:37-44</code>; kích thước tệp <code>domains/prompts.py</code> = 0 dòng.</p>
+</section>
+
+<section id="chat">
+  <h2>POST /chat</h2>
+  <div class="sig"><span class="kw">POST</span> /chat → <code>{"reply": "..."}</code></div>
+  <p>Đây là đường hỏi đáp. Nó không phải một vòng lặp agent thuần: trước hết có một bộ phân loại ý định rất rẻ để tránh đốt ngân sách công cụ cho câu chào hỏi.</p>
+  <details class="params">
+    <summary>Tham số đầu vào <span class="count">2 trường</span></summary>
+    <div class="inner">
+      <table>
+        <thead><tr><th>Trường</th><th>Kiểu</th><th>Ý nghĩa</th></tr></thead>
+        <tbody>
+          <tr><td><code>session_id</code></td><td>str</td><td>Khoá lịch sử hội thoại. Lịch sử nằm trong từ điển bộ nhớ của tiến trình, mất khi khởi động lại.</td></tr>
+          <tr><td><code>message</code></td><td>str</td><td>Câu của người dùng.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+
+  <h3>Bộ định tuyến ý định</h3>
+  <div class="sig"><span class="kw">async def</span> analyze_intent(user_message: str) → "CHITCHAT" | "TRAVEL"</div>
+  <details class="params">
+    <summary>Cách hoạt động <span class="count">4 điểm</span></summary>
+    <div class="inner">
+      <ul>
+        <li>Lời gọi riêng, buộc trả JSON, nhiệt độ 0, tối đa 20 token — càng rẻ càng tốt.</li>
+        <li>Câu trả lời được gột khối mã markdown trước khi phân tích.</li>
+        <li>Mọi lỗi hoặc quá thời gian đều rơi về <code>TRAVEL</code>, tức là chọn đường an toàn là đi tra dữ liệu.</li>
+        <li>Nhánh <code>CHITCHAT</code> gọi một lời gọi duy nhất với nhiệt độ 0,7, giới hạn 500 token, không kèm công cụ.</li>
+      </ul>
+    </div>
+  </details>
+  <p class="evidence">Nguồn: <code>main.py:52-88</code>; nhánh chitchat ở <code>:476-501</code>.</p>
+
+  <h3>Vòng lặp agent</h3>
+  <div class="sig"><span class="kw">async def</span> execute_agent_loop(session_id: str, user_message: str) → str</div>
+  <details class="params">
+    <summary>Bốn bước và các giới hạn cứng <span class="count">5 mục</span></summary>
+    <div class="inner">
+      <ol>
+        <li>Mở phiên MCP qua SSE, khởi tạo, lấy danh sách công cụ.</li>
+        <li>Đổi mô tả công cụ từ dạng MCP sang dạng hàm của OpenAI để nhét vào lời gọi.</li>
+        <li>Lặp tối đa 5 vòng: gửi lịch sử kèm công cụ; nếu mô hình không yêu cầu công cụ nào thì trả câu trả lời và kết thúc.</li>
+        <li>Nếu có yêu cầu công cụ: gọi công cụ qua phiên MCP, gắn kết quả vào lịch sử với đúng <code>tool_call_id</code> để vòng sau mô hình đọc được.</li>
+        <li>Hết 5 vòng mà vẫn còn gọi công cụ thì trả một câu trả lời cắt ngang nói rằng đã tìm nhiều nhưng tới giới hạn.</li>
+      </ol>
+      <table>
+        <thead><tr><th>Giới hạn</th><th>Giá trị</th><th>Ghi chú</th></tr></thead>
+        <tbody>
+          <tr><td>Số vòng</td><td>5</td><td>Hằng số <code>MAX_TURNS</code> trong thân hàm.</td></tr>
+          <tr><td>Thời gian chờ HTTP</td><td>60 giây</td><td>Áp cho cả vòng lặp.</td></tr>
+          <tr><td>Nhiệt độ</td><td>0,3</td><td>Đủ ổn định để gọi đúng công cụ.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+  <p><strong>Trả về:</strong> chuỗi câu trả lời cuối cùng.<br>
+  <strong>Ném:</strong> <code>HTTPException</code> 500 nếu không mở được phiên MCP hoặc lời gọi mô hình hỏng.</p>
+  <p class="evidence">Nguồn: <code>main.py:91-176</code>; hằng số vòng ở <code>:114</code>; chuyển đổi công cụ ở <code>:102-112</code>.</p>
+</section>
+
+<section id="sinh-lich-trinh">
+  <h2>POST /generate_itinerary</h2>
+  <div class="sig"><span class="kw">POST</span> /generate_itinerary → <code>{"reply": {...lịch trình...}, "tool_chain": [...]}</code></div>
+  <p>Khác với đường chat, đường này là một chuỗi bốn bước cố định, không để mô hình tự quyết định gọi gì. Cách làm này đổi tính linh hoạt lấy tính tất định.</p>
+
+  <details class="params">
+    <summary>Tham số đầu vào <span class="count">10 trường</span></summary>
+    <div class="inner">
+      <table>
+        <thead><tr><th>Trường</th><th>Kiểu</th><th>Mặc định</th><th>Dùng ở đâu</th></tr></thead>
+        <tbody>
+          <tr><td><code>session_id</code></td><td>str</td><td>bắt buộc</td><td>Gắn một dòng vào lịch sử hội thoại sau khi sinh xong.</td></tr>
+          <tr><td><code>current_city</code></td><td>str</td><td><code>"Ho Chi Minh City"</code></td><td>Chỉ xuất hiện trong lời nhắc tổng hợp.</td></tr>
+          <tr><td><code>travel_type</code></td><td>str</td><td>bắt buộc</td><td>Phong cách chuyến đi, ví dụ tự khám phá, nghỉ dưỡng.</td></tr>
+          <tr><td><code>num_travelers</code></td><td>int</td><td>bắt buộc</td><td>Số người.</td></tr>
+          <tr><td><code>start_date</code></td><td>str</td><td>bắt buộc</td><td>Ngày bắt đầu.</td></tr>
+          <tr><td><code>target_district</code></td><td>str</td><td>bắt buộc</td><td>Đầu vào duy nhất chạm tới đồ thị: dùng để phân giải ID quận.</td></tr>
+          <tr><td><code>duration_days</code></td><td>int</td><td>bắt buộc</td><td>Số ngày, cũng là số ngày trong lời nhắc.</td></tr>
+          <tr><td><code>budget_range</code></td><td>str</td><td>bắt buộc</td><td>Khoảng ngân sách dạng chữ.</td></tr>
+          <tr><td><code>user_description</code></td><td>str</td><td>bắt buộc</td><td>Yêu cầu riêng, được nhét nguyên văn vào lời nhắc.</td></tr>
+          <tr><td><code>duration_days</code> (lặp)</td><td>—</td><td>—</td><td>Xuất hiện ở cả bước phân giải lẫn bước tổng hợp.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+
+  <h3>Bốn bước chạy</h3>
+  <table>
+    <thead><tr><th>Bước</th><th>Việc</th><th>Thất bại thì sao</th></tr></thead>
+    <tbody>
+      <tr><td>1. Phân giải địa lý</td><td>Gọi <code>resolve_geographic_id</code> với <code>target_district</code>, lấy ID của kết quả đầu tiên</td><td>Không tìm thấy thì trả ngay <code>{"reply": "Location not found."}</code> kèm chuỗi công cụ đã chạy</td></tr>
+      <tr><td>2. Tìm ứng viên</td><td>Ba lượt gọi <code>explore_pois</code> với danh mục <code>cat_coffee</code>, <code>cat_restaurant</code>, <code>cat_attractions</code>, mỗi lượt lấy 6 POI</td><td>Lượt nào rỗng thì đóng góp 0 ứng viên; không dừng</td></tr>
+      <tr><td>3. Làm giàu song song</td><td>Gom ID duy nhất rồi gọi <code>get_poi_details</code> song song cho tất cả</td><td>Một lời gọi hỏng chỉ bị bỏ qua nhờ <code>return_exceptions=True</code></td></tr>
+      <tr><td>4. Tổng hợp</td><td>Nhét toàn bộ POI đã làm giàu vào lời nhắc lớn, buộc trả JSON theo schema chốt sẵn</td><td>JSON hỏng thì trả về lỗi có thông báo, không ném exception</td></tr>
+    </tbody>
+  </table>
+  <p><strong>Điểm cứng cần biết:</strong> ba danh mục ở bước 2 là hằng số trong mã (<code>cat_coffee</code>, <code>cat_restaurant</code>, <code>cat_attractions</code>) chứ không lấy từ công cụ liệt kê danh mục. Nếu đồ thị dùng mã danh mục khác thì bước 2 trả về rỗng và lịch trình sẽ trống dù đường dẫn vẫn chạy.</p>
+  <p class="evidence">Nguồn: <code>main.py:181-473</code>; danh mục cứng ở <code>:209-213</code>; làm giàu song song ở <code>:258-261</code>.</p>
+</section>
+
+<section id="persona">
+  <h2>Nhân cách và mười luật</h2>
+  <p><code>prompt.json</code> không chỉ là câu mở đầu: nó là bộ ràng buộc hành vi, và một số luật bù đắp trực tiếp cho dữ liệu chưa sạch.</p>
+  <details class="params">
+    <summary>Mười điều luật và lý do chúng tồn tại <span class="count">10 mục</span></summary>
+    <div class="inner">
+      <table>
+        <thead><tr><th>Luật</th><th>Nội dung</th><th>Vì sao cần</th></tr></thead>
+        <tbody>
+          <tr><td>1. Không bịa</td><td>Không được đoán ID địa lý, danh mục hay POI</td><td>ID trong đồ thị khó đoán; đoán sai thì tra cứu rỗng</td></tr>
+          <tr><td>2. Trình tự tra cứu</td><td>Phân giải địa lý → liệt kê danh mục → tìm POI</td><td>Buộc dùng ID thật thay vì tên hiển thị</td></tr>
+          <tr><td>3. Đào sâu</td><td>Tìm thấy nơi ưng ý thì luôn gọi chi tiết</td><td>Dữ liệu gọn không có ưu đãi và lân cận</td></tr>
+          <tr><td>4. Định tuyến</td><td>Muốn biết thời gian, quãng đường thì gọi công cụ tuyến</td><td>Mô hình không tự tính được đường thật</td></tr>
+          <tr><td>5. Tổng hợp</td><td>Trình bày rõ ràng, có cấu trúc</td><td>Chất lượng trình bày là một phần sản phẩm</td></tr>
+          <tr><td>6. Luật lễ tân</td><td>Không nhắc tới lỗi hệ thống, dữ liệu giữ chỗ hay chữ “Unknown”</td><td>Tránh để lộ dữ liệu chưa sạch cho người dùng cuối</td></tr>
+          <tr><td>7. Xử lý dữ liệu rác</td><td>Địa chỉ “Unknown” thì âm thầm bỏ</td><td>Đồ thị còn bản ghi thiếu địa chỉ</td></tr>
+          <tr><td>8. Mất trí nhớ</td><td>Không dùng các từ “công cụ”, “ID”, “cơ sở dữ liệu”</td><td>Giữ trải nghiệm như một người tư vấn</td></tr>
+          <tr><td>9. Lệnh kỹ thuật</td><td>Người dùng ra lệnh kiểu kỹ thuật thì giả vờ không hiểu</td><td>Chống việc bị dắt điều khiển công cụ</td></tr>
+          <tr><td>10. Kiểm tra địa chỉ</td><td>Đọc <code>full_address</code> từng kết quả, khác quận yêu cầu thì loại</td><td>Bù cho việc tìm theo quận đôi khi trả về sai khu vực</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+  <p class="evidence">Nguồn: <code>ai_service/prompt.json</code>; nạp ở <code>main.py:37-44</code>.</p>
+</section>
+
+<section id="du-lieu-ra">
+  <h2>Dữ liệu lịch trình</h2>
+  <p>Lời nhắc tổng hợp buộc mô hình trả một JSON có dạng cố định. Đây là hợp đồng mà phía giao diện và phía lưu trữ phải khớp:</p>
+  <details class="params">
+    <summary>Cấu trúc JSON đầu ra <span class="count">6 nhóm trường</span></summary>
+    <div class="inner">
+      <table>
+        <thead><tr><th>Trường</th><th>Kiểu</th><th>Luật sinh</th></tr></thead>
+        <tbody>
+          <tr><td><code>id</code>, <code>uid</code></td><td>str</td><td>Sinh ngẫu nhiên, mô hình tự đặt</td></tr>
+          <tr><td><code>start_poi_id</code>, <code>end_poi_id</code></td><td>str</td><td>Lấy ID của điểm đầu và điểm cuối</td></tr>
+          <tr><td><code>total_estimated_budget</code></td><td>float</td><td>Đơn vị đồng, ước theo khoảng ngân sách</td></tr>
+          <tr><td><code>stops[]</code></td><td>mảng</td><td>Mỗi phần tử có <code>date</code>, <code>visit_time</code>, <code>end_time</code>, <code>description</code>, <code>budget</code>, và một <code>poi</code> lồng bên trong</td></tr>
+          <tr><td><code>stops[].visit_time</code>, <code>end_time</code></td><td>str</td><td>Bắt buộc định dạng ISO 8601 kèm múi giờ +07:00</td></tr>
+          <tr><td><code>stops[].poi</code></td><td>đối tượng</td><td>Địa chỉ, liên hệ, giờ mở cửa, đánh giá, thực đơn; thiếu dữ liệu thì để <code>null</code> hoặc mảng rỗng</td></tr>
+        </tbody>
+      </table>
+      <p>Lời nhắc còn ghi rõ: chỉ được chọn nơi có trong mảng POI đã cấp, không được tự thêm địa điểm ngoài danh sách.</p>
+    </div>
+  </details>
+  <p class="evidence">Nguồn: <code>main.py:296-430</code>.</p>
+</section>
+
+<section id="use-case">
+  <h2>Ca sử dụng</h2>
+  <div class="grid two">
+    <div class="uc">
+      <h4>Hỏi một câu về địa điểm</h4>
+      <p>Bộ định tuyến phân loại <code>TRAVEL</code> rồi chạy vòng lặp công cụ.</p>
+      <pre><code>curl -X POST localhost:8002/chat -H 'Content-Type: application/json' \
+  -d '{"session_id":"u1","message":"quán cà phê nào đẹp ở Quận 1?"}'</code></pre>
+    </div>
+    <div class="uc">
+      <h4>Sinh lịch trình hai ngày</h4>
+      <p>Trả kèm <code>tool_chain</code> để biết từng bước gọi gì và kết quả ra sao — dùng để gỡ lỗi đường ống.</p>
+      <pre><code>curl -X POST localhost:8002/generate_itinerary \
+  -H 'Content-Type: application/json' \
+  -d '{"session_id":"u1","travel_type":"self-explore",
+       "num_travelers":2,"start_date":"2026-10-10",
+       "target_district":"District 1","duration_days":2,
+       "budget_range":"2-3 triệu","user_description":"thích cà phê yên tĩnh"}'</code></pre>
+    </div>
+    <div class="uc">
+      <h4>Kiểm tra nhanh bộ công cụ</h4>
+      <p>Đổi <code>GEMINI_MODEL</code> và giữ nguyên phần còn lại; nhánh chitchat không dùng công cụ nên phản hồi nhanh và rẻ.</p>
+      <pre><code>GEMINI_MODEL=gemini-2.5-flash  # biến môi trường, đọc ở main.py:32</code></pre>
+    </div>
+    <div class="uc">
+      <h4>Gọi lịch trình khi đồ thị đổi mã danh mục</h4>
+      <p>Phải sửa ba mã cứng ở bước 2, nếu không lịch trình sẽ rỗng. Đây là chỗ hở đã ghi ở phần khoảng trống.</p>
+      <pre><code>categories = [
+  {"id": "cat_coffee", "label": "Cafes"},  # main.py:210
+  {"id": "cat_restaurant", "label": "Restaurants"},
+  {"id": "cat_attractions", "label": "Attractions"},
+]</code></pre>
+    </div>
+  </div>
+</section>
+
+<section id="khoang-trong">
+  <h2>Khoảng trống</h2>
+  <table>
+    <thead><tr><th>Điểm</th><th>Hệ quả</th><th>Bằng chứng</th></tr></thead>
+    <tbody>
+      <tr><td>Ba mã danh mục viết cứng trong bước tìm ứng viên</td><td>Đồ thị đổi mã là lịch trình rỗng, không có cảnh báo</td><td><code>main.py:209-213</code></td></tr>
+      <tr><td>Địa chỉ MCP lệch nhau giữa <code>mcp_config.json</code>, biến mặc định trong mã và máy chủ thật</td><td>Nguy cơ agent không thấy công cụ nào</td><td><code>mcp_config.json</code>; <code>main.py:33</code>; <code>POI_service/app/api/mcp/tools.py:271</code></td></tr>
+      <tr><td>Lịch sử hội thoại nằm trong bộ nhớ tiến trình, không giới hạn độ dài</td><td>Mất khi khởi động lại; hội thoại dài làm phình ngữ cảnh và tăng chi phí</td><td><code>domains/payloads.py:4</code>; <code>main.py:92-95</code></td></tr>
+      <tr><td>Tên mô hình dùng cho tổng hợp viết cứng <code>gemini-2.5-pro</code>, trong khi các lời gọi khác đọc từ biến môi trường</td><td>Đổi mô hình bằng biến không ảnh hưởng bước tổng hợp</td><td><code>main.py:433</code> đối chiếu <code>:32</code></td></tr>
+      <tr><td>Không có tầng xác thực cho client, không giới hạn tần suất</td><td>Mở ra Internet là mở luôn ngân sách gọi mô hình</td><td><code>main.py:504-518</code>, <code>:35</code></td></tr>
+      <tr><td>Lịch trình trả về client rồi dừng, không được lưu</td><td>Không có đường ghi xuống Firestore trong luồng thật</td><td><code>main.py:464-467</code>; so với <code>backend_service/</code></td></tr>
+      <tr><td><code>domains/prompts.py</code> rỗng 0 dòng trong khi mọi lời nhắc nằm trong <code>main.py</code></td><td>517 dòng trộn lẫn điều phối và văn bản lời nhắc, khó rà soát</td><td><code>ai_service/domains/prompts.py</code></td></tr>
+      <tr><td>Không có nhánh xử lý khi bước làm giàu không lấy được POI nào</td><td>Vẫn gọi tổng hợp với ngữ cảnh rỗng, tốn một lời gọi và dễ sinh lịch trình bịa</td><td><code>main.py:251-290</code></td></tr>
+    </tbody>
+  </table>
+  <footer class="foot">Đối chiếu bản mã <code>1d18ac3</code> ngày 04-10-2026. Số dòng tính theo <code>ai_service/main.py</code> (517 dòng).</footer>
+</section>
+</main>
+</div>
+<script src="../assets/docs.js"></script>
+</body>
+</html>

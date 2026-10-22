@@ -1,0 +1,299 @@
+{
+  "manifest_version": "oc-010.v1",
+  "label": "synthetic-engineering-fixtures",
+  "frozen": true,
+  "excluded_from_original_dataset": true,
+  "generated_before_benchmark": true,
+  "notes": "All POIs, categories, windows, costs and directed routes are hand-authored synthetic values. None are the original thesis POIs and none describe real places. author_expected describes the property a correct scheduler+validator must exhibit; it is authored by hand and is NOT read by the scheduler. Preference profiles P1..P5 are distinct category-weight maps.",
+  "scenarios": [
+    {
+      "scenario_id": "S01",
+      "author_expected": {"status": "feasible", "no_plan_reason": null, "properties": ["one day", "party 2", "P1 profile", "one stop"]},
+      "input": {
+        "scenario_id": "S01", "seed": 1001, "currency": "VND", "party_size": 2,
+        "budget": {"amount": "2000000", "currency": "VND", "unit": "per_party"},
+        "preferences": {"category_weights": {"cat_food": 3, "cat_cafe": 1, "cat_museum": 0, "cat_park": 0, "cat_shop": 0}},
+        "required_categories": ["cat_food"],
+        "days": [{"day_id": "d1", "date": "2026-11-01", "window": {"start": "2026-11-01T08:00:00+07:00", "end": "2026-11-01T18:00:00+07:00"}}],
+        "pois": [
+          {"poi_id": "p_food", "category_ids": ["cat_food"], "visit_minutes": 60, "cost": {"amount": "100000", "currency": "VND", "unit": "per_person"}, "opening_windows": [{"day_id": "d1", "start": "2026-11-01T09:00:00+07:00", "end": "2026-11-01T15:00:00+07:00"}]},
+          {"poi_id": "p_cafe", "category_ids": ["cat_cafe"], "visit_minutes": 30, "cost": {"amount": "50000", "currency": "VND", "unit": "per_person"}, "opening_windows": [{"day_id": "d1", "start": "2026-11-01T08:00:00+07:00", "end": "2026-11-01T18:00:00+07:00"}]}
+        ],
+        "route_edges": [
+          {"from_poi_id": "p_food", "to_poi_id": "p_cafe", "duration_minutes": 10, "distance_km": "1.0", "transport_mode": "car", "provenance": "synthetic"},
+          {"from_poi_id": "p_cafe", "to_poi_id": "p_food", "duration_minutes": 10, "distance_km": "1.0", "transport_mode": "car", "provenance": "synthetic"}
+        ]
+      }
+    },
+    {
+      "scenario_id": "S02",
+      "author_expected": {"status": "feasible", "no_plan_reason": null, "properties": ["two days", "party 4", "P2 profile", "no depot"]},
+      "input": {
+        "scenario_id": "S02", "seed": 1002, "currency": "VND", "party_size": 4,
+        "budget": {"amount": "5000000", "currency": "VND", "unit": "per_party"},
+        "preferences": {"category_weights": {"cat_food": 1, "cat_cafe": 3, "cat_museum": 1, "cat_park": 0, "cat_shop": 0}},
+        "days": [
+          {"day_id": "d1", "date": "2026-11-01", "window": {"start": "2026-11-01T08:00:00+07:00", "end": "2026-11-01T18:00:00+07:00"}},
+          {"day_id": "d2", "date": "2026-11-02", "window": {"start": "2026-11-02T08:00:00+07:00", "end": "2026-11-02T18:00:00+07:00"}}
+        ],
+        "pois": [
+          {"poi_id": "p_food", "category_ids": ["cat_food"], "visit_minutes": 60, "cost": {"amount": "120000", "currency": "VND", "unit": "per_person"}, "opening_windows": [{"day_id": "d1", "start": "2026-11-01T08:00:00+07:00", "end": "2026-11-01T18:00:00+07:00"}, {"day_id": "d2", "start": "2026-11-02T08:00:00+07:00", "end": "2026-11-02T18:00:00+07:00"}]},
+          {"poi_id": "p_cafe", "category_ids": ["cat_cafe"], "visit_minutes": 45, "cost": {"amount": "60000", "currency": "VND", "unit": "per_person"}, "opening_windows": [{"day_id": "d1", "start": "2026-11-01T08:00:00+07:00", "end": "2026-11-01T18:00:00+07:00"}, {"day_id": "d2", "start": "2026-11-02T08:00:00+07:00", "end": "2026-11-02T18:00:00+07:00"}]},
+          {"poi_id": "p_museum", "category_ids": ["cat_museum"], "visit_minutes": 90, "cost": {"amount": "80000", "currency": "VND", "unit": "per_person"}, "opening_windows": [{"day_id": "d1", "start": "2026-11-01T08:00:00+07:00", "end": "2026-11-01T18:00:00+07:00"}, {"day_id": "d2", "start": "2026-11-02T08:00:00+07:00", "end": "2026-11-02T18:00:00+07:00"}]}
+        ],
+        "route_edges": [
+          {"from_poi_id": "p_food", "to_poi_id": "p_cafe", "duration_minutes": 15, "distance_km": "2.0", "transport_mode": "car", "provenance": "synthetic"},
+          {"from_poi_id": "p_cafe", "to_poi_id": "p_museum", "duration_minutes": 20, "distance_km": "3.0", "transport_mode": "car", "provenance": "synthetic"},
+          {"from_poi_id": "p_museum", "to_poi_id": "p_food", "duration_minutes": 25, "distance_km": "4.0", "transport_mode": "car", "provenance": "synthetic"},
+          {"from_poi_id": "p_cafe", "to_poi_id": "p_food", "duration_minutes": 15, "distance_km": "2.0", "transport_mode": "car", "provenance": "synthetic"},
+          {"from_poi_id": "p_food", "to_poi_id": "p_museum", "duration_minutes": 30, "distance_km": "4.5", "transport_mode": "car", "provenance": "synthetic"},
+          {"from_poi_id": "p_museum", "to_poi_id": "p_cafe", "duration_minutes": 20, "distance_km": "3.0", "transport_mode": "car", "provenance": "synthetic"}
+        ]
+      }
+    },
+    {
+      "scenario_id": "S03",
+      "author_expected": {"status": "no_plan", "no_plan_reason": "impossible_constraints", "properties": ["low budget", "single expensive required POI", "budget_exceeded exclusion"]},
+      "input": {
+        "scenario_id": "S03", "seed": 1003, "currency": "VND", "party_size": 2,
+        "budget": {"amount": "50000", "currency": "VND", "unit": "per_party"},
+        "required_categories": ["cat_museum"],
+        "days": [{"day_id": "d1", "date": "2026-11-01", "window": {"start": "2026-11-01T08:00:00+07:00", "end": "2026-11-01T18:00:00+07:00"}}],
+        "pois": [
+          {"poi_id": "p_museum", "category_ids": ["cat_museum"], "visit_minutes": 60, "cost": {"amount": "300000", "currency": "VND", "unit": "per_person"}}
+        ],
+        "route_edges": []
+      }
+    },
+    {
+      "scenario_id": "S04",
+      "author_expected": {"status": "feasible", "no_plan_reason": null, "properties": ["high budget", "party 3", "P3 profile"]},
+      "input": {
+        "scenario_id": "S04", "seed": 1004, "currency": "VND", "party_size": 3,
+        "budget": {"amount": "99000000", "currency": "VND", "unit": "per_party"},
+        "preferences": {"category_weights": {"cat_food": 0, "cat_cafe": 0, "cat_museum": 1, "cat_park": 3, "cat_shop": 1}},
+        "days": [{"day_id": "d1", "date": "2026-11-01", "window": {"start": "2026-11-01T08:00:00+07:00", "end": "2026-11-01T20:00:00+07:00"}}],
+        "pois": [
+          {"poi_id": "p_park", "category_ids": ["cat_park"], "visit_minutes": 120, "cost": {"amount": "0", "currency": "VND", "unit": "per_party"}, "opening_windows": [{"day_id": "d1", "start": "2026-11-01T08:00:00+07:00", "end": "2026-11-01T20:00:00+07:00"}]},
+          {"poi_id": "p_shop", "category_ids": ["cat_shop"], "visit_minutes": 45, "cost": {"amount": "200000", "currency": "VND", "unit": "per_person"}, "opening_windows": [{"day_id": "d1", "start": "2026-11-01T08:00:00+07:00", "end": "2026-11-01T20:00:00+07:00"}]}
+        ],
+        "route_edges": [
+          {"from_poi_id": "p_park", "to_poi_id": "p_shop", "duration_minutes": 12, "distance_km": "1.5", "transport_mode": "car", "provenance": "synthetic"},
+          {"from_poi_id": "p_shop", "to_poi_id": "p_park", "duration_minutes": 12, "distance_km": "1.5", "transport_mode": "car", "provenance": "synthetic"}
+        ]
+      }
+    },
+    {
+      "scenario_id": "S05",
+      "author_expected": {"status": "feasible", "no_plan_reason": null, "properties": ["directed asymmetry A->B long B->A short", "one day"]},
+      "input": {
+        "scenario_id": "S05", "seed": 1005, "currency": "VND", "party_size": 2,
+        "days": [{"day_id": "d1", "date": "2026-11-01", "window": {"start": "2026-11-01T08:00:00+07:00", "end": "2026-11-01T14:00:00+07:00"}}],
+        "pois": [
+          {"poi_id": "p_a", "category_ids": ["cat_museum"], "visit_minutes": 60, "cost": {"amount": "0", "currency": "VND", "unit": "per_party"}, "opening_windows": [{"day_id": "d1", "start": "2026-11-01T08:00:00+07:00", "end": "2026-11-01T14:00:00+07:00"}]},
+          {"poi_id": "p_b", "category_ids": ["cat_cafe"], "visit_minutes": 60, "cost": {"amount": "0", "currency": "VND", "unit": "per_party"}, "opening_windows": [{"day_id": "d1", "start": "2026-11-01T08:00:00+07:00", "end": "2026-11-01T14:00:00+07:00"}]}
+        ],
+        "route_edges": [
+          {"from_poi_id": "p_a", "to_poi_id": "p_b", "duration_minutes": 180, "distance_km": "40.0", "transport_mode": "car", "provenance": "synthetic"},
+          {"from_poi_id": "p_b", "to_poi_id": "p_a", "duration_minutes": 10, "distance_km": "2.0", "transport_mode": "car", "provenance": "synthetic"}
+        ]
+      }
+    },
+    {
+      "scenario_id": "S06",
+      "author_expected": {"status": "feasible", "no_plan_reason": null, "properties": ["exact closing boundary", "departure equals window end"]},
+      "input": {
+        "scenario_id": "S06", "seed": 1006, "currency": "VND", "party_size": 1,
+        "days": [{"day_id": "d1", "date": "2026-11-01", "window": {"start": "2026-11-01T08:00:00+07:00", "end": "2026-11-01T10:00:00+07:00"}}],
+        "pois": [
+          {"poi_id": "p_closed", "category_ids": ["cat_museum"], "visit_minutes": 60, "cost": {"amount": "0", "currency": "VND", "unit": "per_party"}, "opening_windows": [{"day_id": "d1", "start": "2026-11-01T09:00:00+07:00", "end": "2026-11-01T10:00:00+07:00"}]}
+        ],
+        "route_edges": []
+      }
+    },
+    {
+      "scenario_id": "S07",
+      "author_expected": {"status": "feasible", "no_plan_reason": null, "properties": ["wait before opening", "arrival earlier than opening"]},
+      "input": {
+        "scenario_id": "S07", "seed": 1007, "currency": "VND", "party_size": 1,
+        "days": [{"day_id": "d1", "date": "2026-11-01", "window": {"start": "2026-11-01T08:00:00+07:00", "end": "2026-11-01T18:00:00+07:00"}}],
+        "pois": [
+          {"poi_id": "p_late", "category_ids": ["cat_museum"], "visit_minutes": 60, "cost": {"amount": "0", "currency": "VND", "unit": "per_party"}, "opening_windows": [{"day_id": "d1", "start": "2026-11-01T12:00:00+07:00", "end": "2026-11-01T17:00:00+07:00"}]}
+        ],
+        "route_edges": []
+      }
+    },
+    {
+      "scenario_id": "S08",
+      "author_expected": {"status": "feasible", "no_plan_reason": null, "properties": ["long transfer", "only one stop fits"]},
+      "input": {
+        "scenario_id": "S08", "seed": 1008, "currency": "VND", "party_size": 2,
+        "days": [{"day_id": "d1", "date": "2026-11-01", "window": {"start": "2026-11-01T08:00:00+07:00", "end": "2026-11-01T12:00:00+07:00"}}],
+        "pois": [
+          {"poi_id": "p_near", "category_ids": ["cat_cafe"], "visit_minutes": 60, "cost": {"amount": "0", "currency": "VND", "unit": "per_party"}, "opening_windows": [{"day_id": "d1", "start": "2026-11-01T08:00:00+07:00", "end": "2026-11-01T12:00:00+07:00"}]},
+          {"poi_id": "p_far", "category_ids": ["cat_museum"], "visit_minutes": 60, "cost": {"amount": "0", "currency": "VND", "unit": "per_party"}, "opening_windows": [{"day_id": "d1", "start": "2026-11-01T08:00:00+07:00", "end": "2026-11-01T12:00:00+07:00"}]}
+        ],
+        "route_edges": [
+          {"from_poi_id": "p_near", "to_poi_id": "p_far", "duration_minutes": 150, "distance_km": "60.0", "transport_mode": "car", "provenance": "synthetic"},
+          {"from_poi_id": "p_far", "to_poi_id": "p_near", "duration_minutes": 150, "distance_km": "60.0", "transport_mode": "car", "provenance": "synthetic"}
+        ]
+      }
+    },
+    {
+      "scenario_id": "S09",
+      "author_expected": {"status": "feasible", "no_plan_reason": null, "properties": ["required meal window satisfied"]},
+      "input": {
+        "scenario_id": "S09", "seed": 1009, "currency": "VND", "party_size": 2,
+        "days": [{"day_id": "d1", "date": "2026-11-01", "window": {"start": "2026-11-01T08:00:00+07:00", "end": "2026-11-01T18:00:00+07:00"}, "meal_windows": [{"category_id": "cat_food", "start": "2026-11-01T11:00:00+07:00", "end": "2026-11-01T13:00:00+07:00"}]}],
+        "pois": [
+          {"poi_id": "p_food", "category_ids": ["cat_food"], "visit_minutes": 60, "cost": {"amount": "0", "currency": "VND", "unit": "per_party"}, "opening_windows": [{"day_id": "d1", "start": "2026-11-01T09:00:00+07:00", "end": "2026-11-01T17:00:00+07:00"}]}
+        ],
+        "route_edges": []
+      }
+    },
+    {
+      "scenario_id": "S10",
+      "author_expected": {"status": "partial", "no_plan_reason": null, "properties": ["required meal window impossible", "no matching category", "unsatisfied meal_window"]},
+      "input": {
+        "scenario_id": "S10", "seed": 1010, "currency": "VND", "party_size": 2,
+        "days": [{"day_id": "d1", "date": "2026-11-01", "window": {"start": "2026-11-01T08:00:00+07:00", "end": "2026-11-01T18:00:00+07:00"}, "meal_windows": [{"category_id": "cat_food", "start": "2026-11-01T11:00:00+07:00", "end": "2026-11-01T13:00:00+07:00"}]}],
+        "pois": [
+          {"poi_id": "p_museum", "category_ids": ["cat_museum"], "visit_minutes": 60}
+        ],
+        "route_edges": []
+      }
+    },
+    {
+      "scenario_id": "S11",
+      "author_expected": {"status": "feasible", "no_plan_reason": null, "properties": ["sparse single candidate"]},
+      "input": {
+        "scenario_id": "S11", "seed": 1011, "currency": "VND", "party_size": 2,
+        "days": [{"day_id": "d1", "date": "2026-11-01", "window": {"start": "2026-11-01T08:00:00+07:00", "end": "2026-11-01T18:00:00+07:00"}}],
+        "pois": [{"poi_id": "p_solo", "category_ids": ["cat_park"], "visit_minutes": 45, "cost": {"amount": "0", "currency": "VND", "unit": "per_party"}, "opening_windows": [{"day_id": "d1", "start": "2026-11-01T08:00:00+07:00", "end": "2026-11-01T18:00:00+07:00"}]}],
+        "route_edges": []
+      }
+    },
+    {
+      "scenario_id": "S12",
+      "author_expected": {"status": "no_plan", "no_plan_reason": "no_candidates", "properties": ["empty candidates"]},
+      "input": {
+        "scenario_id": "S12", "seed": 1012, "currency": "VND", "party_size": 2,
+        "days": [{"day_id": "d1", "date": "2026-11-01", "window": {"start": "2026-11-01T08:00:00+07:00", "end": "2026-11-01T18:00:00+07:00"}}],
+        "pois": [],
+        "route_edges": []
+      }
+    },
+    {
+      "scenario_id": "S13",
+      "author_expected": {"status": "unverifiable", "no_plan_reason": null, "properties": ["missing hours", "hours_unknown reason", "no known violation"]},
+      "input": {
+        "scenario_id": "S13", "seed": 1013, "currency": "VND", "party_size": 2,
+        "days": [{"day_id": "d1", "date": "2026-11-01", "window": {"start": "2026-11-01T08:00:00+07:00", "end": "2026-11-01T18:00:00+07:00"}}],
+        "pois": [{"poi_id": "p_nohours", "category_ids": ["cat_cafe"], "visit_minutes": 30}],
+        "route_edges": []
+      }
+    },
+    {
+      "scenario_id": "S14",
+      "author_expected": {"status": "no_plan", "no_plan_reason": "impossible_constraints", "properties": ["missing route edge", "directed travel unknown", "route_unknown exclusion"]},
+      "input": {
+        "scenario_id": "S14", "seed": 1014, "currency": "VND", "party_size": 2,
+        "start_depot_poi_id": "depot",
+        "days": [{"day_id": "d1", "date": "2026-11-01", "window": {"start": "2026-11-01T08:00:00+07:00", "end": "2026-11-01T18:00:00+07:00"}}],
+        "pois": [
+          {"poi_id": "depot", "category_ids": ["cat_depot"], "visit_minutes": 1},
+          {"poi_id": "p_a", "category_ids": ["cat_museum"], "visit_minutes": 60}
+        ],
+        "route_edges": []
+      }
+    },
+    {
+      "scenario_id": "S15",
+      "author_expected": {"status": "unverifiable", "no_plan_reason": null, "properties": ["missing price with declared budget", "cost_unknown reason"]},
+      "input": {
+        "scenario_id": "S15", "seed": 1015, "currency": "VND", "party_size": 2,
+        "budget": {"amount": "1000000", "currency": "VND", "unit": "per_party"},
+        "days": [{"day_id": "d1", "date": "2026-11-01", "window": {"start": "2026-11-01T08:00:00+07:00", "end": "2026-11-01T18:00:00+07:00"}}],
+        "pois": [{"poi_id": "p_noprice", "category_ids": ["cat_shop"], "visit_minutes": 30, "opening_windows": [{"day_id": "d1", "start": "2026-11-01T09:00:00+07:00", "end": "2026-11-01T17:00:00+07:00"}]}],
+        "route_edges": []
+      }
+    },
+    {
+      "scenario_id": "S16",
+      "author_expected": {"status": "no_plan", "no_plan_reason": "impossible_constraints", "properties": ["all candidates closed during day window", "opening_conflict"]},
+      "input": {
+        "scenario_id": "S16", "seed": 1016, "currency": "VND", "party_size": 2,
+        "days": [{"day_id": "d1", "date": "2026-11-01", "window": {"start": "2026-11-01T08:00:00+07:00", "end": "2026-11-01T10:00:00+07:00"}}],
+        "pois": [{"poi_id": "p_night", "category_ids": ["cat_museum"], "visit_minutes": 60, "opening_windows": [{"day_id": "d1", "start": "2026-11-01T18:00:00+07:00", "end": "2026-11-01T22:00:00+07:00"}]}],
+        "route_edges": []
+      }
+    },
+    {
+      "scenario_id": "S17",
+      "author_expected": {"status": "partial", "no_plan_reason": null, "properties": ["required category absent", "still schedules others", "required_category unmet"]},
+      "input": {
+        "scenario_id": "S17", "seed": 1017, "currency": "VND", "party_size": 2,
+        "required_categories": ["cat_food"],
+        "days": [{"day_id": "d1", "date": "2026-11-01", "window": {"start": "2026-11-01T08:00:00+07:00", "end": "2026-11-01T18:00:00+07:00"}}],
+        "pois": [{"poi_id": "p_museum", "category_ids": ["cat_museum"], "visit_minutes": 60}],
+        "route_edges": []
+      }
+    },
+    {
+      "scenario_id": "S18",
+      "author_expected": {"status": "feasible", "no_plan_reason": null, "properties": ["P4 food preference profile", "preference ordering"]},
+      "input": {
+        "scenario_id": "S18", "seed": 1018, "currency": "VND", "party_size": 2,
+        "preferences": {"category_weights": {"cat_food": 5, "cat_cafe": 2, "cat_museum": 1, "cat_park": 0, "cat_shop": 0}},
+        "days": [{"day_id": "d1", "date": "2026-11-01", "window": {"start": "2026-11-01T08:00:00+07:00", "end": "2026-11-01T20:00:00+07:00"}}],
+        "pois": [
+          {"poi_id": "p_food", "category_ids": ["cat_food"], "visit_minutes": 60, "cost": {"amount": "0", "currency": "VND", "unit": "per_party"}, "opening_windows": [{"day_id": "d1", "start": "2026-11-01T08:00:00+07:00", "end": "2026-11-01T20:00:00+07:00"}]},
+          {"poi_id": "p_museum", "category_ids": ["cat_museum"], "visit_minutes": 60, "cost": {"amount": "0", "currency": "VND", "unit": "per_party"}, "opening_windows": [{"day_id": "d1", "start": "2026-11-01T08:00:00+07:00", "end": "2026-11-01T20:00:00+07:00"}]}
+        ],
+        "route_edges": [
+          {"from_poi_id": "p_food", "to_poi_id": "p_museum", "duration_minutes": 10, "distance_km": "1.0", "transport_mode": "car", "provenance": "synthetic"},
+          {"from_poi_id": "p_museum", "to_poi_id": "p_food", "duration_minutes": 10, "distance_km": "1.0", "transport_mode": "car", "provenance": "synthetic"}
+        ]
+      }
+    },
+    {
+      "scenario_id": "S19",
+      "author_expected": {"status": "feasible", "no_plan_reason": null, "properties": ["P5 culture preference profile", "high preference closed POI cannot override closing", "feasible alternative keeps plan valid"]},
+      "input": {
+        "scenario_id": "S19", "seed": 1019, "currency": "VND", "party_size": 2,
+        "preferences": {"category_weights": {"cat_food": 0, "cat_cafe": 0, "cat_museum": 5, "cat_park": 1, "cat_shop": 1}},
+        "days": [{"day_id": "d1", "date": "2026-11-01", "window": {"start": "2026-11-01T08:00:00+07:00", "end": "2026-11-01T10:00:00+07:00"}}],
+        "pois": [
+          {"poi_id": "p_closed", "category_ids": ["cat_museum"], "visit_minutes": 60, "cost": {"amount": "0", "currency": "VND", "unit": "per_party"}, "opening_windows": [{"day_id": "d1", "start": "2026-11-01T14:00:00+07:00", "end": "2026-11-01T18:00:00+07:00"}]},
+          {"poi_id": "p_open", "category_ids": ["cat_park"], "visit_minutes": 30, "cost": {"amount": "0", "currency": "VND", "unit": "per_party"}, "opening_windows": [{"day_id": "d1", "start": "2026-11-01T08:00:00+07:00", "end": "2026-11-01T10:00:00+07:00"}]}
+        ],
+        "route_edges": []
+      }
+    },
+    {
+      "scenario_id": "S20",
+      "author_expected": {"status": "feasible", "no_plan_reason": null, "properties": ["two days", "start and end depot", "duplicates disallowed", "return leg"]},
+      "input": {
+        "scenario_id": "S20", "seed": 1020, "currency": "VND", "party_size": 2,
+        "start_depot_poi_id": "depot", "end_depot_poi_id": "depot",
+        "allow_duplicate_pois": false,
+        "days": [
+          {"day_id": "d1", "date": "2026-11-01", "window": {"start": "2026-11-01T08:00:00+07:00", "end": "2026-11-01T18:00:00+07:00"}},
+          {"day_id": "d2", "date": "2026-11-02", "window": {"start": "2026-11-02T08:00:00+07:00", "end": "2026-11-02T18:00:00+07:00"}}
+        ],
+        "pois": [
+          {"poi_id": "depot", "category_ids": ["cat_depot"], "visit_minutes": 1},
+          {"poi_id": "p_a", "category_ids": ["cat_museum"], "visit_minutes": 60, "cost": {"amount": "0", "currency": "VND", "unit": "per_party"}, "opening_windows": [{"day_id": "d1", "start": "2026-11-01T08:00:00+07:00", "end": "2026-11-01T18:00:00+07:00"}, {"day_id": "d2", "start": "2026-11-02T08:00:00+07:00", "end": "2026-11-02T18:00:00+07:00"}]},
+          {"poi_id": "p_b", "category_ids": ["cat_cafe"], "visit_minutes": 45, "cost": {"amount": "0", "currency": "VND", "unit": "per_party"}, "opening_windows": [{"day_id": "d1", "start": "2026-11-01T08:00:00+07:00", "end": "2026-11-01T18:00:00+07:00"}, {"day_id": "d2", "start": "2026-11-02T08:00:00+07:00", "end": "2026-11-02T18:00:00+07:00"}]}
+        ],
+        "route_edges": [
+          {"from_poi_id": "depot", "to_poi_id": "p_a", "duration_minutes": 10, "distance_km": "1.0", "transport_mode": "car", "provenance": "synthetic"},
+          {"from_poi_id": "p_a", "to_poi_id": "p_b", "duration_minutes": 15, "distance_km": "2.0", "transport_mode": "car", "provenance": "synthetic"},
+          {"from_poi_id": "p_b", "to_poi_id": "depot", "duration_minutes": 12, "distance_km": "1.5", "transport_mode": "car", "provenance": "synthetic"},
+          {"from_poi_id": "p_b", "to_poi_id": "p_a", "duration_minutes": 15, "distance_km": "2.0", "transport_mode": "car", "provenance": "synthetic"},
+          {"from_poi_id": "p_a", "to_poi_id": "depot", "duration_minutes": 10, "distance_km": "1.0", "transport_mode": "car", "provenance": "synthetic"}
+        ]
+      }
+    }
+  ]
+}

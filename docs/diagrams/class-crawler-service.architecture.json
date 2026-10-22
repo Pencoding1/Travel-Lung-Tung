@@ -1,0 +1,100 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Sơ đồ lớp crawler_service: khám phá, cào chi tiết, làm sạch",
+    "output": "docs/diagrams/class-crawler-service.architecture.html",
+    "viewBox": [1240, 660],
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/Pencoding1/Travel-Lung-Tung",
+      "provider": "github",
+      "revision": "1d18ac30140dfe36335fadf49abe7c6177a19a60"
+    },
+    "views": [
+      {
+        "id": "entry",
+        "label": "Đường vào",
+        "focus": ["entry", "payload", "guard", "crawler", "settings"],
+        "note": "Một endpoint và một lớp Crawler duy nhất điều phối mọi thứ."
+      },
+      {
+        "id": "discover",
+        "label": "Khám phá liên kết",
+        "focus": ["crawler", "discoverer", "strategy", "base_crawl"],
+        "note": "Discoverer chạy crawler thích ứng với chiến lược chấm điểm tiếng Việt."
+      },
+      {
+        "id": "extract",
+        "label": "Cào và làm sạch",
+        "focus": ["crawler", "toka", "loader", "base_detail", "pre", "base_pre", "sink"],
+        "note": "Schema và JS nằm ngoài mã nguồn, lớp cào chỉ nạp chúng theo tên nhóm."
+      }
+    ]
+  },
+  "components": [
+    { "id": "entry", "type": "backend", "label": "main.py FastAPI", "sublabel": "POST /api/v1/crawl", "tag": "cổng vào", "pos": [40, 60], "size": [230, 76], "sources": [{ "path": "crawler_service/app/main.py", "line": 64, "label": "endpoint cào" }] },
+    { "id": "payload", "type": "backend", "label": "CrawlPayload", "sublabel": "discover và crawl_type", "pos": [40, 190], "size": [230, 76], "sources": [{ "path": "crawler_service/app/models/CrawlRecord.py", "line": 4, "label": "mô hình vào" }] },
+    { "id": "guard", "type": "security", "label": "verify_service_token", "sublabel": "header X-API-Key", "tag": "hằng số test", "pos": [40, 320], "size": [230, 76], "sources": [{ "path": "crawler_service/app/core/security.py", "line": 7, "label": "cổng token" }] },
+    { "id": "crawler", "type": "backend", "label": "Crawler", "sublabel": "pipeline và discovery", "tag": "điều phối", "pos": [340, 60], "size": [230, 76], "sources": [{ "path": "crawler_service/app/pipelines/crawling/crawling.py", "line": 27, "label": "lớp Crawler" }] },
+    { "id": "settings", "type": "backend", "label": "AppSettings", "sublabel": "ba nhóm cấu hình", "tag": "settings", "pos": [340, 190], "size": [230, 76], "sources": [{ "path": "crawler_service/app/core/config/settings.py", "line": 169, "label": "gốc cấu hình" }] },
+    { "id": "base_crawl", "type": "backend", "label": "BasePipelineCrawling", "sublabel": "khung pipeline cào", "tag": "trừu tượng", "pos": [340, 320], "size": [230, 76], "sources": [{ "path": "crawler_service/app/pipelines/crawling/base/PipelineBase.py", "line": 16, "label": "lớp cơ sở" }] },
+    { "id": "base_detail", "type": "backend", "label": "BaseDetailCrawler", "sublabel": "run_with_hook", "tag": "trừu tượng", "pos": [340, 450], "size": [230, 76], "sources": [{ "path": "crawler_service/app/pipelines/crawling/base/detail_crawler.py", "line": 44, "label": "khung cào" }] },
+    { "id": "discoverer", "type": "backend", "label": "Discoverer", "sublabel": "lọc link đạt ngưỡng", "pos": [660, 60], "size": [230, 76], "sources": [{ "path": "crawler_service/app/pipelines/crawling/discover/discoverer.py", "line": 70, "label": "lớp khám phá" }] },
+    { "id": "strategy", "type": "backend", "label": "VNStatistcalStrategy", "sublabel": "underthesea, stopwords", "tag": "đang dùng", "pos": [660, 190], "size": [230, 76], "sources": [{ "path": "crawler_service/app/utils/discover_strategies.py", "line": 194, "label": "chiến lược" }] },
+    { "id": "toka", "type": "backend", "label": "TravelokaCrawler", "sublabel": "crawl_with_schema", "pos": [660, 320], "size": [230, 76], "sources": [{ "path": "crawler_service/app/pipelines/crawling/detail_crawler/traveloka_crawler.py", "line": 12, "label": "lớp cào Traveloka" }] },
+    { "id": "loader", "type": "backend", "label": "LoadExtractionScript", "sublabel": "schema và js_codes", "pos": [660, 450], "size": [230, 76], "sources": [{ "path": "crawler_service/app/utils/LoadExtraction.py", "line": 7, "label": "nạp schema" }] },
+    { "id": "pre", "type": "backend", "label": "TravelokaPreprocessor", "sublabel": "JSON và markdown", "pos": [980, 60], "size": [230, 76], "sources": [{ "path": "crawler_service/app/pipelines/preprocessing/preprocessing.py", "line": 10, "label": "lớp làm sạch" }] },
+    { "id": "base_pre", "type": "backend", "label": "BasePreprocessor", "sublabel": "MinHash LSH", "tag": "trừu tượng", "pos": [980, 190], "size": [230, 76], "sources": [{ "path": "crawler_service/app/pipelines/preprocessing/base/PipelineBase.py", "line": 8, "label": "khung làm sạch" }] },
+    { "id": "sink", "type": "database", "label": "save_to_local", "sublabel": "Crawled_Results.json", "tag": "chưa ghi DB", "pos": [980, 320], "size": [230, 76], "sources": [{ "path": "crawler_service/app/pipelines/crawling/crawling.py", "line": 93, "label": "ghi kết quả" }] }
+  ],
+  "boundaries": [
+    { "kind": "region", "label": "Cổng HTTP", "wraps": ["entry", "payload", "guard"] },
+    { "kind": "region", "label": "Điều phối và khung cơ sở", "wraps": ["crawler", "settings", "base_crawl", "base_detail"] },
+    { "kind": "region", "label": "Hiện thực khám phá và cào", "wraps": ["discoverer", "strategy", "toka", "loader"] },
+    { "kind": "security-group", "label": "Làm sạch và lưu", "wraps": ["pre", "base_pre", "sink"] }
+  ],
+  "connections": [
+    { "id": "entry-payload", "from": "entry", "to": "payload", "fromSide": "bottom", "toSide": "top" },
+    { "id": "entry-guard", "from": "entry", "to": "guard", "variant": "security", "fromSide": "left", "toSide": "left" },
+    { "id": "entry-crawler", "from": "entry", "to": "crawler", "variant": "emphasis", "fromSide": "right", "toSide": "left" },
+    { "id": "crawler-settings", "from": "crawler", "to": "settings", "fromSide": "bottom", "toSide": "top" },
+    { "id": "crawler-discoverer", "from": "crawler", "to": "discoverer", "variant": "emphasis", "fromSide": "right", "toSide": "left" },
+    { "id": "crawler-toka", "from": "crawler", "to": "toka", "variant": "emphasis", "fromSide": "right", "toSide": "left" },
+    { "id": "discoverer-strategy", "from": "discoverer", "to": "strategy", "fromSide": "bottom", "toSide": "top" },
+    { "id": "toka-basedetail", "from": "toka", "to": "base_detail", "label": "kế thừa", "variant": "dashed", "fromSide": "left", "toSide": "right" },
+    { "id": "basedetail-base", "from": "base_detail", "to": "base_crawl", "label": "kế thừa", "variant": "dashed", "fromSide": "top", "toSide": "bottom" },
+    { "id": "toka-loader", "from": "toka", "to": "loader", "fromSide": "bottom", "toSide": "top" },
+    { "id": "pre-basepre", "from": "pre", "to": "base_pre", "label": "kế thừa", "labelDy": 18, "variant": "dashed", "fromSide": "bottom", "toSide": "top" },
+    { "id": "pre-sink", "from": "pre", "to": "sink", "fromSide": "right", "toSide": "right" }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Vì sao tách khám phá khỏi cào chi tiết",
+      "items": [
+        "Khám phá chỉ đọc metadata và điểm liên quan, rẻ hơn nhiều so với mở từng trang",
+        "URL sau khi lọc được phân nhóm theo đoạn thứ tư của đường dẫn",
+        "Mỗi nhóm có schema riêng nên thêm nguồn mới chỉ cần thêm thư mục schema và JS"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Chiến lược chấm điểm",
+      "items": [
+        "VNStatistcalStrategy thay cách chấm của crawl4ai bằng tách từ tiếng Việt",
+        "Nội dung được gột ảnh, URL và từ quảng cáo trước khi đếm tần suất từ",
+        "VNEmbeddingStrategy mới là lớp rỗng, chọn embedding sẽ ném lỗi chưa hiện thực"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Chỗ đang hở",
+      "items": [
+        "Cổng token so sánh với chuỗi test nằm thẳng trong mã nguồn",
+        "Nhóm hotel cố tình ném exception nên bị bỏ qua toàn bộ",
+        "Lớp Crawler gọi preprocessor, đường nối đó nằm trong __detail_crawl"
+      ]
+    }
+  ]
+}

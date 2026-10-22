@@ -26,4 +26,43 @@ class MemgraphDB(BaseSettings):
         extra='ignore' 
     )
 
-db_settings = MemgraphDB() #type: ignore
+    @classmethod
+    def from_process_env(cls) -> "MemgraphDB":
+        """Explicit settings from the process environment only.
+
+        ``_env_file=None`` disables the class-level ``.env`` source for this
+        instance; the default ``MemgraphDB()`` behaviour (and the operator
+        contract) is unchanged. No value is logged by this method.
+        """
+        return cls(_env_file=None)  # type: ignore[call-arg]
+
+
+# Explicit process-only selector. Absence keeps the historical .env-file
+# behaviour; ``process_only`` disables the class-level .env source for this
+# process. Any other value fails before either factory could load a file.
+DB_SETTINGS_SOURCE_ENV = "POI_DB_SETTINGS_SOURCE"
+DB_SETTINGS_SOURCE_LEGACY = "legacy_env_file"
+DB_SETTINGS_SOURCE_PROCESS_ONLY = "process_only"
+DB_SETTINGS_SOURCES = (
+    DB_SETTINGS_SOURCE_LEGACY,
+    DB_SETTINGS_SOURCE_PROCESS_ONLY,
+)
+INVALID_DB_SETTINGS_SOURCE = "invalid_db_settings_source"
+
+
+def select_db_settings(source, process_factory, legacy_factory):
+    """Choose the settings factory without touching a file on invalid input."""
+    if source is None or source == "":
+        return legacy_factory()
+    if source not in DB_SETTINGS_SOURCES:
+        raise ValueError(INVALID_DB_SETTINGS_SOURCE)
+    if source == DB_SETTINGS_SOURCE_PROCESS_ONLY:
+        return process_factory()
+    return legacy_factory()
+
+
+db_settings = select_db_settings(
+    os.environ.get(DB_SETTINGS_SOURCE_ENV),
+    MemgraphDB.from_process_env,
+    MemgraphDB,
+)  # type: ignore[assignment]

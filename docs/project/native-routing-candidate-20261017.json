@@ -1,0 +1,28 @@
+{
+  "captured_at": "2026-10-17T21:06:08.5622433+07:00",
+  "api": "https://api.adoptium.net/v3/assets/latest/21/hotspot?architecture=x64&heap_size=normal&image_type=jre&jvm_impl=hotspot&os=linux&vendor=eclipse",
+  "release": "jdk-21.0.12.1+1",
+  "openjdk_version": "21.0.12.1+1-LTS",
+  "package": {
+    "checksum": "2413149700df0f7d440500a84a8f764c535f21e5a5e87d38328b64eec2c5b500",
+    "checksum_link": "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.12.1%2B1/OpenJDK21U-jre_x64_linux_hotspot_21.0.12.1_1.tar.gz.sha256.txt",
+    "download_count": 495536,
+    "link": "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.12.1%2B1/OpenJDK21U-jre_x64_linux_hotspot_21.0.12.1_1.tar.gz",
+    "metadata_link": "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.12.1%2B1/OpenJDK21U-jre_x64_linux_hotspot_21.0.12.1_1.tar.gz.json",
+    "name": "OpenJDK21U-jre_x64_linux_hotspot_21.0.12.1_1.tar.gz",
+    "signature_link": "https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.12.1%2B1/OpenJDK21U-jre_x64_linux_hotspot_21.0.12.1_1.tar.gz.sig",
+    "size": 52059408
+  },
+  "graphhopper": {
+    "jar_url": "https://repo.maven.apache.org/maven2/com/graphhopper/graphhopper-web/11.1/graphhopper-web-11.1.jar",
+    "version": "11.1",
+    "head_status": 200,
+    "head_content_length": 47331301,
+    "local_binary_downloaded": false
+  },
+  "limits": [
+    "Metadata only; no binary extracted or routing runtime started.",
+    "API latest must not be used as an unpinned runtime input; use exact captured package link and checksum.",
+    "No detached signature verification is claimed."
+  ]
+}

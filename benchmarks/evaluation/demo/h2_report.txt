@@ -1,0 +1,27 @@
+H2 evaluation â€” SYNTHETIC EVALUATOR TEST
+manifest=oc18.h2.smoke.v1 thesis_mode=False
+evidence=['synthetic_engineering'] dataset=['synthetic_fixtures']
+planned_runs=12 observed_runs=12 missing_runs=0
+
+per-condition descriptive metrics (planned denominator):
+  hybrid: delivery=0.833333 validated_feasible=0.5 unverifiable=0.166667 refusal=0.166667 failure=0 empty=0
+      violation_determined=0.25 (1/4 determined delivered, coverage=0.8 of 5 delivered); observed_known_violation_lower_bound(all delivered)=0.2 (1/5)
+  llm_only: delivery=1 validated_feasible=0.5 unverifiable=0 refusal=0 failure=0 empty=0
+      violation_determined=0.5 (3/6 determined delivered, coverage=1 of 6 delivered); observed_known_violation_lower_bound(all delivered)=0.5 (3/6)
+
+paired outcome=scenario_has_verified_temporal_violation (hybrid - llm_only)
+  eligible_scenarios=2 excluded=1
+  rate_a=0.5 rate_b=1
+  discordant a_only=0 b_only=1
+  mcnemar_exact_p=suppressed (no inferential claim; blocked_reasons=['synthetic_evidence_only'])
+  paired_effect=-0.5 95%CI=[-1, 0] (seed=20261015, draws=10000, percentile)
+  inferential_available=False blocked_reasons=['synthetic_evidence_only']
+
+secondary outcomes (available/missing over 12 observed runs; only aggregating already-computed fields):
+  poi_grounding: available=12 missing=0 selected=22 grounded=22 grounded_rate=1
+  budget_deviation: available=11 missing=1 non_comparable=0 groups=1 pooled_across_units=False
+  route_travel_minutes [minutes]: available=11 missing=1 median=30 mean=30 min=30 max=30
+  route_distance_km [km]: available=11 missing=1 median=5 mean=5 min=5 max=5
+  latency_seconds [seconds]: available=12 missing=0 median=1.2 mean=1.13333 min=0.4 max=1.2
+  (secondary outcomes carry no p-value or inferential claim.)
+NOTE: synthetic numbers above are evaluator tests, not H2 results.

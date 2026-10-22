@@ -1,0 +1,99 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "Luồng cào dữ liệu POI của crawler_service",
+    "output": "docs/diagrams/crawler-pipeline.workflow.html",
+    "quality_profile": "showcase",
+    "views": [
+      {
+        "id": "discover-mode",
+        "label": "Chế độ khám phá",
+        "focus": ["req", "guard", "pipe", "adaptive", "strat", "filter", "classify"],
+        "note": "discover=true: crawler tự tìm link liên quan rồi mới cào chi tiết."
+      },
+      {
+        "id": "detail-mode",
+        "label": "Chế độ cào thẳng",
+        "focus": ["req", "guard", "pipe", "detail", "pre", "sink"],
+        "note": "discover=false: phải truyền crawl_type, cào đúng một URL."
+      },
+      {
+        "id": "store",
+        "label": "Lưu và đọc lại",
+        "focus": ["cache", "strat", "filter", "classify", "detail", "pre", "sink"],
+        "note": "Danh sách URL đi qua cache, kết quả đi qua làm sạch rồi ghi ra đĩa."
+      }
+    ]
+  },
+  "lanes": [
+    { "id": "api", "label": "Đầu vào HTTP" },
+    { "id": "discover", "label": "Khám phá liên kết" },
+    { "id": "orchestrate", "label": "Crawler điều phối" },
+    { "id": "extract", "label": "Cào chi tiết" },
+    { "id": "output", "label": "Làm sạch" },
+    { "id": "store", "label": "Lưu kết quả" }
+  ],
+  "phases": [
+    { "id": "intake", "label": "Nhận yêu cầu và khám phá", "fromCol": 0, "toCol": 1 },
+    { "id": "harvest", "label": "Chấm điểm, cào, lưu", "fromCol": 2, "toCol": 3, "variant": "emphasis" }
+  ],
+  "mainPath": ["req", "guard", "pipe", "adaptive", "strat", "filter", "classify", "detail", "pre", "sink"],
+  "nodes": [
+    { "id": "req", "lane": "api", "col": 0, "type": "external", "label": "Yêu cầu cào", "sublabel": "CrawlPayload", "width": 145 },
+    { "id": "guard", "lane": "api", "col": 1, "type": "security", "label": "verify_service_token", "sublabel": "X-API-Key", "width": 165 },
+    { "id": "cache", "lane": "discover", "col": 0, "type": "database", "label": "cache/discovery", "sublabel": "CACHE_MODE", "width": 145 },
+    { "id": "pipe", "lane": "orchestrate", "col": 1, "type": "backend", "label": "Crawler.pipeline", "sublabel": "discover hay detail", "width": 155 },
+    { "id": "adaptive", "lane": "discover", "col": 1, "type": "cloud", "label": "AdaptiveCrawler", "sublabel": "LinkPreview và BM25", "width": 155 },
+    { "id": "strat", "lane": "discover", "col": 2, "type": "backend", "label": "VNStatistcal", "sublabel": "underthesea", "width": 155 },
+    { "id": "loader", "lane": "extract", "col": 1, "type": "backend", "label": "LoadExtraction", "sublabel": "schema và JS", "width": 155 },
+    { "id": "filter", "lane": "discover", "col": 3, "type": "backend", "label": "lọc link đạt ngưỡng", "sublabel": "score từ 1.0", "width": 165 },
+    { "id": "classify", "lane": "orchestrate", "col": 3, "type": "backend", "label": "_classifier", "sublabel": "theo nhóm URL", "width": 165 },
+    { "id": "detail", "lane": "extract", "col": 3, "type": "cloud", "label": "crawl_with_schema", "sublabel": "strategy CSS", "width": 165 },
+    { "id": "pre", "lane": "output", "col": 3, "type": "backend", "label": "Preprocessor.parse", "sublabel": "JSON và markdown", "width": 165 },
+    { "id": "sink", "lane": "store", "col": 3, "type": "database", "label": "save_to_local", "sublabel": "Crawled_Results", "width": 165 }
+  ],
+  "edges": [
+    { "id": "req-guard", "from": "req", "to": "guard", "label": "POST /api/v1/crawl", "variant": "default" },
+    { "id": "guard-pipe", "from": "guard", "to": "pipe", "label": "token hợp lệ", "variant": "emphasis" },
+    { "id": "pipe-cache", "from": "pipe", "to": "cache", "label": "đọc cache", "variant": "dashed", "role": "branch" },
+    { "id": "pipe-adaptive", "from": "pipe", "to": "adaptive", "label": "discover=true", "variant": "emphasis" },
+    { "id": "pipe-detail", "from": "pipe", "to": "detail", "label": "discover=false", "variant": "dashed", "role": "branch" },
+    { "id": "adaptive-strat", "from": "adaptive", "to": "strat", "label": "update_state", "variant": "default" },
+    { "id": "strat-filter", "from": "strat", "to": "filter", "label": "chấm điểm", "variant": "emphasis" },
+    { "id": "filter-classify", "from": "filter", "to": "classify", "label": "link đạt", "variant": "emphasis" },
+    { "id": "classify-detail", "from": "classify", "to": "detail", "label": "theo nhóm", "variant": "emphasis" },
+    { "id": "loader-detail", "from": "loader", "to": "detail", "label": "schema và JS", "variant": "dashed" },
+    { "id": "detail-pre", "from": "detail", "to": "pre", "label": "extracted_content", "variant": "emphasis" },
+    { "id": "pre-sink", "from": "pre", "to": "sink", "label": "dict đã sạch", "variant": "emphasis" }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Hai chế độ chạy",
+      "items": [
+        "discover=true chạy khám phá rồi cào hàng loạt theo nhóm URL",
+        "discover=false bắt buộc có crawl_type, chỉ cào một URL",
+        "Thiếu cả hai thì pipeline ném ValueError ngay từ đầu"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Điểm dễ vỡ",
+      "items": [
+        "Cổng token đang so sánh với hằng số test nằm trong mã nguồn",
+        "Nhóm hotel chưa có extractor nên dừng cả nhóm bằng exception có chủ đích",
+        "Kết quả chỉ ghi ra đĩa; nhánh ghi database chưa hiện thực"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Dữ liệu đi ra",
+      "items": [
+        "JSON một tầng cho mỗi nhóm URL, đã giải nén các trường JSON lồng nhau",
+        "Khối HTML trong modal_contents và review_block đổi sang markdown",
+        "MinHash LSH nằm sẵn trong lớp cha để lọc trùng nhưng chưa được nối vào"
+      ]
+    }
+  ]
+}

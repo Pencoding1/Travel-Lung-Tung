@@ -1,0 +1,38 @@
+H3 evaluation â€” SYNTHETIC EVALUATOR TEST
+manifest=oc18.h3.smoke.v1 thesis_mode=False
+evidence=['synthetic_engineering'] dataset=['synthetic_fixtures']
+profiles=['P1', 'P2', 'P3', 'P4', 'P5'] baseline=memory_disabled
+planned_runs=15 observed_runs=15 missing_runs=0
+
+per-profile preferred share (numerator = preferred selected stops; denominator = ALL selected stops; null = coverage gap, see bounds):
+  P1: effects: short_term_minus_baseline=1, two_tier_minus_baseline=1
+      memory_disabled: share=0 (0/1 selected stops preferred) coverage=1
+      short_term: share=1 (1/1 selected stops preferred) coverage=1
+      two_tier: share=1 (1/1 selected stops preferred) coverage=1
+      token_reduction[short_term]=0.25 (defined)
+      token_reduction[two_tier]=0.5 (defined)
+  P2: effects: short_term_minus_baseline=1, two_tier_minus_baseline=1
+      memory_disabled: share=0 (0/1 selected stops preferred) coverage=1
+      short_term: share=1 (1/1 selected stops preferred) coverage=1
+      two_tier: share=1 (1/1 selected stops preferred) coverage=1
+      token_reduction[short_term]=0.25 (defined)
+      token_reduction[two_tier]=0.5 (defined)
+  P3: effects: short_term_minus_baseline=1, two_tier_minus_baseline=1
+      memory_disabled: share=0 (0/1 selected stops preferred) coverage=1
+      short_term: share=1 (1/1 selected stops preferred) coverage=1
+      two_tier: share=1 (1/1 selected stops preferred) coverage=1
+      token_reduction[short_term]=0.25 (defined)
+      token_reduction[two_tier]=0.5 (defined)
+  P4: effects: short_term_minus_baseline=1, two_tier_minus_baseline=1
+      memory_disabled: share=0 (0/1 selected stops preferred) coverage=1
+      short_term: share=1 (1/1 selected stops preferred) coverage=1
+      two_tier: share=1 (1/1 selected stops preferred) coverage=1
+      token_reduction[short_term]=0.25 (defined)
+      token_reduction[two_tier]=0.5 (defined)
+  P5: effects: short_term_minus_baseline=1, two_tier_minus_baseline=1
+      memory_disabled: share=0 (0/1 selected stops preferred) coverage=1
+      short_term: share=1 (1/1 selected stops preferred) coverage=1
+      two_tier: share=1 (2/2 selected stops preferred) coverage=1
+      token_reduction[short_term]=0.25 (defined)
+      token_reduction[two_tier]=0.5 (defined)
+NOTE: synthetic numbers above are evaluator tests, not H3 results.

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Thư viện sơ đồ — Travel Lung Tung</title>
+<link rel="stylesheet" href="../assets/docs.css">
+</head>
+<body>
+<header class="top">
+  <div class="bar">
+    <div class="brand">Travel Lung Tung<small>Thư viện sơ đồ</small></div>
+    <div class="spacer"></div>
+    <a class="btn" href="../index.html">Trang chủ</a>
+    <button class="btn" id="theme-toggle">Nền tối</button>
+  </div>
+</header>
+
+<div class="wrap">
+<nav class="toc">
+  <h4>Tổng quan</h4>
+  <a href="../index.html">Trang chủ</a>
+  <a href="../index.html#he-thong">Hệ thống</a>
+  <a href="../index.html#khoang-trong">Khoảng trống</a>
+  <h4>Trên trang này</h4>
+  <a href="#kien-truc">Kiến trúc chính</a>
+  <a href="#crawler">Luồng cào dữ liệu</a>
+  <a href="#nạp">Vòng đời nạp POI</a>
+  <a href="#api">Tương tác giữa các API</a>
+  <a href="#lop-poi">Sơ đồ lớp POI_service</a>
+  <a href="#lop-crawler">Sơ đồ lớp crawler_service</a>
+  <a href="#trang-thai">Trạng thái kiểm chứng</a>
+  <h4>Module</h4>
+  <a href="../modules/crawler-service.html">crawler_service</a>
+  <a href="../modules/poi-service.html">POI_service</a>
+  <a href="../modules/ai-service.html">ai_service</a>
+  <a href="../modules/backend-service.html">backend_service</a>
+  <a href="../modules/shared-lib.html">shared_lib</a>
+</nav>
+
+<main>
+<section>
+  <h1>Thư viện sơ đồ</h1>
+  <p class="lead">Sáu sơ đồ, dựng bằng Archify 2.17. Mỗi tệp là một trang HTML độc lập: đổi được nền sáng/tối, tìm kiếm thành phần, tô sáng một nhánh quan hệ, mở chế độ trình bày và xuất ảnh. Bốn sơ đồ có thêm phần chú giải theo chương ở góc dưới.</p>
+  <div class="callout">
+    <p>Trong khung nhúng dưới đây, nếu thao tác bị chặn do trình duyệt mở tệp cục bộ, hãy bấm “Mở riêng” để xem toàn màn hình. Phần chú giải và giao diện của trình xem luôn là tiếng Anh; nội dung sơ đồ do tôi soạn bằng tiếng Việt.</p>
+  </div>
+</section>
+
+<section id="kien-truc">
+  <h2>Sơ đồ kiến trúc chính</h2>
+  <p>Mười một thành phần nằm trong năm vùng: Internet công khai, vùng điều phối AI, vùng miền POI giữ nguồn sự thật về vị trí, kho lịch trình, và vùng nạp dữ liệu có cổng token. Sơ đồ này có từ trước, vẽ cho đúng bản mã <code>1d18ac3</code> nên tôi giữ nguyên và đã chạy lại cổng kiểm chứng trong trình duyệt.</p>
+  <div class="diagram">
+    <div class="head"><strong>Travel Vo Lo — Multi-Agent OTA Platform</strong><span class="tag">architecture</span><span class="spacer"></span><a class="btn" href="../travel-vo-lo.architecture.html" target="_blank" rel="noopener">Mở riêng</a></div>
+    <iframe src="../travel-vo-lo.architecture.html" title="Sơ đồ kiến trúc chính" loading="lazy"></iframe>
+    <div class="note">Vùng tin cậy, ranh giới dữ liệu và đường đi của yêu cầu. Gồm ba chương: đường yêu cầu chính, bàn giao lịch trình, và vùng nạp dữ liệu.</div>
+  </div>
+</section>
+
+<section id="crawler">
+  <h2>Luồng cào dữ liệu POI</h2>
+  <p>Mười hai bước trên sáu làn, theo đúng thứ tự gọi trong mã: nhận yêu cầu, qua cổng token, chọn chế độ, khám phá và chấm điểm link, lọc, phân nhóm, cào chi tiết theo schema, làm sạch rồi ghi ra đĩa.</p>
+  <div class="diagram">
+    <div class="head"><strong>Luồng cào dữ liệu POI của crawler_service</strong><span class="tag">workflow</span><span class="spacer"></span><a class="btn" href="crawler-pipeline.workflow.html" target="_blank" rel="noopener">Mở riêng</a></div>
+    <iframe src="crawler-pipeline.workflow.html" title="Luồng cào dữ liệu" loading="lazy"></iframe>
+    <div class="note">Ba chương: chế độ khám phá, chế độ cào thẳng theo <code>crawl_type</code>, và chặng lưu kết quả.</div>
+  </div>
+</section>
+
+<section id="nạp">
+  <h2>Vòng đời nạp POI vào Memgraph</h2>
+  <p>Ray chính năm bước: nhận gói, thử canary, quyết định, trả 202. Làn dưới là phần chạy nền: khối 500 bản ghi và dòng SSE báo hoàn tất. Nhánh canary hỏng trả 422 nằm trong phần chú giải thay vì trên hình, để đường chính không bị cắt.</p>
+  <div class="diagram">
+    <div class="head"><strong>Vòng đời gói nạp POI</strong><span class="tag">lifecycle</span><span class="spacer"></span><a class="btn" href="poi-ingestion.lifecycle.html" target="_blank" rel="noopener">Mở riêng</a></div>
+    <iframe src="poi-ingestion.lifecycle.html" title="Vòng đời nạp POI" loading="lazy"></iframe>
+    <div class="note">Đọc kèm <a href="../modules/poi-service.html#nạp">phần nạp dữ liệu của POI_service</a>.</div>
+  </div>
+</section>
+
+<section id="api">
+  <h2>Tương tác giữa các API</h2>
+  <p>Hai mươi bước, tám bên tham gia: client, AI Hub, Gemini, máy chủ MCP, Memgraph, GraphHopper, dịch vụ lịch trình và Firestore. Sơ đồ cho thấy AI Hub không hề nói chuyện trực tiếp với cơ sở dữ liệu, và toàn bộ tuyến đường do GraphHopper tính.</p>
+  <div class="diagram tall">
+    <div class="head"><strong>Tương tác giữa các API</strong><span class="tag">sequence</span><span class="spacer"></span><a class="btn" href="api-interaction.sequence.html" target="_blank" rel="noopener">Mở riêng</a></div>
+    <iframe src="api-interaction.sequence.html" title="Tương tác giữa các API" loading="lazy"></iframe>
+    <div class="note">Bốn chặng: phân loại ý định, neo ID vào đồ thị, tra cứu và định tuyến, trả lời và bàn giao.</div>
+  </div>
+</section>
+
+<section id="lop-poi">
+  <h2>Sơ đồ lớp POI_service</h2>
+  <p>Mười ba lớp xếp theo bốn tầng: giao diện, ứng dụng, miền và hợp đồng, hạ tầng. Quan hệ thừa kế và hiện thực giao diện có nhãn; các mũi tên còn lại là quan hệ dùng. Đây là sơ đồ trả lời câu hỏi “vì sao tách lớp”: nghiệp vụ chỉ biết giao diện, còn hiện thực nằm ở tầng hạ tầng.</p>
+  <div class="diagram">
+    <div class="head"><strong>Sơ đồ lớp POI_service</strong><span class="tag">architecture</span><span class="spacer"></span><a class="btn" href="class-poi-service.architecture.html" target="_blank" rel="noopener">Mở riêng</a></div>
+    <iframe src="class-poi-service.architecture.html" title="Sơ đồ lớp POI_service" loading="lazy"></iframe>
+    <div class="note">Ba chương: đường ghi dữ liệu, đường đọc cho agent, hợp đồng và hiện thực.</div>
+  </div>
+</section>
+
+<section id="lop-crawler">
+  <h2>Sơ đồ lớp crawler_service</h2>
+  <p>Mười bốn lớp trên bốn tầng: cổng HTTP, điều phối và khung lớp cơ sở, hiện thực khám phá và cào, làm sạch và lưu. Lớp <code>Crawler</code> là nút điều phối duy nhất, mọi việc khác đều nằm sau một giao diện hoặc một lớp trừu tượng.</p>
+  <div class="diagram">
+    <div class="head"><strong>Sơ đồ lớp crawler_service</strong><span class="tag">architecture</span><span class="spacer"></span><a class="btn" href="class-crawler-service.architecture.html" target="_blank" rel="noopener">Mở riêng</a></div>
+    <iframe src="class-crawler-service.architecture.html" title="Sơ đồ lớp crawler_service" loading="lazy"></iframe>
+    <div class="note">Ba chương: đường vào, khám phá liên kết, cào và làm sạch.</div>
+  </div>
+</section>
+
+<section id="trang-thai">
+  <h2>Trạng thái kiểm chứng</h2>
+  <p>Bảng này tách ba loại bằng chứng, không gộp lại thành một chữ “đạt”:</p>
+  <ul>
+    <li><strong>deliver</strong> — cổng nghiệm thu của Archify: kiểm 9 hạng mục trên tệp SVG, 0 lỗi và 0 cảnh báo ở mức <em>showcase</em>, rồi mới ghi ra tệp HTML.</li>
+    <li><strong>visual-check</strong> — mở tệp đã giao trong Chrome thật, đo tràn trang, độ đọc được và chụp ảnh ở bốn kích thước.</li>
+    <li><strong>đọc bằng mắt</strong> — chưa thực hiện: tôi không xem được ảnh, nên phần thẩm mỹ chưa được duyệt.</li>
+  </ul>
+  <table>
+    <thead><tr><th>Sơ đồ</th><th>deliver</th><th>visual-check</th><th>Tràn trang 1440×900</th></tr></thead>
+    <tbody>
+      <tr><td>Kiến trúc chính</td><td><span class="badge ok">đạt</span></td><td><span class="badge ok">đạt</span></td><td><span class="badge ok">không</span></td></tr>
+      <tr><td>Luồng cào dữ liệu</td><td><span class="badge ok">đạt</span></td><td><span class="badge warn">tràn</span></td><td><span class="badge warn">có, phải cuộn</span></td></tr>
+      <tr><td>Vòng đời nạp POI</td><td><span class="badge ok">đạt</span></td><td><span class="badge warn">tràn</span></td><td><span class="badge warn">có ở 1440×900, vừa ở 1920×1080</span></td></tr>
+      <tr><td>Tương tác giữa các API</td><td><span class="badge ok">đạt</span></td><td><span class="badge warn">tràn</span></td><td><span class="badge warn">có, phải cuộn</span></td></tr>
+      <tr><td>Lớp POI_service</td><td><span class="badge ok">đạt</span></td><td><span class="badge warn">tràn</span></td><td><span class="badge warn">có ở 1440×900, vừa ở 1920×1080</span></td></tr>
+      <tr><td>Lớp crawler_service</td><td><span class="badge ok">đạt</span></td><td><span class="badge warn">tràn</span></td><td><span class="badge warn">có ở 1440×900, vừa ở 1920×1080</span></td></tr>
+    </tbody>
+  </table>
+  <div class="callout gap">
+    <p><strong>Việc còn lại của phần sơ đồ.</strong> Bốn sơ đồ mới cao hơn khung nhìn 1440×900 nên người đọc phải cuộn trang, trong khi tiêu chuẩn của bộ công cụ là phải vừa một màn hình. Cách sửa đã xác định: giảm số bước trên mỗi sơ đồ hoặc tách thành hai sơ đồ, giữ tỉ lệ rộng/cao khoảng 1,9. Chưa làm vì cần cắt bớt nội dung — nên hỏi trước khi cắt.</p>
+  </div>
+  <p>Tệp đặc tả nằm cùng thư mục, mở được bằng bất kỳ trình soạn thảo nào: <code>crawler-pipeline.workflow.json</code>, <code>poi-ingestion.lifecycle.json</code>, <code>api-interaction.sequence.json</code>, <code>class-poi-service.architecture.json</code>, <code>class-crawler-service.architecture.json</code>. Mỗi tệp ghi kèm số dòng mã nguồn làm bằng chứng cho từng thành phần.</p>
+  <footer class="foot">Dựng ngày 04-10-2026 bằng Archify 2.17 cho bản mã <code>1d18ac3</code>.</footer>
+</section>
+</main>
+</div>
+<script src="../assets/docs.js"></script>
+</body>
+</html>

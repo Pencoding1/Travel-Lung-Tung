@@ -1,10 +1,20 @@
+# Local development Compose definition for Travel Vo Lo.
+#
+# SECRETS: no credential is stored in this file. Sensitive values are injected
+# from the environment (see .env.example). The public tunnel is disabled by
+# default and starts only when the `tunnel` profile is explicitly enabled.
+#
+# IMAGES: every pulled image is overridable through an environment variable.
+# When no verified digest exists the default keeps the tag that was already in
+# use. Reproducibility still requires pinning digests (see
+# docs/deployment/RUNBOOK.md).
 services:
   memgraph:
-    image: memgraph/memgraph-mage:latest
+    image: ${MEMGRAPH_IMAGE:-memgraph/memgraph-mage:latest}
     container_name: memgraph-db
     ports:
-      - "7687:7687"
-      - "7444:7444"
+      - "127.0.0.1:7687:7687"
+      - "127.0.0.1:7444:7444"
     volumes:
       - mg_lib:/var/lib/memgraph
       - mg_log:/var/log/memgraph
@@ -18,13 +28,13 @@ services:
       timeout: 5s
       retries: 5
       start_period: 0s
-    command: ["--log-level=TRACE"]
+    command: ["--log-level=TRACE", "--storage-properties-on-edges=true"]
     
   lab:
-    image: memgraph/lab:latest
+    image: ${MEMGRAPH_LAB_IMAGE:-memgraph/lab:latest}
     container_name: lab
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3000:3000"
     depends_on:
       - memgraph
       
@@ -32,9 +42,11 @@ services:
     build: 
       context: ./graphhopper
       dockerfile: Dockerfile
+      args:
+        GRAPHHOPPER_BASE_IMAGE: ${GRAPHHOPPER_BASE_IMAGE:-israelhikingmap/graphhopper:latest}
     container_name: graphhopper
     ports:
-      - "8989:8989"
+      - "127.0.0.1:8989:8989"
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8989/info || exit 1"]
       interval: 10s
@@ -51,11 +63,19 @@ services:
       - ./shared_lib:/workspace/shared_lib
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
     environment:
       - PYTHONPATH=/workspace
+      - MEMGRAPH_HOST=memgraph
+      - MEMGRAPH_PORT=7687
+      - MEMGRAPH_USER=${MEMGRAPH_USER}
+      - MEMGRAPH_PASSWORD=${MEMGRAPH_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET:?JWT_SECRET is required}
+      - JWT_ALGORITHM=${JWT_ALGORITHM:-HS256}
+      - FIRESTORE_ENABLED=${FIRESTORE_ENABLED:-false}
     env_file:
-      - ./POI_service/.env
+      - path: ./POI_service/.env
+        required: false
     depends_on:
       - memgraph
       
@@ -65,59 +85,63 @@ services:
       dockerfile: POI_service/Dockerfile
     command: uv run python -m app.api.mcp.tools
     ports:
-      - "8001:8001"
+      - "127.0.0.1:8001:8001"
     environment:
       - PYTHONPATH=/workspace
-      - HOST=memgraph-db
-      - PORT=7687
+      - MEMGRAPH_HOST=memgraph
+      - MEMGRAPH_PORT=7687
+      - MEMGRAPH_USER=${MEMGRAPH_USER}
+      - MEMGRAPH_PASSWORD=${MEMGRAPH_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET:?JWT_SECRET is required}
+      - JWT_ALGORITHM=${JWT_ALGORITHM:-HS256}
+      - FIRESTORE_ENABLED=${FIRESTORE_ENABLED:-false}
     env_file:
-      - ./POI_service/.env
+      - path: ./POI_service/.env
+        required: false
     depends_on:
       - memgraph
       
-  # ollama:
-  #   image: ollama/ollama:latest
-  #   container_name: travel_ollama
-  #   ports:
-  #     - "11435:11434"
-  #   volumes:
-  #     - /usr/share/ollama/.ollama:/root/.ollama
-  #   environment:
-  #     - CUDA_VISIBLE_DEVICES=0 
-  #   deploy:
-  #     resources:
-  #       reservations:
-  #         devices:
-  #           - driver: nvidia
-  #             device_ids: ['0']
-  #             capabilities: [gpu]
+  # The Ollama service was disabled while the AI service switched to Gemini.
+  # It is intentionally not defined here; ai_service no longer reads OLLAMA_*.
   ai_service:
     build: 
       context: .                          
       dockerfile: ai_service/Dockerfile
     container_name: travel_ai_hub
     ports:
-      - "8002:8002"
+      - "127.0.0.1:8002:8002"
     volumes:
-      - ./ai_service/mcp_config.json:/app/mcp_config.json
       - ./ai_service/agent_thoughts:/workspace/ai_service/agent_thoughts
+      - ai_memory:/var/lib/ai_memory
     environment:
-      - OLLAMA_HOST=http://travel_ollama:11434
+      - MCP_SERVER_URL=${MCP_SERVER_URL:-http://poi_mcp:8001/sse}
+      - GEMINI_MODEL=${GEMINI_MODEL:-gemini-2.5-pro}
       - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - JWT_SECRET=${JWT_SECRET:?JWT_SECRET is required}
+      - JWT_ALGORITHM=${JWT_ALGORITHM:-HS256}
+      - MEMORY_DB_PATH=${MEMORY_DB_PATH:-}
+    depends_on:
+      - poi_mcp
+
+  # Opt-in public tunnel. Disabled by default: start it explicitly with
+  # `docker compose --profile tunnel up`. Requires NGROK_AUTHTOKEN and
+  # NGROK_DOMAIN in the environment.
   ngrok:
-    image: ngrok/ngrok:latest
+    image: ${NGROK_IMAGE:-ngrok/ngrok:latest}
+    profiles: ["tunnel"]
     restart: unless-stopped
     command:
       - "http"
       - "http://travel_ai_hub:8002"
-      - "--url=neonatal-martin-unregulated.ngrok-free.dev"
+      - "--url=${NGROK_DOMAIN}"
     environment:
-      - NGROK_AUTHTOKEN=3BVb6Vh7qzIXS9DLjz3BYfYgfL5_2Mqh7v1aKBfzgMP1sEhrQ
+      - NGROK_AUTHTOKEN=${NGROK_AUTHTOKEN}
     ports:
-      - "4041:4040"
+      - "127.0.0.1:4041:4040"
     depends_on:
       - ai_service
 volumes:
   mg_lib:
   mg_log:
   mg_etc:
+  ai_memory:

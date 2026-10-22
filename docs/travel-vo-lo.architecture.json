@@ -1,0 +1,214 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Travel Vo Lo — Multi-Agent OTA Platform",
+    "output": "travel-vo-lo.architecture.html",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/Pencoding1/Travel-Lung-Tung",
+      "revision": "1d18ac30140dfe36335fadf49abe7c6177a19a60"
+    },
+    "views": [
+      {
+        "id": "primary-request",
+        "label": "Primary request path",
+        "focus": ["ota_client", "ngrok", "ai_hub", "poi_mcp", "memgraph", "gemini"],
+        "note": "Chat and itinerary generation: the agent loop grounds every answer in graph data."
+      },
+      {
+        "id": "itinerary-handoff",
+        "label": "Itinerary handoff",
+        "focus": ["ai_hub", "poi_mcp", "graphhopper", "backend_itinerary", "firestore"],
+        "note": "Generated itinerary leaves the AI zone for the persistence owner."
+      },
+      {
+        "id": "ingestion",
+        "label": "Data ingestion",
+        "focus": ["crawler", "poi_api", "memgraph"],
+        "note": "Crawled OTA batches enter the POI domain through the service-token gate."
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "ota_client",
+      "type": "frontend",
+      "label": "OTA Web / Mobile UI",
+      "sublabel": "Trip planning client",
+      "pos": [40, 140],
+      "size": [150, 72],
+      "sources": [{ "path": "docker-compose.yaml", "line": 110, "label": "ngrok edge target" }]
+    },
+    {
+      "id": "ngrok",
+      "type": "cloud",
+      "label": "ngrok Tunnel",
+      "sublabel": "public HTTPS ingress",
+      "pos": [250, 140],
+      "size": [140, 72],
+      "tag": ":4041 console",
+      "sources": [{ "path": "docker-compose.yaml", "line": 107, "label": "ngrok http travel_ai_hub:8002" }]
+    },
+    {
+      "id": "ai_hub",
+      "type": "backend",
+      "label": "AI Hub",
+      "sublabel": "ai_service FastAPI :8002",
+      "pos": [450, 136],
+      "size": [170, 80],
+      "sources": [
+        { "path": "ai_service/main.py", "line": 504, "label": "POST /chat" },
+        { "path": "ai_service/main.py", "line": 181, "label": "POST /generate_itinerary" }
+      ]
+    },
+    {
+      "id": "gemini",
+      "type": "external",
+      "label": "Google Gemini API",
+      "sublabel": "gemini-2.5-pro",
+      "pos": [455, 0],
+      "size": [160, 64],
+      "sources": [{ "path": "ai_service/main.py", "line": 30, "label": "OpenAI-compatible endpoint" }]
+    },
+    {
+      "id": "poi_mcp",
+      "type": "backend",
+      "label": "POI MCP Server",
+      "sublabel": "FastMCP SSE :8001",
+      "pos": [690, 140],
+      "size": [170, 76],
+      "sources": [{ "path": "POI_service/app/api/mcp/tools.py", "line": 26, "label": "FastMCP tool gateway" }]
+    },
+    {
+      "id": "memgraph",
+      "type": "database",
+      "label": "Memgraph",
+      "sublabel": "Graph SoT :7687",
+      "pos": [960, 144],
+      "size": [160, 80],
+      "tag": "MAGE algorithms",
+      "sources": [{ "path": "POI_service/app/core/infrastructure/db/database/connector.py", "line": 67, "label": "neo4j driver" }]
+    },
+    {
+      "id": "backend_itinerary",
+      "type": "backend",
+      "label": "Itinerary Service",
+      "sublabel": "backend_service",
+      "pos": [30, 340],
+      "size": [180, 76],
+      "tag": "Firestore repo",
+      "sources": [{ "path": "backend_service/app/core/infrastructure/repository/firebase.py", "line": 15, "label": "Itinerary + Stop repos" }]
+    },
+    {
+      "id": "firestore",
+      "type": "database",
+      "label": "Firebase Firestore",
+      "sublabel": "itineraries / stops",
+      "pos": [270, 340],
+      "size": [150, 76],
+      "sources": [{ "path": "POI_service/app/core/infrastructure/db/database/connector.py", "line": 13, "label": "FireStoreConnector" }]
+    },
+    {
+      "id": "crawler",
+      "type": "backend",
+      "label": "Crawler Service",
+      "sublabel": "crawl4ai pipeline",
+      "pos": [490, 340],
+      "size": [130, 76],
+      "tag": "Traveloka / OSM",
+      "sources": [{ "path": "crawler_service/app/main.py", "line": 64, "label": "POST /api/v1/crawl" }]
+    },
+    {
+      "id": "graphhopper",
+      "type": "backend",
+      "label": "GraphHopper",
+      "sublabel": "routing :8989",
+      "pos": [690, 340],
+      "size": [170, 76],
+      "tag": "HCMC OSM PBF",
+      "sources": [{ "path": "graphhopper/Dockerfile", "line": 5, "label": "hcmc-latest.osm.pbf" }]
+    },
+    {
+      "id": "poi_api",
+      "type": "backend",
+      "label": "POI Service API",
+      "sublabel": "FastAPI REST :8000",
+      "pos": [960, 340],
+      "size": [170, 76],
+      "tag": "CQRS",
+      "sources": [{ "path": "POI_service/app/main.py", "line": 56, "label": "management + ingestion routers" }]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Public Internet (untrusted)",
+      "wraps": ["ota_client", "ngrok"]
+    },
+    {
+      "kind": "security-group",
+      "label": "AI Orchestration Zone (stateless)",
+      "wraps": ["ai_hub"]
+    },
+    {
+      "kind": "security-group",
+      "label": "POI Domain — Location Source of Truth",
+      "wraps": ["poi_mcp", "poi_api", "memgraph", "graphhopper"]
+    },
+    {
+      "kind": "security-group",
+      "label": "Itinerary Store — owns user data",
+      "wraps": ["backend_itinerary", "firestore"]
+    },
+    {
+      "kind": "region",
+      "label": "Ingestion (token-gated)",
+      "wraps": ["crawler"]
+    }
+  ],
+  "connections": [
+    { "id": "edge-https", "from": "ota_client", "to": "ngrok", "label": "HTTPS" },
+    { "id": "edge-chat", "from": "ngrok", "to": "ai_hub", "label": "POST /chat · /generate_itinerary", "variant": "emphasis", "labelAt": [420, 250] },
+    { "id": "edge-intent", "from": "ai_hub", "to": "gemini", "label": "intent + synthesis", "variant": "dashed", "fromSide": "top", "toSide": "bottom", "labelAt": [535, 92] },
+    { "id": "edge-mcp", "from": "ai_hub", "to": "poi_mcp", "label": "MCP SSE", "variant": "emphasis" },
+    { "id": "edge-cypher-read", "from": "poi_mcp", "to": "memgraph", "label": "Cypher reads" },
+    { "id": "edge-route", "from": "poi_mcp", "to": "graphhopper", "label": "GET /route", "fromSide": "bottom", "toSide": "top", "labelAt": [815, 278] },
+    { "id": "edge-cypher-write", "from": "poi_api", "to": "memgraph", "label": "UNWIND writes", "variant": "dashed", "fromSide": "top", "toSide": "bottom", "labelDx": 76 },
+    { "id": "edge-ota-batch", "from": "crawler", "to": "poi_api", "label": "OTA batch", "variant": "dashed", "fromSide": "bottom", "toSide": "bottom", "via": [[555, 500], [1045, 500]], "labelAt": [800, 522] },
+    { "id": "edge-itinerary", "from": "ai_hub", "to": "backend_itinerary", "label": "itinerary handoff", "variant": "dashed", "fromSide": "bottom", "toSide": "top", "via": [[535, 280], [120, 280]] },
+    { "id": "edge-firestore", "from": "backend_itinerary", "to": "firestore", "label": "save itineraries / stops", "labelAt": [240, 428] }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "AI Orchestration (ai_service :8002)",
+      "items": [
+        "Intent router skips the tool loop for CHITCHAT",
+        "execute_agent_loop runs up to 5 Gemini tool-calling turns",
+        "generate_itinerary: resolve → explore → enrich → JSON synthesis",
+        "Stateless; holds no database credentials"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "POI Domain — owns the location SoT",
+      "items": [
+        "REST :8000 plus the FastMCP :8001 tool gateway",
+        "Memgraph is the sole SoT for POIs, tags and POI↔POI relations",
+        "GraphHopper routes HCMC OSM for car, foot and bike",
+        "CQRS: 500-record UNWIND chunks, canary + SSE progress"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Persistence, Edge & Trust",
+      "items": [
+        "backend_service owns itineraries and stops in Firestore",
+        "crawler_service feeds OTA batches through a service-token gate",
+        "Only ai_service :8002 is public; ngrok fronts it on a fixed domain",
+        "Secrets in .env / serviceAccountKey.json; CORS is '*'"
+      ]
+    }
+  ]
+}

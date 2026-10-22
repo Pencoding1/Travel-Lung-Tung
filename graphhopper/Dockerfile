@@ -1,4 +1,5 @@
-FROM israelhikingmap/graphhopper:latest
+ARG GRAPHHOPPER_BASE_IMAGE=israelhikingmap/graphhopper:latest
+FROM ${GRAPHHOPPER_BASE_IMAGE}
 
 COPY ./data/ /app_data/
 

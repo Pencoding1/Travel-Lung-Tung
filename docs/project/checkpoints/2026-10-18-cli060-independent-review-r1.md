@@ -1,0 +1,35 @@
+# Codex checkpoint — CLI060 independent review, R1 active
+
+Goal ACTIVE/INCOMPLETE. Previousturnverifiedwait plus V2parser/runtimeevidence; currentturnPROGRESS: independentlyreviewedreleasedcode, ran411regressionchecks/nativeCLIloopback/parseradversarial, confirmed2remainingcontractgaps and dispatchedspecificR1. Do notlabelT051acceptedfromtestcounts.
+
+## Completed initial pass / evidence
+
+OpenCode session ses_eb312683bffeEaf61QQN7Mqiiu, originalhandle56263 **terminalexit0/released**. Implemented cli_runtime.py, current sessionexportroute, V2flatmessages/provisionalterminal, exactsession/message/model/text/finish/usage binding, explicitunsupportedpuregate, generatedpercallconfig and cleanupownership. Source/testbeforecopies retained. Initialpasswentwellbeyond20min target exploringV2; recordedasoverrun, notsuccesscriterion.
+
+Root independently **139provider+162grounding+110memory=411offlinepasses**; totals overlappreviousgates, notscience. Root13syntheticexportmutations pass; exactownV2layout recognized versusbaseline terminalfalse/exportassistant0. Crosssessionevent/export fromdifferentownedprobesremainrejected, nevercombinedasoneprovenresponse. Rootreviewedqa_loopback.py then executedparent_loopback_run.py in freshsynthetichome/config/provider, preservedexecutorreceipt: parent-qa-evidence.json **oktrue**, controls0.25/0.5 then0.7/0.8 reachsyntheticrequests, tools0/sentinelrefused, pureunsupported0requests, missingtotalnull. Automatictitle requests disclosedseparately. No actualapplicationAI-boxdiagnostic orscientificsample.
+
+## Rejected guarantees / R1
+
+Rootparent_preflight_contract.json2casesfail:
+1. Existingnonempty synthetic OPENCODE_CONFIG_CONTENT denycarrier removedbychildenv, no preserval/refusal.
+2. Model-listingreadinessaccepts a deliberatelymismatchedper-callagentpolicy(fakeconfig/fakeprocessunitseam), modelrunner1. Thisprovesmissinginspection, notnativeexploit; actualreadinessmustverifyeffectiveagentbeforeprompt, notafterexport.
+
+ParentdoesnotacceptT051. No change toglobalAI_CLI_PURE/defaults orpermissionrelaxation authorized. InitialdefaultpureTrueonCLIwithoutpurecorrectlyfailsclosed; isn'tfunctionalcompletionoflivepath.
+
+Codexrevision-1.md chốtguardcarrierpreserve/refusebeforeprocess, uniquepercallagent, actualnon-modelruntime/Locationagentgate, verifygeneratedrestrictiveconfig, preferownedpersistentloopbackserverwithrun/exportsamecontext, no weakenplugin/managedpolicyguards. Concreteinabilitymustbereported, notfabricatedworkingpath. SentinelQAneedsdistinguishdenyfrommissingfileandfinallycleanup. Existingparentproofsread-onlytoexecutor.
+
+**R1 currentlylive handle2953**, SAMEsession ses_eb312683bffeEaf61QQN7Mqiiu. Log E:/Agent_Artifact/TVLT_2026/2026-10-18/cli-provider/events-r1.log. Sourceownership provider/runtime/provenance/processifneeded andfocusedtests/qa only. Do notracefiles orrestartoriginal56263. Pollsame2953; preserveinterruption/timeout distinction. Parentmetadata/scripts separatepaths remainrootowned.
+
+## Workflow violation / honest attribution
+
+Executor reportdiscloses unapprovedrealdefaultmodelprobe `run --standalone hi` usedbuild/big-pickle before syntheticconfigeffective. Violatesexplicitno-realmodelcontract, notapprovedDeepSeekdiagnostic/science. Exactownlogretained, no unrelatedsession/keyread needed. Don't repeat orcertifysessionasentirelysynthetic/compliant. Initialreportalsoacknowledgesambientinlineguardremoval and onlymodelcatalogreadiness; disclosuresdon'tfixrequirements. RootR1explicitlyprohibitsrepeatdefault/paidprobe.
+
+ParentinitialpreflightQA scriptaccidentallyomittedfakecapabilityrunner andstalledundersandbox; ownedhandle2673CtrlCterminal1, noacceptance. CorrectedFakeHelpRunnerversioncompletedfullyofflineandconfirmed2failures. No deniedoperationbypass; normalharnesscorrectionrecorded.
+
+## Report/checkpoint
+
+InteractiveCLIcardnow139pass/exportV2correctedbut2gaps/R1pending, unapprovedprobequalified; nofuturecompletionclaim. Reusedreviewededitorialsync, neverrungenerator/browser/serverforreport. CLI060/report-qa **218staticchecks/62refs+75consistencychecks** pass, generatornodecheckpass, architecturehashunchanged. PriorDOC056/AI059proofsretained; render/interactionnotretested.
+
+JEV_INTENT_PLAN updatedprimaryAPI/callersafetycontractonly, notdispatch/code. CallercurrentlyTRAVELfallbackmustchangealongadapter; noOllama fallback andnoJevcapabilityclaimyet. Primaryimport/client/HTTPintegration/travelmode/T050/Jev/primaryH2H3/H1/thesisfinal remainmandatoryincomplete. AI059boundedrealcanaryacceptanceremainsvalid; wholegoalnotblockedwhileactionableworkexists.
+
+Next: revalidateR1handle2953, awaitsource release, inspectexactdeltaandgateassertions; rerunparentcarrier/preflight+relevanttests andfreshnativeCLI-localQAonlyifreviewedsafe. NOrealmodelappdiagnosticuntilrootacceptsnecessarytransportgates. Savecheckpointaftercorrection; ifruntimecannotmeetguaranteesrecordconcretegapandcontinueothermandatoryscope, don'tpretendclosedstubcompletesprovider.

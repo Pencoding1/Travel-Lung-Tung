@@ -1,0 +1,33 @@
+{
+  "manifest_version": "oc18.h3.smoke.v1",
+  "task": "H3",
+  "label": "synthetic-evaluator-smoke-h3",
+  "thesis_mode": false,
+  "warning": "Synthetic evaluator fixture. Not human participants and not an H3 result.",
+  "conditions": ["memory_disabled", "short_term", "two_tier"],
+  "baseline_condition": "memory_disabled",
+  "repetitions_per_case": 1,
+  "profiles": [
+    {"profile_id": "P1"},
+    {"profile_id": "P2"},
+    {"profile_id": "P3"},
+    {"profile_id": "P4"},
+    {"profile_id": "P5"}
+  ],
+  "scenarios": [
+    {"scenario_id": "S01"}
+  ],
+  "category_truth": {
+    "p_food": ["cat_food"],
+    "p_cafe": ["cat_cafe"],
+    "p_museum": ["cat_museum"],
+    "p_park": ["cat_park"]
+  },
+  "active_preference_truth": {
+    "P1": {"S01": ["cat_food"]},
+    "P2": {"S01": ["cat_cafe"]},
+    "P3": {"S01": ["cat_museum"]},
+    "P4": {"S01": ["cat_park"]},
+    "P5": {"S01": ["cat_food", "cat_cafe"]}
+  }
+}

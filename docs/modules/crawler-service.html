@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>crawler_service — Travel Lung Tung</title>
+<link rel="stylesheet" href="../assets/docs.css">
+</head>
+<body>
+<header class="top">
+  <div class="bar">
+    <div class="brand">crawler_service<small>Cào dữ liệu du lịch và làm sạch</small></div>
+    <div class="spacer"></div>
+    <a class="btn" href="../index.html">Trang chủ</a>
+    <button class="btn" id="theme-toggle">Nền tối</button>
+  </div>
+</header>
+
+<div class="wrap">
+<nav class="toc">
+  <h4>Tổng quan</h4>
+  <a href="../index.html">Trang chủ</a>
+  <a href="../diagrams/index.html">Thư viện sơ đồ</a>
+  <a href="../diagrams/crawler-pipeline.workflow.html">Sơ đồ luồng cào</a>
+  <a href="../diagrams/class-crawler-service.architecture.html">Sơ đồ lớp</a>
+  <h4>Module</h4>
+  <a href="poi-service.html">POI_service</a>
+  <a href="ai-service.html">ai_service</a>
+  <a href="backend-service.html">backend_service</a>
+  <a href="shared-lib.html">shared_lib</a>
+  <h4>Trên trang này</h4>
+  <a href="#vai-tro">Vai trò</a>
+  <a href="#cau-truc">Cấu trúc gói</a>
+  <a href="#api">API</a>
+  <a href="#cau-hinh">Cấu hình</a>
+  <a href="#pipeline">Lớp Crawler</a>
+  <a href="#kham-pha">Discoverer và chiến lược</a>
+  <a href="#cao-chi-tiet">Cào chi tiết</a>
+  <a href="#lam-sach">Làm sạch và lưu</a>
+  <a href="#du-lieu-ra">Dữ liệu đi ra</a>
+  <a href="#use-case">Ca sử dụng</a>
+  <a href="#khoang-trong">Khoảng trống</a>
+</nav>
+
+<main>
+<section id="vai-tro">
+  <h1>crawler_service</h1>
+  <p class="lead">Sinh ra để biến một trang du lịch trên web thành JSON có cấu trúc, sạch, dùng được cho đồ thị POI. Gói này không giữ dữ liệu lâu dài, không nói chuyện với đồ thị; nó chỉ cào và làm sạch.</p>
+
+  <h3>Nó giải quyết việc gì</h3>
+  <p>Dữ liệu du lịch nằm rải trong các trang chi tiết: giờ mở cửa, khu vực, danh sách vé, khối đánh giá, bài giới thiệu. Mở từng trang để lấy là tốn kém nếu không biết trang nào đáng mở. Vì vậy gói này chia làm hai chặng có chi phí rất khác nhau:</p>
+  <ul>
+    <li><strong>Chặng khám phá</strong> chỉ đọc metadata và điểm liên quan để chọn ra danh sách URL đáng cào.</li>
+    <li><strong>Chặng cào chi tiết</strong> mở đúng những trang đã chọn và bóc nội dung theo schema đã viết sẵn.</li>
+  </ul>
+  <p>Chặng thứ hai không nhúng cứng bộ chọn CSS vào mã Python: mỗi nhóm trang có một tệp schema và một đoạn JS riêng nằm ngoài mã nguồn, nhờ vậy thêm nguồn mới là thêm thư mục chứ không phải sửa lớp.</p>
+
+  <h3>Hai chế độ chạy</h3>
+  <table>
+    <thead><tr><th>Chế độ</th><th>Điều kiện</th><th>Việc xảy ra</th><th>Bằng chứng</th></tr></thead>
+    <tbody>
+      <tr><td>Có khám phá</td><td><code>discover=true</code></td><td>Tìm link, chấm điểm, lọc, phân nhóm rồi cào hàng loạt</td><td><code>crawling.py:197-212</code></td></tr>
+      <tr><td>Cào thẳng</td><td><code>discover=false</code> và có <code>crawl_type</code></td><td>Cào đúng một URL với bộ trích xuất của nhóm đó</td><td><code>crawling.py:213-219</code></td></tr>
+      <tr><td>Thiếu cả hai</td><td><code>discover=false</code>, không có <code>crawl_type</code></td><td>Ném <code>ValueError</code> ngay từ đầu pipeline</td><td><code>crawling.py:198-199</code></td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="cau-truc">
+  <h2>Cấu trúc gói</h2>
+  <table>
+    <thead><tr><th>Đường dẫn</th><th>Vai trò</th></tr></thead>
+    <tbody>
+      <tr><td><code>app/main.py</code></td><td>Cổng HTTP duy nhất, dựng cấu hình rồi gọi pipeline</td></tr>
+      <tr><td><code>app/core/config/settings.py</code></td><td>Sáu lớp cấu hình: trình duyệt, khám phá, bộ trích xuất, bộ phân tích</td></tr>
+      <tr><td><code>app/core/security.py</code></td><td>Cổng token cho router</td></tr>
+      <tr><td><code>app/models/CrawlRecord.py</code></td><td><code>CrawlPayload</code> — thân yêu cầu</td></tr>
+      <tr><td><code>app/pipelines/crawling/crawling.py</code></td><td>Lớp <code>Crawler</code> điều phối cả hai chặng</td></tr>
+      <tr><td><code>app/pipelines/crawling/discover/</code></td><td><code>Discoverer</code> và bản vá crawler thích ứng</td></tr>
+      <tr><td><code>app/pipelines/crawling/base/</code></td><td>Khung trừu tượng cho pipeline cào và cào chi tiết</td></tr>
+      <tr><td><code>app/pipelines/crawling/detail_crawler/</code></td><td>Hiện thực cho Traveloka</td></tr>
+      <tr><td><code>app/pipelines/preprocessing/</code></td><td>Làm sạch: giải nén JSON, đổi HTML sang markdown</td></tr>
+      <tr><td><code>app/utils/</code></td><td>Chiến lược chấm điểm, nạp schema, bộ lọc ngữ nghĩa</td></tr>
+      <tr><td><code>crawl_schemas/css/traveloka/&lt;nhóm&gt;/*.json</code></td><td>Schema trích xuất theo nhóm trang</td></tr>
+      <tr><td><code>js_codes/traveloka/&lt;nhóm&gt;/*.js</code></td><td>Đoạn JS chạy trong trang trước khi bóc nội dung</td></tr>
+      <tr><td><code>stopwords/stopwords.txt</code></td><td>Danh sách từ dừng cho chiến lược chấm điểm</td></tr>
+      <tr><td><code>logs/</code>, <code>data/</code></td><td>Ghi log xoay vòng và nơi ghi kết quả</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="api">
+  <h2>API</h2>
+  <div class="sig"><span class="kw">POST</span> /api/v1/crawl → <code>{"status": "success" | "failed", "result": ...}</code></div>
+  <p>Endpoint nằm sau cổng kiểm tra khoá dịch vụ; thiếu hoặc sai khoá thì trả 401. Thân yêu cầu là <code>CrawlPayload</code>.</p>
+
+  <h3>CrawlPayload</h3>
+  <details class="params">
+    <summary>Tham số đầu vào <span class="count">4 trường</span></summary>
+    <div class="inner">
+      <table>
+        <thead><tr><th>Trường</th><th>Kiểu</th><th>Mặc định</th><th>Ý nghĩa</th></tr></thead>
+        <tbody>
+          <tr><td><code>target_url</code></td><td>str</td><td>bắt buộc</td><td>URL hạt giống. Được kiểm tra bằng <code>TypeAdapter(HttpUrl)</code>; sai thì pipeline dừng và trả <code>failed</code>.</td></tr>
+          <tr><td><code>discover</code></td><td>bool</td><td><code>false</code></td><td>Bật chặng khám phá trước khi cào.</td></tr>
+          <tr><td><code>crawl_type</code></td><td>str hoặc null</td><td><code>null</code></td><td>Nhóm trang, dùng làm tên thư mục schema. Bắt buộc khi <code>discover=false</code>.</td></tr>
+          <tr><td><code>target_urls</code></td><td>list[str]</td><td>bắt buộc</td><td>Có trong mô hình nhưng endpoint hiện tại chưa dùng tới.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+  <p class="evidence">Nguồn: <code>app/models/CrawlRecord.py:4-7</code>; kiểm tra URL ở <code>app/main.py:45-49</code>; cổng token <code>app/core/security.py:7-12</code>.</p>
+
+  <div class="callout warn">
+    <p>Khoá dịch vụ đang so sánh với hằng số <code>"test"</code> viết thẳng trong mã (<code>app/core/security.py:8</code>). Đây là chỗ phải sửa trước khi mở cổng ra ngoài.</p>
+  </div>
+
+  <h3>Gọi từ mã</h3>
+  <pre><code># app/main.py:32-53 — dựng cấu hình mặc định rồi chạy
+load = LoadPipelineSetting(
+    crawler_cfg=CrawlerSetting(),
+    extractor_cfg=ExtractorSettings(),
+    discover_cfg=DiscoverSettings(),
+)
+crawler = Crawler(app_settings, seed_url=url)
+crawler.cfg.load_settings[0].cache_mode = CACHE_MODE.WRITE
+await crawler.pipeline(discover=discover, service=True, crawl_type=crawl_type)</code></pre>
+</section>
+
+<section id="cau-hinh">
+  <h2>Cấu hình</h2>
+  <p>Toàn bộ tham số nằm trong bốn lớp kế thừa <code>BaseSettings</code>, đọc được từ biến môi trường và tệp <code>.env</code>.</p>
+
+  <h3>CrawlerSetting — trình duyệt và giới hạn cào</h3>
+  <div class="sig">class CrawlerSetting(BaseSettings)</div>
+  <details class="params">
+    <summary>Tham số <span class="count">7 trường</span></summary>
+    <div class="inner">
+      <table>
+        <thead><tr><th>Tham số</th><th>Mặc định</th><th>Ý nghĩa và hệ quả</th></tr></thead>
+        <tbody>
+          <tr><td><code>run_cfg</code></td><td><code>CrawlerRunConfig(...)</code></td><td>Cấu hình một lượt chạy: chờ 7 giây, trễ 10 giây trước khi lấy HTML, giả lập người dùng, cuộn hết trang, bỏ qua khối mục lục bài viết.</td></tr>
+          <tr><td><code>max_depth</code></td><td><code>4</code></td><td>Độ sâu tối đa khi khám phá.</td></tr>
+          <tr><td><code>max_pages</code></td><td><code>100</code></td><td>Trần số trang mỗi lượt.</td></tr>
+          <tr><td><code>headless</code></td><td><code>True</code></td><td>Có bộ kiểm tra tự đồng bộ xuống <code>browser_config.headless</code> sau khi khởi tạo, nên giá trị này mới là giá trị có hiệu lực.</td></tr>
+          <tr><td><code>use_embedding</code></td><td><code>False</code></td><td>Cờ dành cho chiến lược embedding, hiện chưa được đọc ở đâu.</td></tr>
+          <tr><td><code>store_destination</code></td><td><code>"local"</code></td><td>Chọn nơi ghi: tệp hay cơ sở dữ liệu.</td></tr>
+          <tr><td><code>global_keywords</code></td><td>15 mẫu</td><td>Mẫu URL dùng để nhận diện trang du lịch Việt Nam.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+  <p class="evidence">Nguồn: <code>app/core/config/settings.py:15-72</code>; bộ đồng bộ trạng thái ở dòng 64-72.</p>
+
+  <h3>DiscoverSettings — chặng khám phá</h3>
+  <details class="params">
+    <summary>Tham số <span class="count">9 trường</span></summary>
+    <div class="inner">
+      <table>
+        <thead><tr><th>Tham số</th><th>Mặc định</th><th>Ý nghĩa</th></tr></thead>
+        <tbody>
+          <tr><td><code>strategy_type</code></td><td><code>"statistical"</code></td><td>Chỉ nhận <code>statistical</code> hoặc <code>embedding</code> (mẫu kiểm tra ngay trong khai báo trường).</td></tr>
+          <tr><td><code>queries</code></td><td>4 câu tiếng Việt</td><td>Câu truy vấn định hướng khám phá: nơi nghỉ, vui chơi, ăn uống, kinh nghiệm.</td></tr>
+          <tr><td><code>top_k</code></td><td><code>10</code></td><td>Số trang liên quan giữ lại sau khi chấm điểm.</td></tr>
+          <tr><td><code>weight_threshold</code></td><td><code>0.1</code></td><td>Ngưỡng độ tin cậy để giữ một trang nguồn.</td></tr>
+          <tr><td><code>relevant_threshold</code></td><td><code>0.1</code></td><td>Ngưỡng liên quan cho nội dung.</td></tr>
+          <tr><td><code>cache_path</code></td><td><code>cache/discovery</code></td><td>Nơi đọc và ghi danh sách URL đã phân nhóm.</td></tr>
+          <tr><td><code>excluded_urls</code></td><td>11 URL</td><td>Danh sách URL tuyệt đối không cào (vé máy bay, khách sạn, khuyến mãi).</td></tr>
+          <tr><td><code>disallowed_endings</code></td><td><code>activities, hotel, flight</code></td><td>Phần đuôi đường dẫn bị loại.</td></tr>
+          <tr><td><code>excluded_patterns</code>, <code>included_patterns</code></td><td><code>promotions</code>, <code>hotels</code></td><td>Mẫu loại trừ và mẫu ưu tiên, dùng trong <code>is_data_valid</code>.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+  <p class="evidence">Nguồn: <code>app/core/config/settings.py:85-146</code>.</p>
+
+  <h3>ParserSettings và ExtractorSettings</h3>
+  <details class="params">
+    <summary>Tham số <span class="count">7 trường</span></summary>
+    <div class="inner">
+      <table>
+        <thead><tr><th>Tham số</th><th>Mặc định</th><th>Ý nghĩa</th></tr></thead>
+        <tbody>
+          <tr><td><code>BATCH_SIZE</code></td><td><code>32</code></td><td>Cỡ lô khi mã hoá nội dung (chưa dùng ở đường chính).</td></tr>
+          <tr><td><code>DATA_SOURCE</code></td><td><code>"local"</code></td><td>Nguồn dữ liệu cho bước phân tích.</td></tr>
+          <tr><td><code>AGENCIES</code>, <code>CITIES</code></td><td>toàn bộ enum</td><td>Phạm vi đại lý và thành phố được nhận.</td></tr>
+          <tr><td><code>MODEL_NAME</code></td><td><code>all-MiniLM-L6-v2</code></td><td>Mô hình mã hoá dùng cho lọc ngữ nghĩa.</td></tr>
+          <tr><td><code>ACCEPTED_THRESHOLD</code></td><td><code>0.7</code></td><td>Ngưỡng chấp nhận khi lọc theo ngữ nghĩa.</td></tr>
+          <tr><td><code>domain</code> (ExtractorSettings)</td><td><code>TRAVELOKA</code></td><td>Đại lý đang cào; đổi bằng <code>set_domain()</code>, tên phải khớp enum <code>Agency</code>.</td></tr>
+          <tr><td><code>root_dir</code></td><td>gốc gói</td><td>Gốc để tìm <code>crawl_schemas</code> và <code>js_codes</code>.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+  <p class="evidence">Nguồn: <code>app/core/config/settings.py:75-83</code> và <code>:148-156</code>.</p>
+</section>
+
+<section id="pipeline">
+  <h2>Lớp Crawler — nút điều phối</h2>
+  <div class="sig">class Crawler(cfg: AppSettings, seed_url: str)</div>
+  <p>Khởi tạo dựng sẵn ba đối tượng con: <code>Discoverer</code>, <code>TravelokaCrawler</code> và <code>AppSettings</code>; đồng thời tắt cờ <code>magic</code> của crawl4ai vì đang chạy trên hồ sơ trình duyệt có sẵn.</p>
+
+  <h3>pipeline</h3>
+  <div class="sig"><span class="kw">async def</span> pipeline(service=False, discover=True, crawl_type: str | None = None)</div>
+  <p>Hàm vào duy nhất. Nó quyết định chạy chặng khám phá hay cào thẳng, rồi trả kết quả dưới dạng chuỗi JSON (khi <code>service=False</code>) hoặc ghi ra đĩa (khi <code>service=True</code>).</p>
+  <details class="params">
+    <summary>Tham số <span class="count">3</span></summary>
+    <div class="inner">
+      <table>
+        <thead><tr><th>Tham số</th><th>Kiểu</th><th>Mặc định</th><th>Ý nghĩa</th></tr></thead>
+        <tbody>
+          <tr><td><code>service</code></td><td>bool</td><td><code>False</code></td><td><code>True</code>: ghi kết quả qua <code>save_to_local</code>. <code>False</code>: trả chuỗi JSON cho bên gọi.</td></tr>
+          <tr><td><code>discover</code></td><td>bool</td><td><code>True</code></td><td>Bật chặng khám phá.</td></tr>
+          <tr><td><code>crawl_type</code></td><td>str hoặc null</td><td><code>None</code></td><td>Nhóm trang khi không khám phá.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+  <p><strong>Trả về:</strong> chuỗi JSON của kết quả đã làm sạch, hoặc <code>None</code> nếu không cào được gì.<br>
+  <strong>Ném:</strong> <code>ValueError</code> khi thiếu cả <code>discover</code> lẫn <code>crawl_type</code>; <code>NotImplementedError</code> nếu chọn đường ghi cơ sở dữ liệu.</p>
+  <p class="evidence">Nguồn: <code>app/pipelines/crawling/crawling.py:27-40</code>, <code>:197-219</code>.</p>
+
+  <h3>discovery — chặng khám phá</h3>
+  <div class="sig"><span class="kw">async def</span> discovery() → dict[str, list[str]] | None</div>
+  <p>Đọc cache trước; không có cache thì chạy crawler thích ứng, lọc link đạt ngưỡng, đổi tất cả URL sang bản <code>vi-vn</code>, phân nhóm theo đoạn đường dẫn thứ tư, rồi ghi cache nếu đang ở chế độ ghi.</p>
+  <p><strong>Trả về:</strong> từ điển bốn khoá <code>hotel</code>, <code>destinations</code>, <code>activities</code>, <code>explore</code>; <code>None</code> nếu không tìm được link nào.<br>
+  <strong>Tác dụng phụ:</strong> ghi tệp <code>&lt;dấu thời gian&gt;.json</code> vào <code>cache/discovery</code> khi <code>cache_mode = WRITE</code>.</p>
+  <p class="evidence">Nguồn: <code>crawling.py:97-130</code>; đọc cache ở <code>:100-106</code>; phân nhóm ở <code>:73-88</code>.</p>
+
+  <h3>batch_detail_crawl</h3>
+  <div class="sig"><span class="kw">async def</span> batch_detail_crawl(classified_urls: dict, service=False)</div>
+  <p>Lặp theo nhóm, mỗi URL gọi <code>__detail_crawl</code>. Lỗi ở một URL thì bỏ qua URL đó; gặp lỗi chưa hiện thực thì dừng cả nhóm. Kết quả rỗng thì không ghi gì.</p>
+  <p><strong>Trả về:</strong> <code>None</code> (chế độ dịch vụ) hoặc chuỗi JSON (chế độ thư viện).<br>
+  <strong>Ném:</strong> <code>IntentedNotImplementedException</code> khi chọn ghi cơ sở dữ liệu; <code>ValueError</code> nếu <code>STORAGE</code> lạ.</p>
+  <p class="evidence">Nguồn: <code>crawling.py:160-195</code>.</p>
+</section>
+
+<section id="kham-pha">
+  <h2>Discoverer và chiến lược chấm điểm</h2>
+  <div class="sig">class Discoverer(cfg: LoadPipelineSetting)</div>
+  <p>Bọc crawler thích ứng của crawl4ai, chọn chiến lược theo <code>strategy_type</code>, và — quan trọng nhất — lọc lại kết quả vì chiến lược thống kê không phân biệt được trang chủ với trang nội dung.</p>
+
+  <h3>discovery</h3>
+  <div class="sig"><span class="kw">async def</span> discovery(url: str, print_stats=False) → CrawlState</div>
+  <details class="params">
+    <summary>Tham số <span class="count">2</span></summary>
+    <div class="inner">
+      <table>
+        <thead><tr><th>Tham số</th><th>Mặc định</th><th>Ý nghĩa</th></tr></thead>
+        <tbody>
+          <tr><td><code>url</code></td><td>bắt buộc</td><td>URL hạt giống để bắt đầu khám phá.</td></tr>
+          <tr><td><code>print_stats</code></td><td><code>False</code></td><td>In thống kê chi tiết của crawler thích ứng.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+  <p><strong>Trả về:</strong> <code>CrawlState</code> chứa <code>knowledge_base</code>, <code>metrics</code> và <code>crawl_order</code>.<br>
+  <strong>Ném:</strong> <code>NotImplementedError</code> nếu chọn chiến lược <code>embedding</code>; <code>ValueError</code> nếu <code>strategy_type</code> khác hai giá trị hợp lệ.</p>
+  <p class="evidence">Nguồn: <code>app/pipelines/crawling/discover/discoverer.py:86-125</code>.</p>
+
+  <h3>is_data_valid — bộ lọc URL nguồn</h3>
+  <div class="sig">def is_data_valid(source_url: str, confidence_score: float) → bool</div>
+  <details class="params">
+    <summary>Tham số <span class="count">2</span></summary>
+    <div class="inner">
+      <table>
+        <thead><tr><th>Tham số</th><th>Ý nghĩa</th></tr></thead>
+        <tbody>
+          <tr><td><code>source_url</code></td><td>Địa chỉ trang nguồn, được hạ về chữ thường rồi đối chiếu ba nhóm luật: đuôi bị cấm, mẫu loại trừ, mẫu ưu tiên.</td></tr>
+          <tr><td><code>confidence_score</code></td><td>Điểm tin cậy của cả lượt khám phá; thấp hơn <code>weight_threshold</code> thì loại.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+  <p><strong>Trả về:</strong> <code>True</code> là giữ, <code>False</code> là bỏ. Lưu ý: đuôi bị cấm thắng cả mẫu ưu tiên, nên <code>.../hotels/abc</code> bị loại kể cả khi khớp mẫu ưu tiên.</p>
+  <p class="evidence">Nguồn: <code>discoverer.py:127-146</code>.</p>
+
+  <h3>connected_link_filtering</h3>
+  <div class="sig">def connected_link_filtering(data: CrawlState, threshold: float = 1.0) → dict | None</div>
+  <p>Duyệt trang nguồn trong <code>knowledge_base</code>, chỉ lấy link nội bộ đạt điểm <code>total_score</code> từ ngưỡng trở lên và không nằm trong danh sách URL cấm. Điểm nguồn được gộp lại thành <code>{url: score}</code> và mất trùng tự nhiên.</p>
+  <p><strong>Trả về:</strong> từ điển URL đủ điều kiện; <code>None</code> nếu <code>knowledge_base</code> rỗng hoặc không link nào đạt.</p>
+  <p class="evidence">Nguồn: <code>discoverer.py:148-196</code>; ngưỡng mặc định 1.0 ở dòng 149.</p>
+
+  <h3>VNStatistcalStrategy</h3>
+  <div class="sig">class VNStatistcalStrategy(StatisticalStrategy)</div>
+  <p>Thay cách chấm điểm của crawl4ai bằng cách tách từ tiếng Việt. Lớp anh em <code>VNEmbeddingStrategy</code> chỉ còn phần thân bị chú thích, nên chọn <code>embedding</code> sẽ ném lỗi chưa hiện thực.</p>
+  <details class="params">
+    <summary>Đường ống xử lý văn bản <span class="count">4 bước</span></summary>
+    <div class="inner">
+      <ol>
+        <li><strong>Gột nhiễu</strong> bằng bảy mẫu thay thế: xoá ảnh, giữ chữ của link và bỏ URL, xoá URL trần, xoá từ khoá kỹ thuật của sàn, xoá từ quảng cáo, xoá vài từ rác, thay ký tự lạ bằng khoảng trắng.</li>
+        <li><strong>Bỏ trang rỗng</strong>: nội dung sau khi gột dưới 50 ký tự thì không tính.</li>
+        <li><strong>Tách từ</strong>: chuẩn hoá bằng <code>underthesea</code>, tách từ ở dạng văn bản, bỏ dấu câu (giữ dấu gạch dưới), bỏ từ dừng và token một ký tự.</li>
+        <li><strong>Cập nhật tần suất</strong>: tăng tần suất từ, tần suất tài liệu, ghi lịch sử số từ mới và thứ tự cào.</li>
+      </ol>
+    </div>
+  </details>
+  <p class="evidence">Nguồn: <code>app/utils/discover_strategies.py:194-292</code>; lớp embedding rỗng ở <code>:17</code>.</p>
+</section>
+
+<section id="cao-chi-tiet">
+  <h2>Cào chi tiết</h2>
+  <div class="sig">class TravelokaCrawler(BaseDetailCrawler)</div>
+  <p>Kế thừa khung <code>BaseDetailCrawler</code>. Điểm đáng chú ý nhất không nằm ở việc bóc nội dung mà ở ba lớp chống bị đá khỏi trang: bắt hộp thoại <code>beforeunload</code> và bấm huỷ, vô hiệu hoá <code>pushState</code>/<code>replaceState</code>, và (đang bị chú thích) một tường chặn trả mã 204 cho các request bay tới trang vé máy bay.</p>
+
+  <h3>crawl_with_schema</h3>
+  <div class="sig"><span class="kw">async def</span> crawl_with_schema(url: str | list[str], verbose=True, crawl_type="activities") → CrawlResult</div>
+  <details class="params">
+    <summary>Tham số <span class="count">3</span></summary>
+    <div class="inner">
+      <table>
+        <thead><tr><th>Tham số</th><th>Mặc định</th><th>Ý nghĩa</th></tr></thead>
+        <tbody>
+          <tr><td><code>url</code></td><td>bắt buộc</td><td>Một URL hoặc danh sách URL.</td></tr>
+          <tr><td><code>verbose</code></td><td><code>True</code></td><td>In nhật ký của chiến lược trích xuất.</td></tr>
+          <tr><td><code>crawl_type</code></td><td><code>"activities"</code></td><td>Chọn thư mục schema và JS; đồng thời chọn móc cài vào trang.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+  <p><strong>Ném:</strong> <code>IntentedNotImplementedException</code> với nhóm <code>hotel</code>; <code>ValueError</code> nếu không tìm thấy schema nào (khung cha yêu cầu schema không được rỗng).</p>
+  <p class="evidence">Nguồn: <code>traveloka_crawler.py:107-111</code>, <code>:87-105</code>, <code>:30-86</code>; khung cha <code>base/detail_crawler.py:59-74</code>.</p>
+
+  <h3>LoadExtractionScript — nạp schema và JS theo tên nhóm</h3>
+  <div class="sig">class LoadExtractionScript(config: ExtractorSettings, name: str)</div>
+  <p>Tìm tệp JSON đầu tiên trong <code>crawl_schemas/css/&lt;đại lý&gt;/&lt;nhóm&gt;/</code>; không có thì thử <code>xpath</code>. JS thì đọc tất cả tệp <code>*.js</code> trong <code>js_codes/&lt;đại lý&gt;/&lt;nhóm&gt;/</code>.</p>
+  <p><strong>Trả về:</strong> <code>{"type": "css" | "xpath", "schema": {...}}</code> cho <code>load_schema</code>; danh sách chuỗi cho <code>load_js</code>; <code>None</code> nếu không có schema và danh sách rỗng nếu không có JS.</p>
+  <p class="evidence">Nguồn: <code>app/utils/LoadExtraction.py:13-49</code>.</p>
+
+  <h3>run_with_hook — móc cài trước khi mở trang</h3>
+  <div class="sig">def run_with_hook(hook_method_name="get_hook")</div>
+  <p>Trình trang trí bọc quanh <code>crawl()</code>: mở trình duyệt theo cấu hình, lấy cặp <code>(hàm, tên sự kiện)</code> từ <code>get_hook()</code>, gắn vào chiến lược, chạy rồi luôn đóng trình duyệt trong khối <code>finally</code>.</p>
+  <p class="evidence">Nguồn: <code>base/detail_crawler.py:17-42</code>; chọn móc theo nhóm ở <code>traveloka_crawler.py:30-37</code>.</p>
+</section>
+
+<section id="lam-sach">
+  <h2>Làm sạch và lưu</h2>
+  <div class="sig">class TravelokaPreprocessor(BasePreprocessor)</div>
+  <p>Hai bước, chạy cho cả ba nhánh dữ liệu:</p>
+  <ol>
+    <li><strong>Giải nén JSON lồng nhau</strong> ở năm trường: <code>Product_schema</code>, <code>FAQ_json</code>, <code>all_ticket_details</code>, <code>parsed_blog_data</code>, <code>parsed_destination_data</code>. Trường nào không phải JSON hợp lệ thì bỏ qua, không làm hỏng cả bản ghi.</li>
+    <li><strong>Đổi HTML sang markdown</strong> một cách đệ quy cho các khoá <code>modal_contents</code>, <code>review_block</code>, <code>reviews_block</code>, <code>things_to_know</code>, <code>content</code>, rồi bỏ dòng trắng.</li>
+  </ol>
+  <div class="sig">def parse(content, crawl_type: str) → dict | list[dict]</div>
+  <details class="params">
+    <summary>Tham số <span class="count">2</span></summary>
+    <div class="inner">
+      <table>
+        <thead><tr><th>Tham số</th><th>Kiểu</th><th>Ý nghĩa</th></tr></thead>
+        <tbody>
+          <tr><td><code>content</code></td><td>str hoặc dict hoặc list</td><td>Nội dung thô từ <code>extracted_content</code>. Chuỗi sẽ được phân tích thành JSON trước.</td></tr>
+          <tr><td><code>crawl_type</code></td><td>str</td><td>Nhóm trang; hiện chỉ dùng để ghi nhật ký, chưa rẽ nhánh xử lý.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+  <p><strong>Trả về:</strong> một từ điển nếu chỉ có một bản ghi, danh sách nếu nhiều; <code>{"error": ...}</code> khi đầu vào rỗng hoặc sai định dạng JSON.</p>
+  <p class="evidence">Nguồn: <code>app/pipelines/preprocessing/preprocessing.py:10-77</code>.</p>
+
+  <h3>BasePreprocessor — chống trùng chưa nối</h3>
+  <div class="sig">class BasePreprocessor(lsh: MinHashLSH | None, config: ParserSettings | None)</div>
+  <p>Có sẵn máy chống trùng nội dung: tách shingle ba từ trên văn bản đã tách từ tiếng Việt (<code>pyvi</code>), tính MinHash 128 hoán vị, truy vấn LSH ngưỡng 0,9. Nhưng pipeline hiện tại không gọi tới: <code>TravelokaPreprocessor</code> được tạo với <code>lsh=None</code> và không dùng <code>filter_duplicated</code>.</p>
+  <details class="params">
+    <summary>Hai hàm lọc <span class="count">2</span></summary>
+    <div class="inner">
+      <table>
+        <thead><tr><th>Hàm</th><th>Trả về</th><th>Ghi chú</th></tr></thead>
+        <tbody>
+          <tr><td><code>is_exist(text, text_id)</code></td><td>bool</td><td>Trùng thì <code>True</code>; chưa trùng thì nạp luôn vào LSH.</td></tr>
+          <tr><td><code>filter_duplicated(text, text_id)</code></td><td>str</td><td>Trùng thì trả chuỗi rỗng, chưa trùng thì trả nguyên văn.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+  <p class="evidence">Nguồn: <code>app/pipelines/preprocessing/base/PipelineBase.py:8-53</code>; chỗ tạo preprocessor với <code>lsh=None</code> ở <code>crawling.py:133-136</code>.</p>
+
+  <h3>Ghi kết quả</h3>
+  <div class="sig">def save_to_local(data: dict, file_name="Crawled_Results.json")</div>
+  <p>Ghi JSON vào <code>AppSettings.storage_path</code> (mặc định <code>data/</code> trong gói). Đường ghi cơ sở dữ liệu <code>save_to_database</code> chỉ ném <code>NotImplementedError</code>.</p>
+  <p class="evidence">Nguồn: <code>crawling.py:90-95</code>.</p>
+</section>
+
+<section id="du-lieu-ra">
+  <h2>Dữ liệu đi ra</h2>
+  <p>Bốn schema, kích thước rất khác nhau — nhóm <code>activities</code> là nhóm duy nhất được bóc sâu hiện nay.</p>
+  <table>
+    <thead><tr><th>Nhóm</th><th>Tệp schema</th><th>Trường</th></tr></thead>
+    <tbody>
+      <tr><td><code>activities</code></td><td><code>tour_ticket_schema.json</code></td><td>10 trường: <code>Product_schema</code>, <code>highlights</code>, <code>operating_hours</code>, <code>location_summary</code>, <code>ticket_list</code>, <code>all_ticket_details</code>, <code>things_to_know</code>, <code>reviews_block</code>, <code>FAQ_json</code>, <code>seo_article</code></td></tr>
+      <tr><td><code>destination</code></td><td><code>destination_schema.json</code></td><td><code>title</code>, <code>parsed_destination_data</code></td></tr>
+      <tr><td><code>destinations</code></td><td><code>guide_modal_schema.json</code></td><td><code>title</code>, <code>parsed_destination_data</code> (nội dung giống tệp trên)</td></tr>
+      <tr><td><code>explore</code></td><td><code>blog_modal_schema.json</code></td><td><code>title</code>, <code>canonical_url</code>, <code>parsed_blog_data</code></td></tr>
+    </tbody>
+  </table>
+  <p>Bốn đoạn JS đi kèm: mở và cuộn hộp thoại tour (120 dòng), bóc dữ liệu điểm đến (277 dòng), bóc hộp dẫn đường (277 dòng, trùng nội dung), bóc bài blog (146 dòng), cộng một đoạn 5 dòng chặn chuyển trang.</p>
+  <p class="evidence">Nguồn: <code>crawler_service/crawl_schemas/css/traveloka/**</code>, <code>crawler_service/js_codes/traveloka/**</code>.</p>
+</section>
+
+<section id="use-case">
+  <h2>Ca sử dụng</h2>
+  <div class="grid two">
+    <div class="uc">
+      <h4>Cào một trang hoạt động</h4>
+      <p>Khi đã biết đúng URL cần lấy, không cần khám phá.</p>
+      <pre><code>curl -X POST http://localhost:8000/api/v1/crawl \
+  -H 'X-API-Key: test' -H 'Content-Type: application/json' \
+  -d '{"target_url": "https://www.traveloka.com/vi-vn/activities/vietnam/product/...",
+       "discover": false, "crawl_type": "activities",
+       "target_urls": []}'</code></pre>
+    </div>
+    <div class="uc">
+      <h4>Cào cả cụm từ một URL hạt giống</h4>
+      <p>Dùng khi chưa biết trang nào đáng lấy; chấp nhận chậm hơn nhưng rộng hơn.</p>
+      <pre><code>curl -X POST http://localhost:8000/api/v1/crawl \
+  -H 'X-API-Key: test' -H 'Content-Type: application/json' \
+  -d '{"target_url": "https://www.traveloka.com/vi-vn/destination/area/ho-chi-minh-city-10009794",
+       "discover": true, "target_urls": []}'</code></pre>
+    </div>
+    <div class="uc">
+      <h4>Thêm một nguồn dữ liệu mới</h4>
+      <p>Không sửa Python: tạo thư mục theo tên nhóm ở cả hai cây, rồi trỏ <code>ExtractorSettings.domain</code> sang enum <code>Agency</code> tương ứng. Thiếu bước gán domain thì bộ nạp vẫn tìm ở thư mục Traveloka.</p>
+      <pre><code>crawl_schemas/css/&lt;đại-lý&gt;/&lt;nhóm&gt;/schema.json
+js_codes/&lt;đại-lý&gt;/&lt;nhóm&gt;/extractor.js</code></pre>
+    </div>
+    <div class="uc">
+      <h4>Chạy lại mà không cào lại danh sách URL</h4>
+      <p>Đặt <code>cache_mode = CACHE_MODE.READ</code>; pipeline đọc tệp cũ nhất trong <code>cache/discovery</code> và bỏ qua chặng khám phá. Đổi sang <code>WRITE</code> thì vừa chạy vừa ghi bản mới.</p>
+      <pre><code># crawling.py:100-128
+if first_setting.cache_mode == CACHE_MODE.READ:
+    cache_files = list(first_setting.discover_cfg.cache_path.glob("*.json"))</code></pre>
+    </div>
+  </div>
+</section>
+
+<section id="khoang-trong">
+  <h2>Khoảng trống</h2>
+  <table>
+    <thead><tr><th>Điểm</th><th>Hệ quả</th><th>Bằng chứng</th></tr></thead>
+    <tbody>
+      <tr><td>Nhóm <code>hotel</code> chưa có bộ trích xuất, cố tình ném lỗi</td><td>Cào khách sạn bị bỏ qua, không phải lỗi tạm thời</td><td><code>traveloka_crawler.py:91-92</code></td></tr>
+      <tr><td>Cổng token là hằng số <code>"test"</code></td><td>Không thể phân quyền theo dịch vụ gọi</td><td><code>core/security.py:8</code></td></tr>
+      <tr><td>Chiến lược <code>embedding</code> chỉ còn tên lớp</td><td>Chọn embedding là dừng pipeline</td><td><code>discover_strategies.py:17</code>, <code>discoverer.py:89-90</code></td></tr>
+      <tr><td>Chống trùng MinHash có sẵn nhưng không được gọi</td><td>Dễ hiểu nhầm là đã lọc bài trùng nội dung</td><td><code>crawling.py:133-136</code>; <code>preprocessing/base/PipelineBase.py:51</code></td></tr>
+      <tr><td>Bộ lọc ngữ nghĩa <code>Semantic_Filter</code> không được dùng ở đâu</td><td>Mã chết</td><td><code>app/utils/embedding_filter.py:9</code></td></tr>
+      <tr><td>Đường ghi cơ sở dữ liệu chưa hiện thực</td><td>Kết quả chỉ nằm ở đĩa, phải chuyển tay sang POI_service</td><td><code>crawling.py:90-91</code>, <code>:190-191</code></td></tr>
+      <tr><td>Gói không nằm trong workspace của <code>pyproject.toml</code> gốc, nhưng Dockerfile lại xuất theo tên gói</td><td>Môi trường dựng ảnh có thể lệch</td><td><code>pyproject.toml</code>; <code>crawler_service/Dockerfile:14</code></td></tr>
+      <tr><td>Dòng <code>from torch import Value</code> trong lớp điều phối, gói không khai báo <code>torch</code></td><td>Cần kiểm chứng khi chạy — chưa xác minh được</td><td><code>crawling.py:17</code> <span class="tag">chưa xác minh</span></td></tr>
+      <tr><td>Hai tệp schema <code>destination</code> và <code>destinations</code> trùng nội dung</td><td>Thêm nhóm mới dễ nhầm thư mục nào là thật</td><td><code>crawl_schemas/css/traveloka/destination/</code> và <code>.../destinations/</code></td></tr>
+    </tbody>
+  </table>
+  <footer class="foot">Đối chiếu bản mã <code>1d18ac3</code> ngày 04-10-2026. Mọi dòng trích dẫn tính theo tệp gốc trong <code>crawler_service/</code>.</footer>
+</section>
+</main>
+</div>
+<script src="../assets/docs.js"></script>
+</body>
+</html>

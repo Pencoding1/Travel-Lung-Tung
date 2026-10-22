@@ -1,0 +1,13 @@
+# Backend packaging and provider diagnostic checkpoint
+
+Date:2026-10-16, Asia/Saigon. Full goal ACTIVE/INCOMPLETE. Current phase PROGRESS; no overall impasse while manuscript/figure work remains feasible.
+
+OC030 process66883/session ses_ebbe91cefffeWL4SY0rA5K5uP3 terminal exit0. Parent deployment tests: **40passed2.13s**, fresh .qa-tmp-oc030-independent. Parent independently captured `uv lock --check --offline` and locked offline exports for backend_service/ai_service/poi_service: **all exit0**, results in OC030/independent-export-results.json, requirement exports preserved. No installs or environment changes. Actual uv regenerated metadata for backend direct PyJWT; existing versions retained according to before/after executor evidence. No package upgrade claimed.
+
+Parent independent `docker compose --env-file docs/deployment/integration.env.example -f docker-compose.integration.yaml config --no-env-resolution --quiet`: exit0. Only committed placeholder template used, no full interpolated config printed. Source confirms runnable backend CMD on8003, loopback18003, own int_backend_drafts volume, explicit SQLite path/shared required JWT. Configuration/packaging scope accepted; no container build/start/image digest freeze/live integration proof. Backend liveness healthcheck is /health, deliberately not a readiness guarantee.
+
+DS002 one bounded45s isolated tools-denied/pure INFO diagnostic is terminal:45.575s timeout, stdout0, stderr4794bytes,0JSONevents. Readonly native version/help succeeded before it. Error classes AI_APICallError/AI_RetryError were observed in local diagnostic stderr; no authentication validity or exact upstream cause proven. No real model output/usage/scientific observation obtained. Preserve logs, do not print raw provider details/credentials or repeatedly retry. Historical S01pair2timeouts remain distinct from this transport-only diagnostic.
+
+OC029 original fixed-layout task terminal but no final report. Parent inspected all4images: improved semantics/readability; remaining labels hidden in01/02, out-of-canvas E2label04, header crossing01, backend dependency/status issue02. One bounded R1process33010/session ses_ebbeeec61ffeaZHrUAKgoqldXR now owns figures/ownhandoff. No insertion before reinspection. Native Word equations and current-source manuscript build/render remain next feasible tasks.
+
+Source Chapters3/4/5 and thesisREADME updated with backend52/acquisition140 local evidence, corrected obsolete backend/cross-writer edge claims; existing DOCX therefore stale. Update NEXT_SESSION_HANDOFF, backlog/progress/evidence. Continue ALL SG/AC requirements and save checkpoints at every major task/critical phase.

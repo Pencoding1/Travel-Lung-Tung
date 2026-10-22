@@ -1,4 +1,12 @@
 # syntax=docker/dockerfile:1.7-labs
+#
+# STATUS: unsupported / not wired into docker-compose.yaml.
+# The crawler entrypoint (`app.main:app`) exists, but `crawler_service` is not a
+# member of the root uv workspace ([tool.uv.workspace].members does not list
+# it), so `uv export --package crawler_service` cannot resolve and this image
+# does not build as-is. Do not add it to Compose until the workspace membership
+# and its heavy browser dependencies are verified. See
+# docs/deployment/RUNBOOK.md.
 
 # ==========================================
 # STAGE 1: The Graph Resolver (Builder)

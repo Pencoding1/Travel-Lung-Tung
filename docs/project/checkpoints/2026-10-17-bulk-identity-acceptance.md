@@ -1,0 +1,9 @@
+# Bulk category/tag identity acceptance
+
+Date: 2026-10-17, Asia/Saigon. Full goal ACTIVE/INCOMPLETE. Previous goal turn classified PROGRESS (verified primary artifacts, manuscript layout and implementation evidence).
+
+OC037 process16434 is now missing/terminal; report and completed event stream confirm session ses_ebba84edaffeBfAPTNF7Ch41HW finished. Parent inspected the exact batch_create clauses and seven new tests. Bulk Category/Tag MERGE now keys on explicit id, matching single create/update; display/context remain ON CREATE only. Existing ids and caller data are not rewritten. All 14 source-category IDs pass through actual production validation/query parameters.
+
+Parent independently verified 7 new repository contract tests in .venv-mcp-validation (0.65s), 4 category-wiring tests (0.88s), and 21 ingestion/domain tests in .venv-validation normal-host mode (0.42s). These establish model/query/transaction-spy contracts, not live graph identity counts or Cypher execution. Environment failures are retained: mixed suites failed collection because .venv-validation lacks neo4j and .venv-mcp-validation lacks tenacity; split runs avoid installing dependencies. Restricted Windows ingestion run stalled after six tests and was interrupted exit1; normal-host run passed.
+
+Scope released. No primary graph import/provenance/admin support claimed. Exact frozen primary candidates remain accepted; mutable registry revisions remain partial after independent null-hash/revisit counterexamples. Docker Linux engine remains unavailable on last probe. Next implement optional typed provenance and qualified source-snapshot administration coherently through actual POI writes/reads, null-address safety, then adapt frozen candidate lineage through that boundary. Keep existing local IDs and all raw data immutable. Finish all SG/AC requirements, checkpoint every major phase.

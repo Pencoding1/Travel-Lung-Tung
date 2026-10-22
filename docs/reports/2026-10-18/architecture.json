@@ -1,0 +1,153 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Travel AI — Hệ thống hiện tại",
+    "quality_profile": "showcase"
+  },
+  "layout": {
+    "mode": "grid",
+    "origin": [
+      60,
+      90
+    ],
+    "cols": 4,
+    "cellW": 240,
+    "cellH": 100,
+    "gapX": 50,
+    "gapY": 150
+  },
+  "components": [
+    {
+      "id": "travel-client",
+      "type": "frontend",
+      "label": "Giao diện thử",
+      "sublabel": "Chọn vùng · gửi nhu cầu",
+      "tag": "/travel",
+      "row": 1,
+      "col": 0
+    },
+    {
+      "id": "travel-ai",
+      "type": "backend",
+      "label": "AI Service",
+      "sublabel": "Đề xuất + lập lịch",
+      "tag": "FastAPI",
+      "row": 1,
+      "col": 1
+    },
+    {
+      "id": "poi-tools",
+      "type": "backend",
+      "label": "POI MCP",
+      "sublabel": "Tìm điểm · lấy chi tiết",
+      "tag": "Tool phía máy chủ",
+      "row": 1,
+      "col": 2
+    },
+    {
+      "id": "poi-snapshot",
+      "type": "database",
+      "label": "POI đã xử lý",
+      "sublabel": "6.367 điểm · 26 vùng nguồn",
+      "tag": "Memgraph",
+      "row": 1,
+      "col": 3
+    },
+    {
+      "id": "intent-jev",
+      "type": "cloud",
+      "label": "TypeSafe Jev",
+      "sublabel": "Phân loại yêu cầu",
+      "tag": "jev-1.13.0",
+      "row": 0,
+      "col": 0
+    },
+    {
+      "id": "generation-cli",
+      "type": "backend",
+      "label": "OpenCode CLI",
+      "sublabel": "Chỉ văn bản và JSON",
+      "tag": "Cấm native tool",
+      "row": 0,
+      "col": 1
+    },
+    {
+      "id": "generation-go",
+      "type": "cloud",
+      "label": "DeepSeek V4.1 Flash",
+      "sublabel": "OpenCode Go",
+      "tag": "Model ứng dụng",
+      "row": 0,
+      "col": 2
+    },
+    {
+      "id": "user-memory",
+      "type": "database",
+      "label": "Memory / Profile",
+      "sublabel": "RAM + SQLite tùy chọn",
+      "tag": "S5 chờ kiểm định thật",
+      "row": 2,
+      "col": 1
+    },
+    {
+      "id": "road-routing",
+      "type": "backend",
+      "label": "GraphHopper",
+      "sublabel": "Tuyến ô tô / đi bộ",
+      "tag": "Đã chạy thật",
+      "row": 2,
+      "col": 2
+    }
+  ],
+  "connections": [
+    {
+      "from": "travel-client",
+      "to": "travel-ai",
+      "label": "Yêu cầu + vùng nguồn",
+      "variant": "emphasis",
+      "labelDy": -54,
+      "labelDx": 60
+    },
+    {
+      "from": "travel-ai",
+      "to": "poi-tools",
+      "label": "Gọi tool máy chủ",
+      "variant": "emphasis"
+    },
+    {
+      "from": "poi-tools",
+      "to": "poi-snapshot",
+      "label": "Truy xuất snapshot",
+      "variant": "emphasis"
+    },
+    {
+      "from": "poi-tools",
+      "to": "road-routing",
+      "label": "Đo tuyến thực",
+      "labelDy": 24
+    },
+    {
+      "from": "travel-ai",
+      "to": "intent-jev",
+      "label": "Phân loại ý định"
+    },
+    {
+      "from": "travel-ai",
+      "to": "generation-cli",
+      "label": "Prompt / JSON"
+    },
+    {
+      "from": "generation-cli",
+      "to": "generation-go",
+      "label": "Sinh đề xuất"
+    },
+    {
+      "from": "travel-ai",
+      "to": "user-memory",
+      "label": "Tùy chọn · chờ S5",
+      "variant": "dashed",
+      "labelDy": 24
+    }
+  ]
+}

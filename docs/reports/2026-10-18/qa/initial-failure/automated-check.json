@@ -1,0 +1,543 @@
+{
+  "generatedAt": "2026-10-17T18:25:53.146Z",
+  "pages": [
+    {
+      "page": "index.html",
+      "desktop": true,
+      "pageErrors": [],
+      "consoleErrors": [],
+      "failed": [],
+      "external": [],
+      "label": "index-desktop"
+    },
+    {
+      "page": "modules/acquisition.html",
+      "pageErrors": [],
+      "consoleErrors": [],
+      "failed": [],
+      "external": [],
+      "label": "module-acquisition"
+    },
+    {
+      "page": "modules/data-prep.html",
+      "pageErrors": [],
+      "consoleErrors": [],
+      "failed": [],
+      "external": [],
+      "label": "module-data-prep"
+    },
+    {
+      "page": "modules/graph-mcp.html",
+      "pageErrors": [],
+      "consoleErrors": [],
+      "failed": [],
+      "external": [],
+      "label": "module-graph-mcp"
+    },
+    {
+      "page": "modules/routing.html",
+      "pageErrors": [],
+      "consoleErrors": [],
+      "failed": [],
+      "external": [],
+      "label": "module-routing"
+    },
+    {
+      "page": "modules/ai-provider.html",
+      "pageErrors": [],
+      "consoleErrors": [],
+      "failed": [],
+      "external": [],
+      "label": "module-ai-provider"
+    },
+    {
+      "page": "modules/planner.html",
+      "pageErrors": [],
+      "consoleErrors": [],
+      "failed": [],
+      "external": [],
+      "label": "module-planner"
+    },
+    {
+      "page": "modules/memory.html",
+      "pageErrors": [],
+      "consoleErrors": [],
+      "failed": [],
+      "external": [],
+      "label": "module-memory"
+    },
+    {
+      "page": "modules/backend.html",
+      "pageErrors": [],
+      "consoleErrors": [],
+      "failed": [],
+      "external": [],
+      "label": "module-backend"
+    },
+    {
+      "page": "modules/experiments.html",
+      "pageErrors": [],
+      "consoleErrors": [],
+      "failed": [],
+      "external": [],
+      "label": "module-experiments"
+    },
+    {
+      "page": "architecture.html",
+      "pageErrors": [],
+      "consoleErrors": [],
+      "failed": [],
+      "external": [],
+      "label": "architecture"
+    }
+  ],
+  "checks": [
+    {
+      "name": "index: tải được",
+      "ok": true,
+      "detail": "Travel AI — Báo cáo tiến độ 18/10/2026"
+    },
+    {
+      "name": "index: có 4 giai đoạn",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "index: giai đoạn 1 đang chọn",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "index: không tràn ngang desktop",
+      "ok": true,
+      "detail": "1440"
+    },
+    {
+      "name": "index: tiếng Việt có dấu",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "index: có 9 mô-đun",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "index: có liên kết kiến trúc",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "phase 4: chờ quyết định, không tự chạy",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "phase: complete hiển thị nội dung",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "phase: experiment hiển thị nội dung",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "phase: decide hiển thị nội dung",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "phase: verify hiển thị nội dung",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "phase: điều hướng bàn phím",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "module: chọn thẻ đổi chi tiết",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "module: có bằng chứng mở rộng",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "module: mở được bằng chứng",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "module: deep link cập nhật hash",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "tìm kiếm: lọc còn ít nhất 1",
+      "ok": true,
+      "detail": "1"
+    },
+    {
+      "name": "lọc: chỉ còn mô-đun chờ QA",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "module acquisition: tiêu đề",
+      "ok": true,
+      "detail": "Thu thập dữ liệu"
+    },
+    {
+      "name": "module acquisition: có quay lại",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "module acquisition: có bằng chứng",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "module acquisition: có điều hướng trước/sau",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "module acquisition: không tràn ngang",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "module acquisition: không lỗi JS",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "module acquisition: không request ngoài",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "module data-prep: tiêu đề",
+      "ok": true,
+      "detail": "Chuẩn bị dữ liệu chính"
+    },
+    {
+      "name": "module data-prep: có quay lại",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "module data-prep: có bằng chứng",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "module data-prep: có điều hướng trước/sau",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "module data-prep: không tràn ngang",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "module data-prep: không lỗi JS",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "module data-prep: không request ngoài",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "module graph-mcp: tiêu đề",
+      "ok": true,
+      "detail": "Đồ thị & MCP"
+    },
+    {
+      "name": "module graph-mcp: có quay lại",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "module graph-mcp: có bằng chứng",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "module graph-mcp: có điều hướng trước/sau",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "module graph-mcp: không tràn ngang",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "module graph-mcp: không lỗi JS",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "module graph-mcp: không request ngoài",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "module routing: tiêu đề",
+      "ok": true,
+      "detail": "Tuyến đường"
+    },
+    {
+      "name": "module routing: có quay lại",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "module routing: có bằng chứng",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "module routing: có điều hướng trước/sau",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "module routing: không tràn ngang",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "module routing: không lỗi JS",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "module routing: không request ngoài",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "module ai-provider: tiêu đề",
+      "ok": true,
+      "detail": "AI & nhà cung cấp"
+    },
+    {
+      "name": "module ai-provider: có quay lại",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "module ai-provider: có bằng chứng",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "module ai-provider: có điều hướng trước/sau",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "module ai-provider: không tràn ngang",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "module ai-provider: không lỗi JS",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "module ai-provider: không request ngoài",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "module planner: tiêu đề",
+      "ok": true,
+      "detail": "Lập lịch & kiểm tra"
+    },
+    {
+      "name": "module planner: có quay lại",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "module planner: có bằng chứng",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "module planner: có điều hướng trước/sau",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "module planner: không tràn ngang",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "module planner: không lỗi JS",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "module planner: không request ngoài",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "module memory: tiêu đề",
+      "ok": true,
+      "detail": "Bộ nhớ"
+    },
+    {
+      "name": "module memory: có quay lại",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "module memory: có bằng chứng",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "module memory: có điều hướng trước/sau",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "module memory: không tràn ngang",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "module memory: không lỗi JS",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "module memory: không request ngoài",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "module backend: tiêu đề",
+      "ok": true,
+      "detail": "Backend & bản nháp"
+    },
+    {
+      "name": "module backend: có quay lại",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "module backend: có bằng chứng",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "module backend: có điều hướng trước/sau",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "module backend: không tràn ngang",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "module backend: không lỗi JS",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "module backend: không request ngoài",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "module experiments: tiêu đề",
+      "ok": true,
+      "detail": "Thu thập & đánh giá thí nghiệm"
+    },
+    {
+      "name": "module experiments: có quay lại",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "module experiments: có bằng chứng",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "module experiments: có điều hướng trước/sau",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "module experiments: không tràn ngang",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "module experiments: không lỗi JS",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "module experiments: không request ngoài",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "mobile index: không tràn ngang",
+      "ok": true,
+      "detail": "390"
+    },
+    {
+      "name": "mobile module: không tràn ngang",
+      "ok": true,
+      "detail": "390"
+    },
+    {
+      "name": "architecture: tải và có tiêu đề",
+      "ok": true,
+      "detail": "Dark\nClassic\nPresent\nExport\nTravel AI — luồng thành phần hiện tại\nGUIDED VIEWS\n0 / 3\nExplore this system\n▶\nPlay story\n01"
+    },
+    {
+      "name": "architecture: không tràn ngang",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "architecture: không lỗi JS",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "architecture: không request ngoài",
+      "ok": true,
+      "detail": ""
+    }
+  ],
+  "errors": [],
+  "screenshots": [
+    "qa/screenshots/index-1440x900.png",
+    "qa/screenshots/index-390x844.png",
+    "qa/screenshots/module-graph-mcp-390x844.png",
+    "qa/screenshots/architecture-1440x900.png"
+  ]
+}

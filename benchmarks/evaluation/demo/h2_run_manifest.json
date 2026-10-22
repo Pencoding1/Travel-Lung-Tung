@@ -1,0 +1,12 @@
+{
+  "task": "H2",
+  "evaluator_version": "oc18.eval.v1",
+  "generated_at_utc": "2026-10-16T09:03:31.616233+00:00",
+  "input_sha256": {
+    "manifest": "210f94798de21c10eb5b2e13e271c54298f6831fdf478ad39fcab110feffb98d",
+    "records": "f04c473eee67d8887ea5e602af087e55351fe1f89e83fdd9e1e0eb096878c53a"
+  },
+  "output_sha256": "dd8bd6525416ec8040086fee3ef1711de8d4f42c507d5cff12d3fcbbf97595b5",
+  "no_live_execution": true,
+  "label": "SYNTHETIC EVALUATOR TEST"
+}

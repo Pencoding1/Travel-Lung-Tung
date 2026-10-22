@@ -10,8 +10,14 @@ load_dotenv()
 
 # 2. Trigger Security Fail-Fast 
 # Importing this here ensures the app crashes immediately if JWT_SECRET is missing.
-from app.core.security.auth import JWT_SECRET 
-from app.core.infrastructure.db.database.connector import memgraph_db, firestore_db
+from app.core.security.auth import JWT_SECRET  # noqa: F401
+from app.core.infrastructure.db.database.connector import (
+    dependency_health,
+    firestore_db,
+    memgraph_db,
+    shutdown_databases,
+    startup_databases,
+)
 
 # 3. Import Routers
 from app.api.rest.v1.endpoint_ingestion import router as ingestion_router
@@ -30,24 +36,21 @@ async def lifespan(app: FastAPI):
     """
     logging.info("Travel Lung Tung POI Service starting up...")
     try:
-        # 1. Activate Connections explicitly
-        firestore_db.connect()
-        await memgraph_db.connect()  # Note the 'await' here!
-        
-        # 2. Verify Firebase (Memgraph verified itself during connect)
-        if not firestore_db.verify_connectivity():
-            raise ConnectionError("Firebase SDK failed to verify connection.")
+        # Graph DB is always required; Firestore is opt-in via FIRESTORE_ENABLED.
+        # On any failure this cleans up already-initialized resources and raises
+        # a sanitized error, so the app never serves in a degraded state.
+        await startup_databases(memgraph_db, firestore_db)
+    except Exception:
+        logging.critical("POI service startup failed; refusing to serve requests.")
+        raise
 
-    except Exception as e:
-        logging.critical(f"Startup check failed: {str(e)}")
-        raise RuntimeError(f"Database verification failed: {str(e)}")
-        
-    yield
-    
-    # Shutdown: Cleanly close BOTH database drivers
-    logging.info("Shutting down. Cleaning up external connections...")
-    memgraph_db.close()
-    firestore_db.close()
+    try:
+        yield
+    finally:
+        # Shutdown: cleanly close both drivers even if shutdown is triggered by
+        # an exception escaping the application.
+        logging.info("Shutting down. Cleaning up external connections...")
+        await shutdown_databases(memgraph_db, firestore_db)
 
 
 # ---------------------------------------------------------
@@ -74,7 +77,11 @@ app.add_middleware(
 # Ensures that even unhandled logic crashes return a clean 500 JSON response.
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
-    logging.error(f"GLOBAL CRASH: {request.method} {request.url} - {str(exc)}")
+    # Constant event, safe request method and exception type only. The URL,
+    # query string and raw exception text are never logged here because they
+    # can carry user input or credentials.
+    logging.error("POI_UNHANDLED_EXCEPTION method=%s type=%s",
+                  request.method, type(exc).__name__)
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
         content={
@@ -93,7 +100,8 @@ def root():
     return {
         "status": "online",
         "message": "Travel Lung Tung POI Service is live",
-        "architecture": "Event-Driven Hybrid Ingestion"
+        "architecture": "Event-Driven Hybrid Ingestion",
+        "dependencies": dependency_health(memgraph_db, firestore_db),
     }
 
 # Attach our specialized routers

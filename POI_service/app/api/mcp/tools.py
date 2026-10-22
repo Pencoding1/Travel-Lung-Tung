@@ -1,271 +1,689 @@
-import traceback
 import json
 import logging
-import httpx
+import math
+import os
 
-from typing import List, Optional
+from typing import Callable, List, Optional
+
+import httpx
 from mcp.server.fastmcp import FastMCP
 
-# Database & UoW Imports
-from app.core.infrastructure.db.uow import MemgraphUnitOfWork
-from app.api.mcp.tool_description import (GET_ITINERARY_ROUTE_DESC, 
-                                          GET_POI_DETAILS_DESC,
-                                          GET_EXPLORE_DESC,
-                                          GET_ALL_AVAILABLE_CATEGORIES)
-
-from app.core.infrastructure.db.database.connector import memgraph_db
-
-# Service Imports
-from app.core.services.management import POIManagementService
-
-# RAG Imports & Exceptions
-from app.core.interfaces.repositories import IDocumentRepository
+from app.api.mcp.tool_description import (
+    GET_ALL_AVAILABLE_CATEGORIES,
+    GET_EXPLORE_DESC,
+    GET_ITINERARY_ROUTE_DESC,
+    GET_POI_DETAILS_DESC,
+)
 from travel_shared.exceptions import IntentedNotImplementedException
 
-logger = logging.getLogger(__file__)
-mcp = FastMCP("POI_Admin_Server", host="0.0.0.0", port=8001)
+logger = logging.getLogger(__name__)
 
-class PendingDocumentRepository(IDocumentRepository):
+MCP_HOST_ENV = "MCP_HOST"
+MCP_PORT_ENV = "MCP_PORT"
+DEFAULT_MCP_HOST = "0.0.0.0"
+DEFAULT_MCP_PORT = 8001
+
+
+def _listen_port() -> int:
+    """Read MCP_PORT at process start; an invalid value fails closed."""
+    raw = os.environ.get(MCP_PORT_ENV)
+    if raw is None:
+        return DEFAULT_MCP_PORT
+    try:
+        port = int(raw)
+    except (TypeError, ValueError):
+        raise ValueError(f"{MCP_PORT_ENV} must be an integer port") from None
+    if not 1 <= port <= 65535:
+        raise ValueError(f"{MCP_PORT_ENV} must be between 1 and 65535")
+    return port
+
+
+mcp = FastMCP(
+    "POI_Admin_Server",
+    host=os.environ.get(MCP_HOST_ENV) or DEFAULT_MCP_HOST,
+    port=_listen_port(),
+)
+
+# ---------------------------------------------------------------------------
+# Configuration (environment only; no .env loading, no credentials)
+# ---------------------------------------------------------------------------
+GRAPHHOPPER_URL_ENV = "GRAPHHOPPER_URL"
+GRAPHHOPPER_PROFILES_ENV = "GRAPHHOPPER_PROFILES"
+DEFAULT_GRAPHHOPPER_URL = "http://graphhopper:8989/route"
+# The deployed GraphHopper config (graphhopper/data/config.yml) enables exactly
+# the "car" profile, so that is the only profile accepted unless an operator
+# explicitly configures more through GRAPHHOPPER_PROFILES.
+DEFAULT_SUPPORTED_PROFILES = ("car",)
+# Contraction hierarchies are built per profile. The deployed config builds CH
+# only for "car" (`.runtime-native/graphhopper-11.1/config/config.yml`, measured
+# 18/10/2026), so every other accepted profile must send ch.disable=true.
+GRAPHHOPPER_CH_PROFILES_ENV = "GRAPHHOPPER_CH_PROFILES"
+DEFAULT_CH_PROFILES = ("car",)
+
+
+# ---------------------------------------------------------------------------
+# Injectable collaborators
+#
+# The concrete UnitOfWork / connector / service imports happen *lazily*, inside
+# this one factory, so importing this module never opens a database connection
+# nor reads real credentials. Tests inject a fake factory instead of patching
+# ``sys.modules``.
+# ---------------------------------------------------------------------------
+_uow_factory: Optional[Callable[[], object]] = None
+_http_client_factory: Optional[Callable[[], object]] = None
+
+
+def set_uow_factory(factory: Optional[Callable[[], object]]) -> None:
+    global _uow_factory
+    _uow_factory = factory
+
+
+def reset_uow_factory() -> None:
+    set_uow_factory(None)
+
+
+def set_http_client_factory(factory: Optional[Callable[[], object]]) -> None:
+    global _http_client_factory
+    _http_client_factory = factory
+
+
+def reset_http_client_factory() -> None:
+    set_http_client_factory(None)
+
+
+def _default_uow_factory():
+    # Imported here so module import stays free of connector/settings effects.
+    from app.core.infrastructure.db.database.connector import memgraph_db
+    from app.core.infrastructure.db.uow import MemgraphUnitOfWork
+
+    return MemgraphUnitOfWork(memgraph_db)
+
+
+def _get_uow():
+    factory = _uow_factory or _default_uow_factory
+    return factory()
+
+
+def _management_module():
+    from app.core.services import management
+
+    return management
+
+
+def _build_doc_repo():
+    from app.core.interfaces.repositories import IDocumentRepository
+
+    class PendingDocumentRepository(IDocumentRepository):
+        """Fails open with an explicit "unimplemented" signal.
+
+        The service converts this into ``POIDescription.status == "unavailable"``
+        with a null rating, so the Retrieval Agent never crashes and never sees an
+        invented rating.
+        """
+
+        def get_poi_documents(self, poi_id: str) -> dict:
+            raise IntentedNotImplementedException(
+                "Document RAG is on the roadmap but not yet implemented."
+            )
+
+    return PendingDocumentRepository()
+
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+def _error(code: str, detail: str, **extra) -> str:
+    """Stable, sanitized error envelope (no tracebacks / provider raw messages)."""
+    payload = {
+        "success": False,
+        "code": code,
+        "detail": detail,
+        "message": detail,
+    }
+    payload.update(extra)
+    return json.dumps(payload, indent=2)
+
+
+class SourcePayloadSerializationError(Exception):
+    """A source-scope payload could not be encoded as JSON.
+
+    Kept distinct from an exploration failure: the query itself succeeded, so
+    reporting ``exploration_failed`` would hide a real serialization defect
+    behind a generic "Exploration failed." message.
     """
-    A temporary mock repository that intentionally fails open.
-    This prevents the Retrieval Agent from crashing while the Vector DB is unbuilt.
+
+
+def _dumps_source_payload(envelope: dict) -> str:
+    """Encode a source-scope envelope or raise the dedicated error type.
+
+    Logs only the exception class/message; never the payload values.
     """
-    def get_poi_documents(self, poi_id: str) -> dict:
-        raise IntentedNotImplementedException("Document RAG is on the roadmap but not yet implemented.")
+    try:
+        return json.dumps(envelope, indent=2)
+    except (TypeError, ValueError) as exc:
+        raise SourcePayloadSerializationError(
+            "source-scope payload is not JSON serializable"
+        ) from exc
 
 
+def _finite_number(value) -> Optional[float]:
+    if value is None or isinstance(value, bool):
+        return None
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        return None
+    if not math.isfinite(number):
+        return None
+    return number
+
+
+# Provider geometry is bounded so a hostile/oversized response cannot bloat the
+# tool payload. Values outside these bounds are treated as missing geometry.
+MAX_ROUTE_GEOMETRY_POINTS = 20000
+
+
+def _validated_route_geometry(points):
+    """Return ``(geojson_linestring_or_None, status)`` from provider points.
+
+    Only an actual, finite GeoJSON ``LineString`` with at least two
+    ``[longitude, latitude]`` positions is accepted. Nothing is interpolated:
+    an absent/malformed/oversized geometry is explicitly ``missing``.
+    """
+    if points is None:
+        return None, "missing"
+    if not isinstance(points, dict):
+        return None, "malformed"
+    if points.get("type") != "LineString":
+        return None, "malformed"
+    coordinates = points.get("coordinates")
+    if not isinstance(coordinates, list) or not (
+        2 <= len(coordinates) <= MAX_ROUTE_GEOMETRY_POINTS
+    ):
+        return None, "malformed"
+    cleaned = []
+    for position in coordinates:
+        if not isinstance(position, list) or len(position) != 2:
+            return None, "malformed"
+        longitude = _finite_number(position[0])
+        latitude = _finite_number(position[1])
+        if (
+            longitude is None
+            or latitude is None
+            or not (-180.0 <= longitude <= 180.0)
+            or not (-90.0 <= latitude <= 90.0)
+        ):
+            return None, "malformed"
+        cleaned.append([longitude, latitude])
+    return {"type": "LineString", "coordinates": cleaned}, "available"
+
+
+def _graphhopper_url() -> str:
+    raw = os.getenv(GRAPHHOPPER_URL_ENV)
+    if raw is None:
+        return DEFAULT_GRAPHHOPPER_URL
+    cleaned = raw.strip()
+    return cleaned or DEFAULT_GRAPHHOPPER_URL
+
+
+def _supported_profiles() -> set:
+    raw = os.getenv(GRAPHHOPPER_PROFILES_ENV)
+    if raw is None or not raw.strip():
+        return set(DEFAULT_SUPPORTED_PROFILES)
+    return {token.strip() for token in raw.split(",") if token.strip()}
+
+
+def _ch_enabled_profiles() -> set:
+    """Profiles the routing engine built contraction hierarchies for.
+
+    A profile without CH must be requested with ``ch.disable=true``; otherwise
+    GraphHopper answers HTTP 400 ("Disable CH using ch.disable=true; available
+    CH profiles: [...]"). The default keeps the previously verified car-only
+    CH set, so ``car`` keeps its exact current behaviour.
+    """
+    raw = os.getenv(GRAPHHOPPER_CH_PROFILES_ENV)
+    if raw is None or not raw.strip():
+        return set(DEFAULT_CH_PROFILES)
+    return {token.strip() for token in raw.split(",") if token.strip()}
+
+
+# ---------------------------------------------------------------------------
+# Tools
+# ---------------------------------------------------------------------------
 @mcp.tool(
     name="get_poi_details",
-    description=GET_POI_DETAILS_DESC)
+    description=GET_POI_DETAILS_DESC,
+)
 def get_poi_details(poi_id: str) -> str:
     """
     AI Agent Tool: Provide the exact POI_ID string (e.g., 'cafe_123_hcmc').
-    Returns a JSON string containing the POI details, offers, and a NEAR_BY array.
+    Returns a JSON string containing the POI details, offers, parent
+    administrative context and a NEAR_BY array.
     """
+    if not isinstance(poi_id, str) or not poi_id.strip():
+        return _error("invalid_request", "poi_id must be a nonblank string.",
+                      result=None)
+
     try:
-        uow = MemgraphUnitOfWork(memgraph_db)
-        poi_service = POIManagementService(uow)
-        doc_repo = PendingDocumentRepository()
+        management = _management_module()
+    except Exception:
+        logger.error("get_poi_details: POI service dependencies unavailable")
+        return _error("internal_error", "POI service is unavailable.",
+                      result=None)
 
-        response_payload = poi_service.get_agentic_poi_details(poi_id=poi_id, doc_repo=doc_repo)
-        
+    try:
+        service = management.POIManagementService(_get_uow())
+        doc_repo = _build_doc_repo()
+        response_payload = service.get_agentic_poi_details(
+            poi_id=poi_id, doc_repo=doc_repo
+        )
         return response_payload.model_dump_json(indent=2)
-
-    except ValueError as e:
-        error_payload = {"success": False, "result": None, "detail": str(e)}
-        return json.dumps(error_payload, indent=2)
-        
-    except IntentedNotImplementedException as e:
-        reject_payload = {"success": False, "result": None, "detail": "This feature is not implemented yet."}
-        return json.dumps(reject_payload, indent=2)
-    
-    except Exception as e:
-        error_payload = {"success": False, "result": None, "detail": f"Internal system error during retrieval: {str(e)}"}
-        return json.dumps(error_payload, indent=2)
+    except management.EntityNotFoundError:
+        return _error("not_found", "POI not found.", result=None)
+    except IntentedNotImplementedException:
+        return _error("not_implemented", "This feature is not implemented yet.",
+                      result=None)
+    except Exception:
+        logger.error("get_poi_details: internal retrieval failure")
+        return _error("internal_error", "Internal system error during retrieval.",
+                      result=None)
 
 
 @mcp.tool(
     name="get_itinerary_route",
-    description=GET_ITINERARY_ROUTE_DESC
+    description=GET_ITINERARY_ROUTE_DESC,
 )
-def get_itinerary_route(ordered_poi_ids: List[str], vehicle: str="car") -> str:
+def get_itinerary_route(ordered_poi_ids: List[str], vehicle: str = "car") -> str:
     """
-    AI Agent Tool: Pass an array of exact POI_IDs in the order they should be visited.
-    Valid vehicles: 'car', 'foot', 'bike'.
+    AI Agent Tool: Pass an array of exact POI_IDs in the order they should be
+    visited. The supported profile is configurable through GRAPHHOPPER_PROFILES
+    and defaults to 'car'. Profiles the engine did not build a contraction
+    hierarchy for (GRAPHHOPPER_CH_PROFILES, default 'car') are requested with
+    ch.disable=true; no straight-line fallback is ever substituted.
     """
-    GRAPHHOPPER_URL = "http://graphhopper:8989/route"
-    
-    if len(ordered_poi_ids) < 2:
-        return json.dumps({"success": False, "error": "An itinerary must have at least 2 stops."})
+    if not isinstance(ordered_poi_ids, list) or len(ordered_poi_ids) < 2:
+        return _error(
+            "invalid_request",
+            "An itinerary must have at least 2 stops.",
+            error="An itinerary must have at least 2 stops.",
+        )
 
-    uow = MemgraphUnitOfWork(memgraph_db)
-    poi_service = POIManagementService(uow)
+    ordered_ids: List[str] = []
+    for raw_id in ordered_poi_ids:
+        if not isinstance(raw_id, str) or not raw_id.strip():
+            return _error(
+                "invalid_request",
+                "Every stop must be a nonblank POI id.",
+                error="Every stop must be a nonblank POI id.",
+            )
+        ordered_ids.append(raw_id)
 
-    waypoints = []
-    
-    for poi in ordered_poi_ids:
-        with uow:
-            poi_data = poi_service.get_poi(poi) 
-            if poi_data and poi_data.latitude and poi_data.longitude:
-                waypoints.append((poi_data.latitude, poi_data.longitude))
-            else:
-                logger.warning(f"Could not find coordinates for POI {poi}")
-            
-    if len(waypoints) < 2:
-        return json.dumps({"success": False, "error": "Not enough valid coordinates to calculate a route."})
-    
-    params = {
-        "profile": vehicle,
-        "locale": "en",
-        "calc_points": "true", 
-        "instructions": "true" 
-    }
-
-    query_string = "&".join([f"point={lat},{lon}" for lat, lon in waypoints])
-    full_url = f"{GRAPHHOPPER_URL}?{query_string}"
+    profile = vehicle.strip() if isinstance(vehicle, str) else ""
+    if not profile or profile not in _supported_profiles():
+        return _error(
+            "invalid_request",
+            "Unsupported vehicle profile.",
+            error="Unsupported vehicle profile.",
+        )
 
     try:
-        with httpx.Client(timeout=10.0) as client:
-            response = client.get(full_url, params=params)
+        management = _management_module()
+        uow = _get_uow()
+        service = management.POIManagementService(uow)
+    except Exception:
+        logger.error("get_itinerary_route: POI service dependencies unavailable")
+        return _error(
+            "internal_error",
+            "POI service is unavailable.",
+            error="POI service is unavailable.",
+        )
+
+    # Resolve every coordinate inside a single, fresh UoW scope. A missing id or
+    # coordinate aborts the whole request before any HTTP call is made.
+    coordinates: List[tuple] = []
+    failing: List[dict] = []
+    try:
+        with uow:
+            for poi_id in ordered_ids:
+                poi = service.get_poi(poi_id)
+                if poi is None:
+                    failing.append({"id": poi_id, "reason": "not_found"})
+                    continue
+                latitude = _finite_number(getattr(poi, "latitude", None))
+                longitude = _finite_number(getattr(poi, "longitude", None))
+                if (
+                    latitude is None
+                    or longitude is None
+                    or not (-90.0 <= latitude <= 90.0)
+                    or not (-180.0 <= longitude <= 180.0)
+                ):
+                    failing.append({"id": poi_id, "reason": "missing_coordinates"})
+                    continue
+                coordinates.append((poi_id, latitude, longitude))
+    except Exception:
+        logger.error("get_itinerary_route: failed to resolve stops")
+        return _error(
+            "internal_error",
+            "Failed to resolve itinerary stops.",
+            error="Failed to resolve itinerary stops.",
+        )
+
+    if failing:
+        return _error(
+            "stops_unresolved",
+            "Some stops could not be resolved to coordinates.",
+            error="Some stops could not be resolved to coordinates.",
+            failing_stops=failing,
+        )
+
+    # Repeat "point" as a list of pairs so query encoding is handled correctly.
+    # ``points_encoded=false`` returns GeoJSON coordinates from the actual
+    # road path instead of an encoded polyline; no geometry is inferred.
+    params = [
+        ("profile", profile),
+        ("locale", "en"),
+        ("calc_points", "true"),
+        ("instructions", "true"),
+        ("points_encoded", "false"),
+    ]
+    # A profile without a built contraction hierarchy must disable CH explicitly,
+    # otherwise GraphHopper rejects the request with HTTP 400. This is a routing
+    # mode decision, never a silent fallback: car keeps its exact current params.
+    ch_disabled = profile not in _ch_enabled_profiles()
+    if ch_disabled:
+        params.append(("ch.disable", "true"))
+    for _poi_id, latitude, longitude in coordinates:
+        params.append(("point", f"{latitude},{longitude}"))
+
+    try:
+        factory = _http_client_factory or httpx.Client
+        with factory() as client:
+            response = client.get(_graphhopper_url(), params=params, timeout=10.0)
             response.raise_for_status()
             route_data = response.json()
+    except httpx.HTTPStatusError as exc:
+        # Status is diagnostic evidence; the provider's raw message is never
+        # echoed into the payload.
+        status_code = exc.response.status_code
+        logger.error(
+            "get_itinerary_route: routing provider returned HTTP %s", status_code
+        )
+        return _error(
+            "route_failed",
+            f"Routing provider returned HTTP {status_code}.",
+            error=f"Routing provider returned HTTP {status_code}.",
+            upstream_status=status_code,
+            ch_disabled=ch_disabled,
+        )
+    except Exception:
+        logger.error("get_itinerary_route: routing provider request failed")
+        return _error(
+            "route_failed",
+            "Routing provider request failed.",
+            error="Routing provider request failed.",
+            ch_disabled=ch_disabled,
+        )
 
-        best_path = route_data["paths"][0]
-        
-        result_payload = {
-            "success": True,
-            "total_distance_km": round(best_path["distance"] / 1000, 2),
-            "total_time_minutes": round(best_path["time"] / (1000 * 60)),
-            "turn_by_turn": [instruction["text"] for instruction in best_path["instructions"]],
-            "stops_mapped": len(waypoints)
-        }
-        return json.dumps(result_payload, indent=2)
+    if not isinstance(route_data, dict):
+        return _error(
+            "route_failed",
+            "Routing provider returned a malformed payload.",
+            error="Routing provider returned a malformed payload.",
+        )
 
-    except Exception as e:
-        error_traceback = traceback.format_exc()
-        logger.error(f"Critical Tool Failure:\n{error_traceback}")
-        
-        error_payload = {"success": False, "error_message": str(e), "traceback": error_traceback}
-        return json.dumps(error_payload, indent=2)
-        
+    paths = route_data.get("paths")
+    if not isinstance(paths, list) or not paths:
+        return _error(
+            "no_route",
+            "No route could be found between the requested stops.",
+            error="No route could be found between the requested stops.",
+        )
+
+    best_path = paths[0]
+    if not isinstance(best_path, dict):
+        return _error(
+            "route_failed",
+            "Routing provider returned a malformed path.",
+            error="Routing provider returned a malformed path.",
+        )
+
+    distance_meters = _finite_number(best_path.get("distance"))
+    time_ms = _finite_number(best_path.get("time"))
+    if (
+        distance_meters is None
+        or time_ms is None
+        or distance_meters < 0
+        or time_ms < 0
+    ):
+        return _error(
+            "route_failed",
+            "Routing provider returned non-finite distance or time.",
+            error="Routing provider returned non-finite distance or time.",
+        )
+
+    turn_by_turn: List[str] = []
+    for instruction in best_path.get("instructions") or []:
+        if isinstance(instruction, dict):
+            text = instruction.get("text")
+            if isinstance(text, str) and text:
+                turn_by_turn.append(text)
+
+    # Only an actual GeoJSON LineString from the provider's best path is
+    # accepted. Missing/malformed/NaN/oversized geometry stays explicitly
+    # missing: a straight line between stops is never fabricated here.
+    route_geometry, geometry_status = _validated_route_geometry(best_path.get("points"))
+
+    result_payload = {
+        "success": True,
+        # Unrounded so downstream validation can inspect exact values.
+        "distance_km": distance_meters / 1000.0,
+        "time_minutes": time_ms / 60000.0,
+        "turn_by_turn": turn_by_turn,
+        "route_geometry": route_geometry,
+        "route_geometry_status": geometry_status,
+        "route_provenance": "graphhopper",
+        "route_profile": profile,
+        "stops_mapped": len(coordinates),
+        "stops": [
+            {"id": poi_id, "latitude": latitude, "longitude": longitude}
+            for poi_id, latitude, longitude in coordinates
+        ],
+    }
+    return json.dumps(result_payload, indent=2)
+
 
 @mcp.tool(
     name="explore_pois",
-    description="Searches for POIs. You MUST use exact _id parameters (city_id, district_id, street_id, category_id) obtained from the discovery tools. DO NOT pass normal text names here."
+    description=GET_EXPLORE_DESC,
 )
 def explore_pois(
-    city_id: Optional[str] = None, 
+    city_id: Optional[str] = None,
     district_id: Optional[str] = None,
     street_id: Optional[str] = None,
     category_id: Optional[str] = None,
     product_keyword: Optional[str] = None,
-    limit: int = 15
+    limit: int = 15,
+    offset: int = 0,
+    source_scope: Optional[dict] = None,
+    source_snapshot: Optional[dict] = None,
+    source_discovery: Optional[str] = None,
 ) -> str:
+    """
+    Searches for POIs using exact ids. All supplied ids are applied
+    conjunctively; a category id is matched exactly and never replaced by a
+    display name.
+
+    Source mode is explicit. ``source_discovery="snapshots"`` lists available
+    dataset snapshots; ``source_discovery="source_areas"`` with
+    ``source_snapshot={"dataset_namespace","input_sha256"}`` lists qualified
+    source areas. ``source_scope={"dataset_namespace","input_sha256",
+    "source_area_id"}`` (single) or the alternate
+    ``source_scope={"dataset_namespace","input_sha256","source_area_ids":[...]}``
+    retrieves only matching source-only records and cannot be combined with
+    current city/district/street ids.
+    """
     try:
-        uow = MemgraphUnitOfWork(memgraph_db)
-        poi_service = POIManagementService(uow)
+        management = _management_module()
+    except Exception:
+        logger.error("explore_pois: POI service dependencies unavailable")
+        return _error(
+            "internal_error", "POI service is unavailable.", count=0, results=[]
+        )
 
-        raw_results = []
-        FETCH_LIMIT = 200 
+    try:
+        service = management.POIManagementService(_get_uow())
 
-        # 1. PRIORITY ROUTING: Geography First!
-        # Shrink the search radius before looking for specific products
-        if street_id:
-            raw_results = poi_service.explore_by_street_id(street_id=street_id, limit=FETCH_LIMIT)
-        elif district_id:
-            raw_results = poi_service.explore_by_district_id(district_id=district_id, limit=FETCH_LIMIT)
-        elif city_id:
-            raw_results = poi_service.explore_by_city_id(city_id=city_id, limit=FETCH_LIMIT)
-        elif category_id:
-            raw_results = poi_service.explore_by_category(category_id=category_id, limit=FETCH_LIMIT)
-        elif product_keyword:
-            raw_results = poi_service.explore_by_product(product_keyword=product_keyword, limit=FETCH_LIMIT)
-        else:
-            return json.dumps({"success": False, "message": "You must provide at least one valid parameter."})
+        if source_discovery is not None:
+            if any(
+                value is not None
+                for value in (
+                    city_id,
+                    district_id,
+                    street_id,
+                    category_id,
+                    product_keyword,
+                    source_scope,
+                )
+            ):
+                return _error(
+                    "invalid_request",
+                    "source_discovery cannot be combined with search filters or source_scope.",
+                    results=[],
+                )
+            if source_discovery == "snapshots":
+                payload = service.list_source_snapshots()
+            elif source_discovery == "source_areas":
+                if source_snapshot is None:
+                    return _error(
+                        "invalid_request",
+                        "source_snapshot is required for source_areas.",
+                        results=[],
+                    )
+                payload = service.list_source_areas(source_snapshot)
+            else:
+                return _error(
+                    "invalid_request",
+                    "source_discovery must be 'snapshots' or 'source_areas'.",
+                    results=[],
+                )
+            return json.dumps(
+                {"success": True, "mode": source_discovery, **payload},
+                indent=2,
+            )
 
-        # 2. In-Memory Compound Filtering
-        filtered_results = []
-        for poi in raw_results:
-            is_match = True
-            
-            # Safely extract fields
-            address_str = str(poi.get("address", poi.get("full_address", ""))).lower()
-            poi_name = str(poi.get("name", "")).lower()
-            categories = [str(c).lower() for c in poi.get("categories", [])]
-            offers = [str(o).lower() for o in poi.get("offers", poi.get("products", []))]
+        results = service.explore_compound(
+            city_id=city_id,
+            district_id=district_id,
+            street_id=street_id,
+            category_id=category_id,
+            product_keyword=product_keyword,
+            limit=limit,
+            offset=offset,
+            source_scope=source_scope,
+        )
+        if source_scope is not None:
+            payload = results if isinstance(results, dict) else {"results": []}
+            payload = dict(payload)
+            payload.setdefault("results", [])
+            return _dumps_source_payload(
+                {
+                    "success": True,
+                    "count": len(payload.get("results") or []),
+                    **payload,
+                }
+            )
 
-            # --------------------------------------------------
-            # GARBAGE COLLECTOR: Silently drop corrupted OTA data
-            # --------------------------------------------------
-            if "unknown unknown" in address_str or poi_name == "unknown":
-                continue # Skip this loop iteration entirely
-
-            # --------------------------------------------------
-            # CATEGORY FILTER
-            # --------------------------------------------------
-            if category_id and is_match:
-                # Clean 'cat_coffee' to 'coffee' to match the string array returned by POILite
-                clean_cat = category_id.lower().replace("cat_", "").replace("_", " ")
-                if not any(clean_cat in cat for cat in categories):
-                    is_match = False
-                
-            # --------------------------------------------------
-            # PRODUCT FILTER
-            # --------------------------------------------------
-            if product_keyword and is_match:
-                if not any(product_keyword.lower() in off for off in offers):
-                    is_match = False
-
-            if is_match:
-                filtered_results.append(poi)
-                
-            if len(filtered_results) >= limit:
-                break
-
-        return json.dumps({
-            "success": True, 
-            "count": len(filtered_results), 
-            "results": filtered_results
-        }, indent=2)
-
-    except Exception as e:
-        import logging
-        logger = logging.getLogger("Travel_Lung_Tung_Agent")
-        logger.error(f"Exploration Tool Failure: {str(e)}")
-        return json.dumps({"success": False, "detail": str(e)})
+        results = results if isinstance(results, list) else []
+        return json.dumps(
+            {"success": True, "count": len(results), "results": results},
+            indent=2,
+        )
+    except SourcePayloadSerializationError:
+        # The query succeeded; only the encoding failed. Never surface this as
+        # an exploration failure, and never log payload values.
+        logger.error(
+            "explore_pois: source-scope payload serialization failure"
+        )
+        return _error(
+            "serialization_failed",
+            "Exploration result could not be serialized.",
+            count=0,
+            results=[],
+        )
+    except management.InvalidRequestError as exc:
+        return _error("invalid_request", str(exc), count=0, results=[])
+    except Exception:
+        logger.error("explore_pois: exploration failure")
+        return _error(
+            "exploration_failed",
+            "Exploration failed.",
+            count=0,
+            results=[],
+        )
 
 
 @mcp.tool(
     name="get_available_categories",
-    description=GET_ALL_AVAILABLE_CATEGORIES
+    description=GET_ALL_AVAILABLE_CATEGORIES,
 )
 def get_available_categories() -> str:
     """
     AI Agent Tool: Returns a list of dictionaries containing 'id' and 'name'.
+    Always returns a list (possibly empty) with success=true.
     """
     try:
-        uow = MemgraphUnitOfWork(memgraph_db)
-        poi_service = POIManagementService(uow)
-        
-        categories = poi_service.get_available_categories()
-        
-        if not categories:
-             return json.dumps({"success": True, "message": "No categories currently exist in the database."})
-             
-        return json.dumps({
-            "success": True,
-            "total": len(categories),
-            "categories": categories
-        }, indent=2)
-        
-    except Exception as e:
-        logger.error(f"Category Fetch Failure: {str(e)}")
-        return json.dumps({
-            "success": False,
-            "detail": f"Failed to retrieve categories: {str(e)}"
-        })
+        management = _management_module()
+        service = management.POIManagementService(_get_uow())
+        categories = service.get_available_categories()
+        categories = categories if isinstance(categories, list) else []
+        return json.dumps(
+            {"success": True, "total": len(categories), "categories": categories},
+            indent=2,
+        )
+    except Exception:
+        logger.error("get_available_categories: category fetch failure")
+        return _error(
+            "category_fetch_failed",
+            "Failed to retrieve categories.",
+            categories=[],
+        )
 
 
 @mcp.tool(
     name="resolve_geographic_id",
-    description="ALWAYS use this FIRST when a user mentions a city, district, or street to get the exact database ID. Example: keyword='District 1' or 'Hanoi'."
+    description=(
+        "ALWAYS use this FIRST when a user mentions a city, district, or street to get "
+        "the exact database ID. Example: keyword='District 1' or 'Hanoi'. Matches are "
+        "candidates only; do not assume a choice when several are returned."
+    ),
 )
 def resolve_geographic_id(keyword: str) -> str:
+    if not isinstance(keyword, str) or not keyword.strip():
+        return _error(
+            "invalid_request",
+            "keyword must be a nonblank string.",
+            matches=[],
+        )
     try:
-        uow = MemgraphUnitOfWork(memgraph_db)
-        poi_service = POIManagementService(uow)
-        matches = poi_service.search_location_id(keyword)
-        
-        if not matches:
-             return json.dumps({"success": True, "message": f"No official IDs found for '{keyword}'."})
-             
+        management = _management_module()
+        service = management.POIManagementService(_get_uow())
+        matches = service.search_location_id(keyword)
+        matches = matches if isinstance(matches, list) else []
         return json.dumps({"success": True, "matches": matches}, indent=2)
-    except Exception as e:
-        return json.dumps({"success": False, "detail": str(e)})
+    except Exception:
+        logger.error("resolve_geographic_id: location lookup failure")
+        return _error(
+            "location_lookup_failed",
+            "Location lookup failed.",
+            matches=[],
+        )
+
 
 if __name__ == "__main__":
     import asyncio
-    
+
+    from app.core.infrastructure.db.database.connector import memgraph_db
+
     logger.info("Initializing Memgraph connection for MCP Server...")
     asyncio.run(memgraph_db.connect())
     mcp.run(transport="sse")

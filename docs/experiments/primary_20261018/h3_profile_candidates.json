@@ -1,0 +1,161 @@
+{
+  "kind": "h3_profile_candidates",
+  "task": "EXP076",
+  "author": "Codex",
+  "frozen": false,
+  "candidate_status": "unfrozen_profile_declarations_no_results",
+  "design_path": "docs/project/handoffs/EXP-076/parent-h3-design.json",
+  "design_sha256": "5ad0f52d2a3bd6f5dde587b420bd983d3e334c670547ed23590500604cc394c8",
+  "correction_path": "docs/project/handoffs/EXP-076/parent-design-correction-1.json",
+  "correction_sha256": "b72e49928c23ef6ffc822074f8b5002b07791a4d3bafdd491314e4bb154292ca",
+  "profiles": [
+    {
+      "profile_id": "M1",
+      "synthetic": true,
+      "preferred_category_ids": [
+        "hcm_primary_geojson:source-category:coffee"
+      ],
+      "initial_profile": {
+        "tags": [
+          "hcm_primary_geojson:source-category:coffee"
+        ],
+        "pace": "relaxed"
+      },
+      "unknown_preferences": [],
+      "matching_candidate_ids": [
+        "hcm_primary_geojson_internal:033dd327cc9b86b52c8768151afad7f2",
+        "hcm_primary_geojson_internal:f29d9e96d8ebf331a5753afd3d9c8987"
+      ]
+    },
+    {
+      "profile_id": "M2",
+      "synthetic": true,
+      "preferred_category_ids": [
+        "hcm_primary_geojson:source-category:restaurant"
+      ],
+      "initial_profile": {
+        "tags": [
+          "hcm_primary_geojson:source-category:restaurant"
+        ],
+        "pace": "relaxed"
+      },
+      "unknown_preferences": [],
+      "matching_candidate_ids": [
+        "hcm_primary_geojson_internal:34319b08fbfabb695cd2f7f971855105"
+      ]
+    },
+    {
+      "profile_id": "M3",
+      "synthetic": true,
+      "preferred_category_ids": [
+        "hcm_primary_geojson:source-category:specialty_food"
+      ],
+      "initial_profile": {
+        "tags": [
+          "hcm_primary_geojson:source-category:specialty_food"
+        ],
+        "pace": "relaxed"
+      },
+      "unknown_preferences": [],
+      "matching_candidate_ids": [
+        "hcm_primary_geojson_internal:028e7931c327b776ef68b5eb1782c8b2",
+        "hcm_primary_geojson_internal:eb54df2d039a7bb08f696297fb68b82b",
+        "hcm_primary_geojson_internal:fc8708193009ac2123f5af71624965de"
+      ]
+    },
+    {
+      "profile_id": "M4",
+      "synthetic": true,
+      "preferred_category_ids": [
+        "hcm_primary_geojson:source-category:entertainment"
+      ],
+      "initial_profile": {
+        "tags": [
+          "hcm_primary_geojson:source-category:entertainment"
+        ],
+        "pace": "relaxed"
+      },
+      "unknown_preferences": [],
+      "matching_candidate_ids": [
+        "hcm_primary_geojson_internal:09918fdb765a04c39491a9673022bde6"
+      ]
+    },
+    {
+      "profile_id": "M5",
+      "synthetic": true,
+      "preferred_category_ids": [
+        "hcm_primary_geojson:source-category:apparel_and_gifts"
+      ],
+      "initial_profile": {
+        "tags": [
+          "hcm_primary_geojson:source-category:apparel_and_gifts"
+        ],
+        "pace": "relaxed"
+      },
+      "unknown_preferences": [],
+      "matching_candidate_ids": [
+        "hcm_primary_geojson_internal:28ad1bea11031ffa62fab32b1c5bca3c"
+      ]
+    }
+  ],
+  "conditions": [
+    "memory_disabled",
+    "short_term",
+    "two_tier"
+  ],
+  "shared_request": "Gợi ý ba điểm phù hợp trong phạm vi dữ liệu đã chọn; chỉ chọn từ danh sách ứng viên được cung cấp.",
+  "candidate_ids": [
+    "hcm_primary_geojson_internal:028e7931c327b776ef68b5eb1782c8b2",
+    "hcm_primary_geojson_internal:033dd327cc9b86b52c8768151afad7f2",
+    "hcm_primary_geojson_internal:09918fdb765a04c39491a9673022bde6",
+    "hcm_primary_geojson_internal:28ad1bea11031ffa62fab32b1c5bca3c",
+    "hcm_primary_geojson_internal:34319b08fbfabb695cd2f7f971855105",
+    "hcm_primary_geojson_internal:eb54df2d039a7bb08f696297fb68b82b",
+    "hcm_primary_geojson_internal:f29d9e96d8ebf331a5753afd3d9c8987",
+    "hcm_primary_geojson_internal:fc8708193009ac2123f5af71624965de"
+  ],
+  "candidate_categories": {
+    "hcm_primary_geojson_internal:028e7931c327b776ef68b5eb1782c8b2": [
+      "hcm_primary_geojson:source-category:specialty_food"
+    ],
+    "hcm_primary_geojson_internal:033dd327cc9b86b52c8768151afad7f2": [
+      "hcm_primary_geojson:source-category:coffee"
+    ],
+    "hcm_primary_geojson_internal:09918fdb765a04c39491a9673022bde6": [
+      "hcm_primary_geojson:source-category:entertainment"
+    ],
+    "hcm_primary_geojson_internal:28ad1bea11031ffa62fab32b1c5bca3c": [
+      "hcm_primary_geojson:source-category:apparel_and_gifts"
+    ],
+    "hcm_primary_geojson_internal:34319b08fbfabb695cd2f7f971855105": [
+      "hcm_primary_geojson:source-category:restaurant"
+    ],
+    "hcm_primary_geojson_internal:eb54df2d039a7bb08f696297fb68b82b": [
+      "hcm_primary_geojson:source-category:specialty_food"
+    ],
+    "hcm_primary_geojson_internal:f29d9e96d8ebf331a5753afd3d9c8987": [
+      "hcm_primary_geojson:source-category:coffee"
+    ],
+    "hcm_primary_geojson_internal:fc8708193009ac2123f5af71624965de": [
+      "hcm_primary_geojson:source-category:specialty_food"
+    ]
+  },
+  "required_lifecycle": [
+    "initial preference",
+    "explicit preference update and contradiction",
+    "session restart",
+    "explicit profile delete",
+    "unknown preference"
+  ],
+  "profiles_are_synthetic": true,
+  "not_human_participants": true,
+  "profile_declarations_are_not_h3_results": true,
+  "no_experiment_results": true,
+  "execution_design_status": "Profile/category declarations only. Matched HTTP lifecycle controls (preference update, contradiction, session restart, delete, unknown preference) and full-cost accounting design are not yet approved; no live H3 run is authorized by this file.",
+  "limitations": [
+    "Profiles are synthetic fixtures, not humans and not H1 participants.",
+    "Preferred categories are source category IDs; matching just proves the declared category exists in the supplied candidate pool.",
+    "No memory system was executed and no H3 effect or lifecycle correctness is claimed.",
+    "Lifetime/HTTP protocol and auxiliary model-call cost coverage remain unapproved and unfrozen."
+  ]
+}

@@ -1,0 +1,1878 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Travel Lung Tung — Trợ lý du lịch TP.HCM</title>
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@6.15.0/dist/maplibre-gl.css">
+<style>
+  :root {
+    color-scheme: light;
+    --bg: #eef1ec;
+    --panel: #f7f8f5;
+    --card: #ffffff;
+    --ink: #18241d;
+    --muted: #5d6b61;
+    --line: #dde4dc;
+    --green: #1f7a4d;
+    --green-dark: #145c39;
+    --citrus: #d9f27a;
+    --citrus-soft: #f0f8d3;
+    --red: #d0342c;
+    --bad: #a12027;
+    --warn: #8a4b00;
+    --shadow: 0 18px 40px rgba(24, 36, 29, .10);
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  button { cursor: pointer; }
+  button:focus-visible, input:focus-visible, select:focus-visible,
+  textarea:focus-visible, summary:focus-visible, [tabindex]:focus-visible {
+    outline: 3px solid #0f7a53;
+    outline-offset: 2px;
+  }
+  .sr-only {
+    position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+    overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+  }
+  .shell {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 72px minmax(0, 1fr);
+    gap: 0;
+  }
+  .rail {
+    background: #12241b;
+    color: #eaf3ec;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    padding: 20px 0;
+  }
+  .brand-mark {
+    width: 40px; height: 40px; border-radius: 14px;
+    background: var(--citrus); color: #17301f;
+    display: grid; place-items: center;
+    font-weight: 800; font-size: .95rem; letter-spacing: -.02em;
+  }
+  .rail-line { width: 1px; flex: 1; background: rgba(234, 243, 236, .18); }
+  .rail-note {
+    writing-mode: vertical-rl;
+    font-size: .68rem; letter-spacing: .18em; text-transform: uppercase;
+    color: #a9bcae;
+  }
+  .app { min-width: 0; padding: 22px; }
+  .topbar {
+    display: flex; flex-wrap: wrap; gap: 16px;
+    align-items: flex-end; justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .eyebrow {
+    margin: 0 0 2px; font-size: .76rem; font-weight: 700;
+    letter-spacing: .14em; text-transform: uppercase; color: var(--green);
+  }
+  h1 { margin: 0; font-size: clamp(1.6rem, 3vw, 2.3rem); letter-spacing: -.03em; }
+  h1 span { color: var(--muted); font-weight: 500; font-size: .55em; letter-spacing: 0; }
+  .source-mini {
+    display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end;
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: 16px; padding: 10px 12px; box-shadow: 0 6px 18px rgba(24,36,29,.05);
+  }
+  .source-mini label { font-size: .7rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+  .source-mini select { min-width: 190px; max-width: 260px; }
+  .source-mini p { flex-basis: 100%; margin: 0; font-size: .78rem; color: var(--muted); }
+  .source-mini p:empty { display: none; }
+  select, input, textarea {
+    background: #fbfcf9; border: 1px solid var(--line);
+    border-radius: 10px; padding: 8px 10px; width: 100%;
+  }
+  textarea { resize: vertical; min-height: 84px; max-height: 180px; }
+  .workspace {
+    display: grid;
+    grid-template-columns: minmax(340px, 42%) minmax(0, 58%);
+    gap: 16px;
+    min-height: calc(100vh - 130px);
+    align-items: stretch;
+  }
+  .chatpane, .mappane {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 24px;
+    box-shadow: var(--shadow);
+    min-width: 0;
+  }
+  .chatpane {
+    display: flex; flex-direction: column;
+    padding: 18px 18px 14px;
+    max-height: calc(100vh - 130px);
+  }
+  .chat-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .chat-head h2 { margin: 0; font-size: 1rem; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--green); }
+  .chat-head p { margin: 0; font-size: .78rem; color: var(--muted); }
+  .chat-scroll {
+    flex: 1; overflow-y: auto; padding: 4px 4px 8px;
+    display: flex; flex-direction: column; gap: 10px; min-height: 180px;
+    scrollbar-width: thin;
+  }
+  .bubble-row { display: flex; }
+  .bubble-row.user { justify-content: flex-end; }
+  .bubble {
+    max-width: 88%;
+    border-radius: 18px;
+    padding: 10px 14px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    box-shadow: 0 4px 14px rgba(24,36,29,.05);
+  }
+  .bubble-row.user .bubble {
+    background: var(--green); color: #fff; border-color: var(--green);
+    border-bottom-right-radius: 6px;
+  }
+  .bubble-row.assistant .bubble { border-bottom-left-radius: 6px; }
+  .bubble-text { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .bubble-note { margin: 0; font-size: .8rem; color: var(--muted); }
+  .welcome { background: var(--citrus-soft); border-color: #dcecaa; }
+  .welcome h3 { margin: 0 0 4px; font-size: .98rem; }
+  .welcome p { margin: 0; font-size: .88rem; color: #435243; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .chip {
+    width: auto; background: #fff; border: 1px solid #cfdcc5;
+    border-radius: 999px; padding: 6px 11px; font-size: .8rem;
+    color: #28492f; text-align: left;
+  }
+  .chip:hover { background: var(--citrus-soft); }
+  .status { margin: 8px 2px 0; font-size: .82rem; font-weight: 600; color: var(--muted); }
+  .status.bad { color: var(--bad); }
+  .status.warn { color: var(--warn); }
+  #error-box {
+    margin-top: 8px; padding: 10px 12px; border-radius: 12px;
+    border: 1px solid #ecc9c9; background: #fff4f4; font-size: .84rem;
+  }
+  #error-box p { margin: 0 0 4px; }
+  #error-box p:last-child { margin-bottom: 0; }
+  .composer {
+    border-top: 1px solid var(--line);
+    padding-top: 12px; margin-top: 10px;
+  }
+  .composer textarea {
+    background: #fff; border-radius: 16px; padding: 12px 14px;
+  }
+  .composer-row { display: flex; gap: 8px; margin-top: 8px; }
+  .composer-row button {
+    width: auto; border-radius: 12px; padding: 9px 16px;
+    border: 1px solid var(--line); background: #fff; font-weight: 650;
+  }
+  button.primary {
+    background: var(--green); border-color: var(--green); color: #fff;
+  }
+  button.primary:hover { background: var(--green-dark); }
+  button:disabled { opacity: .5; cursor: not-allowed; }
+  .hint { margin: 6px 2px 0; font-size: .72rem; color: var(--muted); }
+  .settings { margin-top: 10px; }
+  .settings summary {
+    cursor: pointer; font-size: .82rem; font-weight: 700; color: var(--green);
+    list-style: none; display: inline-flex; align-items: center; gap: 6px;
+  }
+  .settings summary::-webkit-details-marker { display: none; }
+  .settings summary::before { content: "+"; font-weight: 800; }
+  .settings[open] summary::before { content: "−"; }
+  .settings-grid {
+    display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    margin-top: 10px; padding: 12px; border-radius: 14px;
+    background: #fff; border: 1px solid var(--line);
+  }
+  .settings-grid label { display: block; font-size: .72rem; font-weight: 700; color: var(--muted); margin-bottom: 3px; }
+  .settings-grid input, .settings-grid select { padding: 7px 9px; }
+  fieldset { border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; margin: 0; }
+  legend { font-size: .72rem; font-weight: 700; color: var(--muted); padding: 0 4px; }
+  .radio-row { display: flex; gap: 14px; }
+  .radio-row label { display: flex; gap: 5px; align-items: center; font-size: .85rem; font-weight: 500; color: var(--ink); margin: 0; }
+  .radio-row input { width: auto; }
+  .mappane {
+    position: relative; overflow: hidden; display: flex; flex-direction: column;
+    background: #dfe7dc;
+  }
+  .map-head {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    padding: 12px 16px; background: rgba(255,255,255,.94);
+    border-bottom: 1px solid var(--line); z-index: 2;
+  }
+  .map-head h2 { margin: 0; font-size: 1rem; }
+  .map-head p { margin: 1px 0 0; font-size: .74rem; color: var(--muted); }
+  .map-head button {
+    width: auto; padding: 7px 14px; border-radius: 999px;
+    border: 1px solid var(--line); background: #fff; font-weight: 700; font-size: .8rem;
+  }
+  .map-head button[aria-pressed="true"] { background: var(--citrus); border-color: #c9e06b; }
+  .map { flex: 1; min-height: 360px; position: relative; background: #dfe7dc; }
+  .map-status {
+    margin: 0; padding: 8px 14px; font-size: .78rem; color: #33453a;
+    background: rgba(255,255,255,.9); border-top: 1px solid var(--line);
+  }
+  .map-status.bad { color: var(--bad); }
+  #map-retry {
+    position: absolute; right: 14px; bottom: 44px; z-index: 3;
+    width: auto; padding: 8px 12px; border-radius: 10px;
+    border: 1px solid var(--line); background: #fff; font-weight: 650; font-size: .8rem;
+  }
+  .attribution {
+    margin: 0; padding: 6px 12px; font-size: .68rem; color: #5b6a5f;
+    background: rgba(255,255,255,.92); border-top: 1px solid var(--line);
+  }
+  .itinerary {
+    position: absolute; left: 12px; right: 12px; bottom: 62px; z-index: 2;
+    max-height: 42%; overflow-y: auto;
+    background: rgba(255,255,255,.97); border: 1px solid var(--line);
+    border-radius: 18px; box-shadow: var(--shadow); padding: 12px 14px;
+  }
+  .itinerary h2 { margin: 0 0 2px; font-size: .92rem; }
+  #itinerary-summary { margin: 0 0 8px; font-size: .76rem; color: var(--muted); }
+  ol.stops { list-style: none; padding: 0; margin: 0; display: grid; gap: 7px; }
+  ol.stops > li {
+    border: 1px solid var(--line); border-radius: 12px; padding: 8px 10px;
+    cursor: pointer; background: #fff;
+  }
+  ol.stops > li:hover { border-color: #b7cbb0; }
+  ol.stops > li.selected { border-color: var(--green); box-shadow: 0 0 0 2px rgba(31,122,77,.18); }
+  .stop-head { display: flex; flex-wrap: wrap; gap: 6px; align-items: baseline; }
+  .stop-name { font-weight: 700; font-size: .88rem; }
+  .tag {
+    border: 1px solid var(--line); border-radius: 999px; padding: 0 7px;
+    font-size: .7rem; color: var(--muted); background: #f7f9f4;
+  }
+  .fact { margin: 2px 0; font-size: .78rem; }
+  .fact b { font-weight: 650; }
+  .route-note { margin: 8px 0 0; font-size: .74rem; color: var(--warn); }
+  .unknowns { margin: 8px 0 0; padding-left: 18px; font-size: .74rem; color: var(--muted); }
+  .unknowns:empty { display: none; }
+  .place-card-host {
+    position: absolute; z-index: 4; left: 16px; bottom: 74px; width: min(330px, calc(100% - 32px));
+  }
+  .place-card {
+    background: #fff; border: 1px solid var(--line); border-radius: 16px;
+    box-shadow: var(--shadow); padding: 14px; min-height: 190px;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .place-card h3 { margin: 0; font-size: 1rem; }
+  .place-card .place-kicker { margin: 0; font-size: .72rem; font-weight: 700; color: var(--green); text-transform: uppercase; letter-spacing: .08em; }
+  .place-card .fact { font-size: .8rem; }
+  .place-card details { font-size: .74rem; color: var(--muted); }
+  .place-card .place-close {
+    align-self: flex-start; margin-top: auto; width: auto;
+    border: 1px solid var(--line); border-radius: 9px; padding: 5px 10px;
+    font-size: .78rem; background: #f7f9f4;
+  }
+  .map-pin {
+    width: 30px; height: 30px; padding: 0; border-radius: 50% 50% 50% 4px;
+    transform: rotate(-45deg);
+    background: var(--red); border: 2px solid #fff; color: #fff;
+    font-size: .8rem; font-weight: 800;
+    box-shadow: 0 4px 10px rgba(0,0,0,.28);
+    display: grid; place-items: center;
+  }
+  .map-pin span { transform: rotate(45deg); }
+  .map-pin.selected { background: #8f1712; box-shadow: 0 0 0 4px rgba(208,52,44,.25); }
+  .maplibregl-popup-content { border-radius: 16px !important; padding: 0 !important; overflow: hidden; }
+  .maplibregl-popup-content .place-card { border: 0; box-shadow: none; }
+  .maplibregl-popup { z-index: 5; }
+  .compat { display: none; }
+  @media (max-width: 980px) {
+    .shell { grid-template-columns: 1fr; }
+    .rail { display: none; }
+    .app { padding: 14px; }
+    .workspace { grid-template-columns: 1fr; min-height: 0; }
+    .chatpane { max-height: none; }
+    .mappane { min-height: 560px; }
+    .map { min-height: 340px; }
+    .source-mini { width: 100%; }
+    .source-mini select { flex: 1; min-width: 0; max-width: none; }
+  }
+  .area-actions { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+  .area-actions button { font-size: 12px; padding: 6px 8px; }
+  #area[multiple] { min-height: 96px; }
+  .route-note { font-size: 12px; }
+  @media (max-width: 620px) {
+    .app { padding: 10px; }
+    .topbar { margin-bottom: 10px; }
+    .chatpane, .mappane { border-radius: 18px; }
+    .composer-row { flex-direction: column; }
+    .composer-row button { width: 100%; }
+    .mappane { min-height: 520px; }
+    .itinerary { position: static; max-height: none; margin: 10px 12px 0; }
+    .map-status, .attribution { position: relative; }
+    .place-card-host { position: static; width: auto; margin: 10px 12px 0; }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+  <nav class="rail" aria-label="Travel Lung Tung">
+    <div class="brand-mark" aria-hidden="true">TLT</div>
+    <div class="rail-line"></div>
+    <p class="rail-note">Travel Lung Tung</p>
+  </nav>
+  <div class="app">
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">Trợ lý du lịch AI</p>
+        <h1>TP.HCM <span>· khám phá theo cách của bạn</span></h1>
+      </div>
+      <div class="source-mini" aria-label="Vùng dữ liệu nguồn">
+        <div>
+          <label for="snapshot">Ảnh dữ liệu OSM</label>
+          <select id="snapshot"><option value="">Đang tải…</option></select>
+        </div>
+        <div>
+          <label for="area">Vùng nguồn (chọn một hoặc nhiều)</label>
+          <select id="area" multiple size="4" disabled><option value="">Chọn ảnh dữ liệu trước</option></select>
+          <div class="area-actions">
+            <button id="area-all" type="button" disabled>Toàn bộ vùng trong tập dữ liệu TP.HCM</button>
+            <button id="area-clear" type="button" disabled>Bỏ chọn vùng</button>
+          </div>
+          <p class="hint" id="area-hint">Giữ Ctrl/Cmd để chọn nhiều vùng. Nhãn vùng là nhãn dữ liệu nguồn, không phải địa giới hành chính hiện tại.</p>
+        </div>
+        <p id="source-notice"></p>
+        <p id="source-summary"></p>
+      </div>
+    </header>
+
+    <div class="workspace">
+      <section class="chatpane" aria-label="Trò chuyện với trợ lý">
+        <div class="chat-head">
+          <span class="dot" aria-hidden="true"></span>
+          <div>
+            <h2>Trò chuyện</h2>
+            <p>Hỏi tự nhiên, mình gợi ý điểm đến có trong dữ liệu.</p>
+          </div>
+        </div>
+        <div id="chat-log" class="chat-scroll" role="log" aria-live="polite" aria-label="Hội thoại">
+          <div class="bubble-row assistant">
+            <div class="bubble welcome">
+              <h3>Xin chào, mình là trợ lý Travel Lung Tung.</h3>
+              <p>Bạn muốn một buổi sáng nhẹ nhàng, một vòng ăn uống hay lịch trình hai điểm ở TP.HCM? Chọn gợi ý hoặc tự nhập nhu cầu.</p>
+              <div class="chips" role="group" aria-label="Gợi ý nhanh">
+                <button type="button" class="chip" data-chip="Một buổi chiều nhẹ nhàng ở Quận 1, ưu tiên điểm tham quan.">Một buổi chiều nhẹ nhàng</button>
+                <button type="button" class="chip" data-chip="Gợi ý quán ăn địa phương gần khu vực đang chọn, đi bộ.">Quán ăn gần đây</button>
+                <button type="button" class="chip" data-chip="Hai điểm tham quan khác nhau trong ngày, đi xe hơi, mỗi điểm khoảng 45 phút.">Hai điểm, đi xe hơi</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p id="status" class="status" role="status" aria-live="polite">Chưa có yêu cầu nào.</p>
+        <div id="error-box" hidden></div>
+        <div class="composer">
+          <label class="sr-only" for="message">Bạn muốn gì?</label>
+          <textarea id="message" maxlength="8000" placeholder="Ví dụ: Gợi ý quán ăn và điểm tham quan nhẹ nhàng cho buổi chiều."></textarea>
+          <div class="composer-row">
+            <button id="ask" class="primary" type="button" disabled>Gửi tin nhắn</button>
+            <button id="plan" type="button" disabled>Tạo lịch trình</button>
+            <button id="cancel-plan" type="button" hidden>Hủy chờ</button>
+          </div>
+          <p class="hint">Enter để gửi · Shift+Enter để xuống dòng</p>
+        </div>
+        <details id="trip-settings" class="settings">
+          <summary>Tùy chọn chuyến đi</summary>
+          <div class="settings-grid">
+            <div>
+              <label for="start-date">Ngày bắt đầu</label>
+              <input id="start-date" type="date">
+            </div>
+            <div>
+              <label for="days">Số ngày (1–14)</label>
+              <input id="days" type="number" min="1" max="14" step="1" value="1">
+            </div>
+            <div>
+              <label for="travelers">Số người (1–50)</label>
+              <input id="travelers" type="number" min="1" max="50" step="1" value="2">
+            </div>
+            <div>
+              <label for="travel-type">Kiểu chuyến đi</label>
+              <input id="travel-type" value="self-explore, relaxing, sightseeing">
+            </div>
+            <div>
+              <label for="budget">Ngân sách (mô tả)</label>
+              <input id="budget" value="1.500.000 VND cho cả nhóm">
+            </div>
+            <div>
+              <label for="visit-minutes">Thời gian mỗi điểm (phút)</label>
+              <input id="visit-minutes" type="number" min="1" max="1440" step="1" placeholder="Để trống = giả định">
+            </div>
+            <div>
+              <label for="min-stops">Số điểm tối thiểu</label>
+              <input id="min-stops" type="number" min="0" step="1" placeholder="Không bắt buộc">
+            </div>
+            <div>
+              <label for="max-stops">Số điểm tối đa</label>
+              <input id="max-stops" type="number" min="1" step="1" placeholder="Không bắt buộc">
+            </div>
+            <div>
+              <fieldset>
+                <legend>Cách di chuyển</legend>
+                <div class="radio-row">
+                  <label><input type="radio" id="transport-car" name="transport" value="car" checked> Xe hơi</label>
+                  <label><input type="radio" id="transport-foot" name="transport" value="foot"> Đi bộ</label>
+                </div>
+              </fieldset>
+            </div>
+          </div>
+        </details>
+      </section>
+
+      <section class="mappane" aria-label="Bản đồ và lịch trình">
+        <div class="map-head">
+          <div>
+            <h2>Bản đồ TP.HCM</h2>
+            <p>Toạ độ điểm dừng lấy từ dữ liệu nguồn đã chọn.</p>
+          </div>
+          <button id="map-mode-toggle" type="button" aria-pressed="true" disabled>3D</button>
+        </div>
+        <div id="map" class="map" aria-label="Bản đồ thành phố Hồ Chí Minh"></div>
+        <p id="map-status" class="map-status" role="status" aria-live="polite">Đang tải bản đồ nền…</p>
+        <button id="map-retry" type="button" hidden>Thử tải lại bản đồ</button>
+        <p class="attribution">© OpenStreetMap contributors · OpenFreeMap · OpenMapTiles. Bản đồ nền cần mạng và WebGL; độ cao khối nhà là ước lượng hiển thị, không phải khảo sát.</p>
+        <div id="place-card-host" class="place-card-host" hidden></div>
+        <section id="itinerary-wrap" class="itinerary" aria-label="Lịch trình" hidden>
+          <h2>Lịch trình</h2>
+          <p id="itinerary-summary"></p>
+          <ol id="stops" class="stops"></ol>
+          <p class="route-note">Đường đi trên bản đồ chỉ vẽ khi máy chủ trả về hình học đường thực tế (GraphHopper) cho đúng chặng đã chọn; không nối thẳng các ghim.</p>
+          <p id="route-notice" class="route-note" role="status" aria-live="polite"></p>
+          <ul id="route-directions" class="unknowns" aria-label="Hướng dẫn đường đi thực tế"></ul>
+          <ul id="coord-unavailable" class="unknowns" aria-label="Điểm chưa ghim được"></ul>
+          <ul id="unknowns" class="unknowns" aria-label="Dữ liệu chưa xác minh"></ul>
+        </section>
+      </section>
+    </div>
+  </div>
+</div>
+
+<div class="compat" aria-hidden="true">
+  <div id="reply-wrap" hidden><p id="reply"></p><div id="chat-meta"></div></div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var MAPLIBRE_ESM = "https://unpkg.com/maplibre-gl@6.15.0/dist/maplibre-gl.mjs";
+  var MAP_STYLE = "https://tiles.openfreemap.org/styles/bright";
+  var MAP_SOURCE_URL = "https://tiles.openfreemap.org/planet";
+  var HCMC_CENTER = [106.7009, 10.7769];
+  var HCMC_VIEW = { zoom: 15.5, pitch: 55, bearing: -20 };
+  var ENVELOPE = { minLng: 106.3, minLat: 10.3, maxLng: 107.1, maxLat: 11.2 };
+  var ROUTE_NOTE = "Thứ tự điểm dừng; bản đồ chưa hiển thị đường đi chi tiết.";
+
+  function clockLabel(iso) {
+    if (typeof iso !== "string" || iso.length < 16) { return "chưa rõ"; }
+    return iso.slice(11, 16);
+  }
+
+  function safeText(value) {
+    if (value === undefined || value === null) { return ""; }
+    if (typeof value === "string") { return value; }
+    if (typeof value === "number" || typeof value === "boolean") { return String(value); }
+    try { return JSON.stringify(value); } catch (e) { return ""; }
+  }
+
+  function poiLabel(poi) {
+    if (poi && typeof poi.name === "string" && poi.name) { return poi.name; }
+    if (poi && poi.id) { return "POI " + poi.id; }
+    return "Điểm chưa có tên";
+  }
+
+  function categoryLabel(poi) {
+    if (!poi || !Array.isArray(poi.poi_categories) || !poi.poi_categories.length) {
+      return "Chưa rõ loại hình";
+    }
+    return poi.poi_categories.map(function (c) {
+      return c && c.name ? c.name : "";
+    }).filter(Boolean).join(", ") || "Chưa rõ loại hình";
+  }
+
+  function menuPrice(poi) {
+    if (!poi || !Array.isArray(poi.menu) || !poi.menu.length) { return null; }
+    var priced = poi.menu.filter(function (item) {
+      return item && item.price !== null && item.price !== undefined;
+    });
+    if (!priced.length) { return null; }
+    var item = priced[0];
+    return String(item.price) + (item.currency ? " " + item.currency : "");
+  }
+
+  function streetAddress(poi) {
+    var address = poi && poi.address && typeof poi.address === "object" ? poi.address : null;
+    if (!address) { return "chưa rõ"; }
+    var parts = [address.street_name, address.ward, address.district,
+      address.city, address.nation].filter(function (part) {
+      return typeof part === "string" && part.trim();
+    });
+    return parts.length ? parts.join(", ") : "chưa rõ";
+  }
+
+  function validCoordinate(poi) {
+    if (!poi) { return null; }
+    var lng = poi.longitude;
+    var lat = poi.latitude;
+    if (typeof lng !== "number" || typeof lat !== "number") { return null; }
+    if (!isFinite(lng) || !isFinite(lat)) { return null; }
+    if (lng < ENVELOPE.minLng || lng > ENVELOPE.maxLng) { return null; }
+    if (lat < ENVELOPE.minLat || lat > ENVELOPE.maxLat) { return null; }
+    return { longitude: lng, latitude: lat };
+  }
+
+  function projectStops(reply) {
+    var stops = reply && Array.isArray(reply.stops) ? reply.stops : [];
+    var pins = [];
+    var unavailable = [];
+    stops.forEach(function (stop, index) {
+      var poi = stop && stop.poi ? stop.poi : null;
+      var coord = validCoordinate(poi);
+      if (!coord || !poi || poi.id === undefined || poi.id === null || poi.id === "") {
+        unavailable.push({
+          index: index,
+          name: poiLabel(poi),
+          reason: coord ? "thiếu mã điểm" : "thiếu toạ độ hợp lệ"
+        });
+        return;
+      }
+      pins.push({
+        id: String(poi.id),
+        index: index,
+        name: poiLabel(poi),
+        category: categoryLabel(poi),
+        longitude: coord.longitude,
+        latitude: coord.latitude,
+        stop: stop,
+        poi: poi
+      });
+    });
+    return { pins: pins, unavailable: unavailable };
+  }
+
+  function createTravelApp(deps) {
+    var doc = deps.document;
+    var loadMapLibre = deps.loadMapLibre;
+    var doFetch = deps.fetch;
+    var now = deps.now || function () { return Date.now(); };
+
+    var state = {
+      snapshots: [],
+      areas: [],
+      selection: null,
+      sessionId: "ui-" + now().toString(36) + "-" +
+        Math.random().toString(36).slice(2, 10),
+      chatBusy: false,
+      planBusy: false,
+      chatToken: 0,
+      planToken: 0,
+      planController: null,
+      lastUserMessage: "",
+      generation: 0,
+      catalogGeneration: 0,
+      conversation: [],
+      itinerary: null,
+      projection: null,
+      selectedPoiId: null,
+      routeGeometry: null,
+      map: null,
+      maplibre: null,
+      mapLoading: false,
+      mapReady: false,
+      mapFailed: false,
+      popup: null,
+      markers: [],
+      is3d: true
+    };
+
+    function byId(id) { return doc.getElementById(id); }
+
+    function el(tag, text, className) {
+      var node = doc.createElement(tag);
+      if (text !== undefined && text !== null) { node.textContent = String(text); }
+      if (className) { node.className = className; }
+      return node;
+    }
+
+    function clear(node) {
+      while (node.firstChild) { node.removeChild(node.firstChild); }
+    }
+
+    function show(node, visible) { node.hidden = !visible; }
+
+    var statusEl = byId("status");
+    var errorBox = byId("error-box");
+    var snapshotSel = byId("snapshot");
+    var areaSel = byId("area");
+    var noticeEl = byId("source-notice");
+    var summaryEl = byId("source-summary");
+    var askBtn = byId("ask");
+    var planBtn = byId("plan");
+    var cancelPlanBtn = byId("cancel-plan");
+    var areaAllBtn = byId("area-all");
+    var areaClearBtn = byId("area-clear");
+    var areaHint = byId("area-hint");
+    var messageEl = byId("message");
+    var chatLog = byId("chat-log");
+    var mapEl = byId("map");
+    var mapStatusEl = byId("map-status");
+    var mapRetry = byId("map-retry");
+    var mapModeBtn = byId("map-mode-toggle");
+    var placeCardHost = byId("place-card-host");
+    var itineraryWrap = byId("itinerary-wrap");
+    var stopsList = byId("stops");
+    var summaryOut = byId("itinerary-summary");
+    var coordUnavailable = byId("coord-unavailable");
+    var unknownsList = byId("unknowns");
+    var routeNotice = byId("route-notice");
+    var routeDirections = byId("route-directions");
+
+    function setStatus(text, kind) {
+      statusEl.textContent = text;
+      statusEl.className = "status" + (kind ? " " + kind : "");
+    }
+
+    function setMapStatus(text, kind) {
+      mapStatusEl.textContent = text;
+      mapStatusEl.className = "map-status" + (kind ? " " + kind : "");
+    }
+
+    function syncBusy() {
+      askBtn.disabled = state.chatBusy || !state.selection;
+      planBtn.disabled = state.planBusy || !state.selection;
+      cancelPlanBtn.hidden = !state.planBusy;
+      var hasAreas = state.areas.length > 0;
+      areaAllBtn.disabled = !hasAreas;
+      areaClearBtn.disabled = !hasAreas;
+    }
+
+    function setChatBusy(busy) {
+      state.chatBusy = busy;
+      syncBusy();
+    }
+
+    function setPlanBusy(busy) {
+      state.planBusy = busy;
+      syncBusy();
+    }
+
+    // Legacy callers only need a resync now that the two actions are separate.
+    function setBusy() { syncBusy(); }
+
+    function abortPlanWait() {
+      if (state.planController && typeof state.planController.abort === "function") {
+        try { state.planController.abort(); } catch (e) { /* already aborted */ }
+      }
+      state.planController = null;
+    }
+
+    function transportMode() {
+      return byId("transport-foot").checked ? "foot" : "car";
+    }
+
+    function showError(code, message, details) {
+      clear(errorBox);
+      show(errorBox, true);
+      errorBox.appendChild(el("p", "Lỗi: " + (code || "không xác định"), "status bad"));
+      if (message) { errorBox.appendChild(el("p", message)); }
+      if (details !== undefined && details !== null) {
+        errorBox.appendChild(el("p", safeText(details), "muted"));
+      }
+    }
+
+    function hideError() { show(errorBox, false); clear(errorBox); }
+
+    function detailFromBody(body) {
+      if (!body || typeof body !== "object") { return { code: "http_error", message: "" }; }
+      if (body.error && typeof body.error === "object") {
+        return { code: body.error.code, message: body.error.message,
+                 details: body.error.details };
+      }
+      if (body.detail && typeof body.detail === "object") {
+        return { code: body.detail.code, message: body.detail.message,
+                 details: body.detail.details };
+      }
+      if (typeof body.detail === "string") { return { code: "http_error", message: body.detail }; }
+      return { code: body.status || "http_error", message: "" };
+    }
+
+    async function requestJson(url, options) {
+      var response = await doFetch(url, options);
+      var body = null;
+      try { body = await response.json(); } catch (e) { body = null; }
+      if (!response.ok) {
+        var info = detailFromBody(body);
+        var err = new Error(info.message || ("HTTP " + response.status));
+        err.code = info.code;
+        err.details = info.details;
+        throw err;
+      }
+      return body;
+    }
+
+    function appendBubble(role, text, className) {
+      var row = el("div", null, "bubble-row " + role);
+      var bubble = el("div", null, "bubble" + (className ? " " + className : ""));
+      bubble.appendChild(el("p", text, "bubble-text"));
+      row.appendChild(bubble);
+      chatLog.appendChild(row);
+      if (typeof chatLog.scrollHeight === "number") { chatLog.scrollTop = chatLog.scrollHeight; }
+      state.conversation.push({ role: role, text: safeText(text) });
+      return bubble;
+    }
+
+    function resetConversation(reason) {
+      clear(chatLog);
+      state.conversation = [];
+      var note = appendBubble("assistant", reason, "context-note");
+      note.firstChild.className = "bubble-text bubble-note";
+    }
+
+    function selectedSnapshot() {
+      var index = snapshotSel.selectedIndex;
+      return index >= 0 ? state.snapshots[index] : null;
+    }
+
+    async function loadSnapshots() {
+      var token = ++state.catalogGeneration;
+      clear(snapshotSel);
+      try {
+        var data = await requestJson("/catalog/snapshots", { method: "GET" });
+        if (token !== state.catalogGeneration) { return; }
+        state.snapshots = Array.isArray(data.snapshots) ? data.snapshots : [];
+        if (data.notice) { noticeEl.textContent = data.notice; }
+        if (!state.snapshots.length) {
+          var none = el("option", "Không có ảnh dữ liệu");
+          none.value = "";
+          snapshotSel.appendChild(none);
+          setStatus("Không tìm thấy ảnh dữ liệu nguồn nào.", "warn");
+          return;
+        }
+        state.snapshots.forEach(function (snap) {
+          var option = el("option", snap.dataset_namespace + " · " +
+            snap.valid_record_count + " bản ghi");
+          option.value = snap.input_sha256;
+          snapshotSel.appendChild(option);
+        });
+        snapshotSel.selectedIndex = 0;
+        await loadAreas(token);
+      } catch (e) {
+        if (token !== state.catalogGeneration) { return; }
+        clear(snapshotSel);
+        var failed = el("option", "Không tải được danh mục");
+        failed.value = "";
+        snapshotSel.appendChild(failed);
+        setStatus("Không tải được danh mục vùng nguồn.", "bad");
+        showError(e.code, e.message, e.details);
+      }
+    }
+
+    async function loadAreas(catalogToken) {
+      var token = catalogToken === undefined ? ++state.catalogGeneration : catalogToken;
+      var snap = selectedSnapshot();
+      clear(areaSel);
+      areaSel.disabled = true;
+      state.areas = [];
+      state.selection = null;
+      setBusy(false);
+      if (!snap) { return; }
+      var query = "?dataset_namespace=" + encodeURIComponent(snap.dataset_namespace) +
+        "&input_sha256=" + encodeURIComponent(snap.input_sha256);
+      try {
+        var data = await requestJson("/catalog/source_areas" + query, { method: "GET" });
+        if (token !== state.catalogGeneration) { return; }
+        state.areas = Array.isArray(data.source_areas) ? data.source_areas : [];
+        if (data.notice) { noticeEl.textContent = data.notice; }
+        if (!state.areas.length) {
+          var none = el("option", "Ảnh dữ liệu này không có vùng nguồn");
+          none.value = "";
+          areaSel.appendChild(none);
+          summaryEl.textContent = "";
+          if (areaHint) {
+            areaHint.textContent = "Ảnh dữ liệu này không có vùng nguồn đã gán; không thể gửi yêu cầu.";
+          }
+          syncBusy();
+          return;
+        }
+        state.areas.forEach(function (area, index) {
+          var option = el("option", area.source_area_label + " (" +
+            area.valid_record_count + " bản ghi)");
+          option.value = String(index);
+          areaSel.appendChild(option);
+        });
+        areaSel.disabled = false;
+        // Default: every currently discovered assigned area in this exact
+        // snapshot. Explicit concrete ids only; no administrative claim.
+        for (var i = 0; i < areaSel.options.length; i += 1) {
+          areaSel.options[i].selected = true;
+        }
+        applyAreaSelection();
+      } catch (e) {
+        if (token !== state.catalogGeneration) { return; }
+        var failed = el("option", "Không tải được vùng nguồn");
+        failed.value = "";
+        areaSel.appendChild(failed);
+        setStatus("Không tải được danh sách vùng nguồn.", "bad");
+        showError(e.code, e.message, e.details);
+      }
+    }
+
+    function selectedAreaIndices() {
+      var indices = [];
+      for (var i = 0; i < areaSel.options.length; i += 1) {
+        if (areaSel.options[i].selected) { indices.push(Number(areaSel.options[i].value)); }
+      }
+      return indices.filter(function (index) {
+        return Number.isInteger(index) && index >= 0 && index < state.areas.length;
+      });
+    }
+
+    function buildSelection(indices) {
+      if (!indices.length) { return null; }
+      var first = state.areas[indices[0]];
+      if (!first || !first.selection) { return null; }
+      var ids = [];
+      for (var i = 0; i < indices.length; i += 1) {
+        var area = state.areas[indices[i]];
+        if (!area || !area.selection) { return null; }
+        ids.push(area.selection.source_area_id);
+      }
+      ids.sort();
+      var selection = {
+        dataset_namespace: first.selection.dataset_namespace,
+        input_sha256: first.selection.input_sha256
+      };
+      if (ids.length === 1) {
+        selection.source_area_id = ids[0];
+      } else {
+        selection.source_area_ids = ids;
+      }
+      return selection;
+    }
+
+    function applyAreaSelection() {
+      var indices = selectedAreaIndices();
+      var selection = buildSelection(indices);
+      if (!selection) {
+        state.selection = null;
+        summaryEl.textContent = "";
+        if (areaHint) {
+          areaHint.textContent = state.areas.length
+            ? "Chưa chọn vùng nào; hãy chọn ít nhất một vùng để gửi yêu cầu."
+            : "Ảnh dữ liệu này không có vùng nguồn đã gán; không thể gửi yêu cầu.";
+        }
+        syncBusy();
+        return;
+      }
+      state.selection = selection;
+      var labels = indices.map(function (index) {
+        return state.areas[index].source_area_label;
+      });
+      var all = indices.length === state.areas.length;
+      var parts = [all
+        ? "Đang chọn toàn bộ " + indices.length + " vùng trong tập dữ liệu TP.HCM"
+        : "Đang chọn " + indices.length + " vùng: " + labels.join("; ")];
+      var first = state.areas[indices[0]];
+      if (first.raw_city || first.raw_area) {
+        parts.push("nhãn dữ liệu gốc: " + [first.raw_city, first.raw_area]
+          .filter(Boolean).join(" / ") + (indices.length > 1 ? " (vùng đầu tiên)" : ""));
+      }
+      summaryEl.textContent = parts.join(" · ");
+      if (areaHint) {
+        areaHint.textContent = "Nhãn vùng là dữ liệu nguồn, không phải địa giới hành chính hiện tại.";
+      }
+      syncBusy();
+    }
+
+    function selectAllAreas() {
+      for (var i = 0; i < areaSel.options.length; i += 1) {
+        areaSel.options[i].selected = true;
+      }
+      onAreaChange();
+    }
+
+    function clearAreaSelection() {
+      for (var i = 0; i < areaSel.options.length; i += 1) {
+        areaSel.options[i].selected = false;
+      }
+      onAreaChange();
+    }
+
+    function newSessionId() {
+      return "ui-" + now().toString(36) + "-" + Math.random().toString(36).slice(2, 10);
+    }
+
+    function invalidateResults() {
+      state.generation += 1;
+      state.chatToken += 1;
+      state.planToken += 1;
+      abortPlanWait();
+      state.chatBusy = false;
+      state.planBusy = false;
+      state.itinerary = null;
+      state.projection = null;
+      state.selectedPoiId = null;
+      state.routeGeometry = null;
+      closePlaceCard();
+      clearMarkers();
+      clearRouteLayers();
+      if (routeNotice) { routeNotice.textContent = ""; }
+      if (routeDirections) { clear(routeDirections); }
+      show(itineraryWrap, false);
+      clear(stopsList);
+      clear(coordUnavailable);
+      clear(unknownsList);
+      summaryOut.textContent = "";
+      syncBusy();
+    }
+
+    function onSourceChange(reason, options) {
+      invalidateResults();
+      state.sessionId = newSessionId();
+      resetConversation(reason);
+      return options;
+    }
+
+    function onModeChange() {
+      onSourceChange("Đã đổi cách di chuyển; hội thoại và kết quả cũ đã được xoá. Hãy hỏi lại hoặc tạo lịch trình mới.");
+      setStatus("Đã đổi cách di chuyển; hội thoại và kết quả cũ đã được xoá. Hãy hỏi lại hoặc tạo lịch trình mới.", "warn");
+    }
+
+    function clearMarkers() {
+      state.markers.forEach(function (marker) {
+        try { marker.remove(); } catch (e) { /* marker already detached */ }
+      });
+      state.markers = [];
+    }
+
+    var ROUTE_SOURCE_ID = "demo152-route";
+    var ROUTE_LAYER_ID = "demo152-route-line";
+
+    function clearRouteLayers() {
+      var map = state.map;
+      if (!map) { return; }
+      try {
+        if (typeof map.getLayer === "function" && map.getLayer(ROUTE_LAYER_ID)) {
+          map.removeLayer(ROUTE_LAYER_ID);
+        }
+      } catch (e) { /* layer already gone */ }
+      try {
+        if (typeof map.getSource === "function" && map.getSource(ROUTE_SOURCE_ID)) {
+          map.removeSource(ROUTE_SOURCE_ID);
+        }
+      } catch (e) { /* source already gone */ }
+    }
+
+    function routeCoordinate(position) {
+      if (!Array.isArray(position) || position.length !== 2) { return null; }
+      var longitude = Number(position[0]);
+      var latitude = Number(position[1]);
+      if (!isFinite(longitude) || !isFinite(latitude)) { return null; }
+      if (longitude < -180 || longitude > 180 || latitude < -90 || latitude > 90) {
+        return null;
+      }
+      return [longitude, latitude];
+    }
+
+    function safeRouteGeometry(planning) {
+      var raw = planning && planning.route_geometry;
+      if (!raw || typeof raw !== "object") { return null; }
+      if (raw.type !== "FeatureCollection" || !Array.isArray(raw.features)) { return null; }
+      var features = [];
+      raw.features.forEach(function (feature) {
+        if (!feature || typeof feature !== "object") { return; }
+        var geometry = feature.geometry;
+        var properties = feature.properties;
+        if (!geometry || geometry.type !== "LineString" ||
+            !Array.isArray(geometry.coordinates) ||
+            geometry.coordinates.length < 2 || geometry.coordinates.length > 20000) {
+          return;
+        }
+        if (!properties || properties.provenance !== "graphhopper") { return; }
+        if (properties.transport_mode !== "car" && properties.transport_mode !== "foot") {
+          return;
+        }
+        var coordinates = [];
+        for (var i = 0; i < geometry.coordinates.length; i += 1) {
+          var position = routeCoordinate(geometry.coordinates[i]);
+          if (!position) { return; }
+          coordinates.push(position);
+        }
+        features.push({
+          type: "Feature",
+          geometry: { type: "LineString", coordinates: coordinates },
+          properties: {
+            day_id: safeText(properties.day_id),
+            from_poi_id: safeText(properties.from_poi_id),
+            to_poi_id: safeText(properties.to_poi_id),
+            transport_mode: properties.transport_mode,
+            provenance: "graphhopper"
+          }
+        });
+      });
+      return {
+        type: "FeatureCollection",
+        features: features,
+        transport_mode: raw.transport_mode === "foot" ? "foot" : "car",
+        missing_geometry_count: typeof raw.missing_geometry_count === "number"
+          ? raw.missing_geometry_count : 0
+      };
+    }
+
+    function renderRouteGeometry() {
+      var route = state.routeGeometry;
+      var map = state.map;
+      if (!route) { return; }
+      if (!map || !state.mapReady || typeof map.addSource !== "function") { return; }
+      clearRouteLayers();
+      if (!route.features.length) { return; }
+      try {
+        map.addSource(ROUTE_SOURCE_ID, { type: "geojson", data: route });
+        map.addLayer({
+          id: ROUTE_LAYER_ID,
+          type: "line",
+          source: ROUTE_SOURCE_ID,
+          layout: { "line-join": "round", "line-cap": "round" },
+          paint: {
+            "line-color": ["match", ["get", "transport_mode"],
+              "foot", "#1f7a4d", "car", "#c0392b", "#c0392b"],
+            "line-width": 4,
+            "line-opacity": 0.85
+          }
+        });
+      } catch (e) {
+        setMapStatus("Không vẽ được tuyến đường thực tế; các ghim và danh sách điểm vẫn dùng được.", "warn");
+      }
+    }
+
+    function renderRouteDirections(planning, geometry) {
+      if (!routeDirections || !routeNotice) { return; }
+      clear(routeDirections);
+      routeNotice.textContent = "";
+      var groups = planning && Array.isArray(planning.route_instructions)
+        ? planning.route_instructions : [];
+      var stepCount = 0;
+      groups.forEach(function (group) {
+        if (!group || typeof group !== "object" || !Array.isArray(group.steps)) { return; }
+        group.steps.forEach(function (step) {
+          if (typeof step !== "string" || !step) { return; }
+          var label = [group.day_id, group.from_poi_id + " → " + group.to_poi_id]
+            .filter(Boolean).join(" · ");
+          routeDirections.appendChild(el("li", label + ": " + step));
+          stepCount += 1;
+        });
+      });
+      var featureCount = geometry ? geometry.features.length : 0;
+      if (!featureCount && planning && planning.route_geometry_status === "not_applicable") {
+        routeNotice.textContent = "Chặng này không cần đường đi giữa các điểm.";
+      } else if (!featureCount) {
+        routeNotice.textContent = "Chưa có hình học đường thực tế cho chặng đã chọn; bản đồ không nối thẳng các ghim và không hiển thị chỉ dẫn rẽ.";
+      } else if (!stepCount) {
+        routeNotice.textContent = "Đã vẽ đường thực tế nhưng chưa có chỉ dẫn rẽ thực tế từ máy chủ.";
+      } else if (geometry.missing_geometry_count > 0) {
+        routeNotice.textContent = geometry.missing_geometry_count +
+          " chặng chưa có hình học đường thực tế; các chặng đó không được nối thẳng.";
+      }
+    }
+
+    function markerElement(pin) {
+      var button = el("button", null, "map-pin");
+      button.type = "button";
+      var number = el("span", String(pin.index + 1));
+      button.appendChild(number);
+      button.setAttribute("aria-label", "Điểm " + (pin.index + 1) + ": " + pin.name);
+      button.addEventListener("click", function (event) {
+        if (event && typeof event.stopPropagation === "function") { event.stopPropagation(); }
+        selectPoi(pin.id, { fly: true });
+      });
+      return button;
+    }
+
+    function renderPins() {
+      clearMarkers();
+      var projection = state.projection;
+      if (!projection || !projection.pins.length) { return; }
+      if (!state.map || !state.maplibre || !state.mapReady) { return; }
+      projection.pins.forEach(function (pin) {
+        try {
+          var element = markerElement(pin);
+          var marker = new state.maplibre.Marker({ element: element, anchor: "bottom" })
+            .setLngLat([pin.longitude, pin.latitude])
+            .addTo(state.map);
+          marker.poiId = pin.id;
+          marker.element = element;
+          pin.element = element;
+          state.markers.push(marker);
+        } catch (e) {
+          setMapStatus("Không ghim được một điểm trên bản đồ; danh sách điểm vẫn dùng được.", "warn");
+        }
+      });
+      if (state.selectedPoiId) { highlightSelection(state.selectedPoiId); }
+    }
+
+    function highlightSelection(poiId) {
+      state.markers.forEach(function (marker) {
+        var element = marker.element;
+        if (!element || !element.classList) { return; }
+        if (marker.poiId === poiId) {
+          element.classList.add("selected");
+        } else {
+          element.classList.remove("selected");
+        }
+      });
+      var cards = stopsList.children || [];
+      for (var i = 0; i < cards.length; i += 1) {
+        var card = cards[i];
+        if (!card || !card.getAttribute) { continue; }
+        var selected = card.getAttribute("data-poi-id") === poiId;
+        card.className = selected ? "selected" : "";
+        card.setAttribute("aria-current", selected ? "true" : "false");
+      }
+    }
+
+    function fitPadding() {
+      var fallback = 56;
+      var side = 32;
+      try {
+        var container = (state.map && typeof state.map.getContainer === "function")
+          ? state.map.getContainer() : mapEl;
+        if (!container || typeof container.getBoundingClientRect !== "function") { return fallback; }
+        var mapRect = container.getBoundingClientRect();
+        if (!mapRect || !(mapRect.width > 0) || !(mapRect.height > 0)) { return fallback; }
+        var top = side;
+        var left = side;
+        var right = side;
+        var bottom = fallback;
+        if (itineraryWrap && !itineraryWrap.hidden &&
+            typeof itineraryWrap.getBoundingClientRect === "function") {
+          var overlayRect = itineraryWrap.getBoundingClientRect();
+          if (overlayRect && overlayRect.width > 0 && overlayRect.height > 0) {
+            var overlap = Math.round(mapRect.bottom - overlayRect.top);
+            if (overlap > 0) { bottom = overlap + side; }
+          }
+        }
+        if (!(bottom >= fallback)) { bottom = fallback; }
+        var maxVertical = Math.floor(mapRect.height - 24);
+        if (maxVertical < 24) { return fallback; }
+        if (top + bottom > maxVertical) { bottom = Math.max(0, maxVertical - top); }
+        if (top + bottom > maxVertical) { top = 0; bottom = maxVertical; }
+        var maxHorizontal = Math.floor(mapRect.width - 24);
+        if (maxHorizontal < 24) { return fallback; }
+        if (left + right > maxHorizontal) {
+          left = Math.max(0, Math.floor(maxHorizontal / 2));
+          right = Math.max(0, maxHorizontal - left);
+        }
+        return { top: top, bottom: bottom, left: left, right: right };
+      } catch (e) { return fallback; }
+    }
+
+    function fitItinerary() {
+      var pins = state.projection ? state.projection.pins : [];
+      if (!state.map || !state.maplibre || !pins.length) { return; }
+      try {
+        if (pins.length === 1) {
+          state.map.flyTo({ center: [pins[0].longitude, pins[0].latitude],
+            zoom: 16.5, pitch: HCMC_VIEW.pitch, bearing: HCMC_VIEW.bearing });
+          return;
+        }
+        if (typeof state.maplibre.LngLatBounds !== "function") { return; }
+        var bounds = new state.maplibre.LngLatBounds();
+        pins.forEach(function (pin) { bounds.extend([pin.longitude, pin.latitude]); });
+        if (state.routeGeometry) {
+          state.routeGeometry.features.forEach(function (feature) {
+            feature.geometry.coordinates.forEach(function (position) {
+              bounds.extend(position);
+            });
+          });
+        }
+        state.map.fitBounds(bounds, { padding: fitPadding(), maxZoom: 16 });
+      } catch (e) { /* fit is best effort; pins remain */ }
+    }
+
+    function findPin(poiId) {
+      var pins = state.projection ? state.projection.pins : [];
+      for (var i = 0; i < pins.length; i += 1) {
+        if (pins[i].id === String(poiId)) { return pins[i]; }
+      }
+      return null;
+    }
+
+    function selectPoi(poiId, options) {
+      var pin = findPin(poiId);
+      if (!pin) { return; }
+      state.selectedPoiId = pin.id;
+      highlightSelection(pin.id);
+      if (state.map && options && options.fly) {
+        try {
+          state.map.flyTo({ center: [pin.longitude, pin.latitude],
+            zoom: 16.5, pitch: HCMC_VIEW.pitch, bearing: HCMC_VIEW.bearing });
+        } catch (e) { /* selection still visible in the card */ }
+      }
+      openPlaceCard(pin);
+    }
+
+    function placeCard(pin) {
+      var poi = pin.poi || {};
+      var card = el("div", null, "place-card");
+      card.setAttribute("role", "dialog");
+      card.setAttribute("aria-label", "Thông tin điểm dừng " + pin.name);
+
+      card.appendChild(el("p", "Điểm dừng " + (pin.index + 1), "place-kicker"));
+      card.appendChild(el("h3", pin.name));
+      card.appendChild(el("p", pin.category, "fact"));
+
+      var address = el("p", null, "fact");
+      address.appendChild(el("b", "Địa chỉ: "));
+      address.appendChild(doc.createTextNode(streetAddress(poi)));
+      card.appendChild(address);
+
+      var visit = el("p", null, "fact");
+      visit.appendChild(el("b", "Thời gian: "));
+      visit.appendChild(doc.createTextNode(
+        clockLabel(pin.stop && pin.stop.visit_time) + " – " +
+        clockLabel(pin.stop && pin.stop.end_time)));
+      card.appendChild(visit);
+
+      var price = el("p", null, "fact");
+      price.appendChild(el("b", "Giá: "));
+      price.appendChild(doc.createTextNode(menuPrice(poi) || "chưa rõ"));
+      card.appendChild(price);
+
+      var hours = el("p", null, "fact");
+      hours.appendChild(el("b", "Giờ mở cửa: "));
+      hours.appendChild(doc.createTextNode(poi.operation_time || "chưa rõ (chưa xác minh)"));
+      card.appendChild(hours);
+
+      var label = poi.source_snapshot_area && poi.source_snapshot_area.source_area_label;
+      var source = el("p", null, "fact");
+      source.appendChild(el("b", "Vùng dữ liệu: "));
+      source.appendChild(doc.createTextNode(label || "chưa rõ"));
+      card.appendChild(source);
+
+      var fromPrev = el("p", null, "fact");
+      fromPrev.appendChild(el("b", "Từ điểm trước: "));
+      var route = routeFacts(state.itinerary, pin.poi && pin.poi.id);
+      fromPrev.appendChild(doc.createTextNode(route
+        ? routeDistance(route)
+        : "chưa có dữ liệu tuyến"));
+      card.appendChild(fromPrev);
+
+      var details = el("details");
+      details.appendChild(el("summary", "Chi tiết kỹ thuật"));
+      details.appendChild(el("p", "POI ID: " + pin.id));
+      card.appendChild(details);
+
+      var close = el("button", "Đóng thẻ điểm", "place-close");
+      close.type = "button";
+      close.addEventListener("click", closePlaceCard);
+      card.appendChild(close);
+      return card;
+    }
+
+    function closePlaceCard() {
+      if (state.popup) {
+        try { state.popup.remove(); } catch (e) { /* popup already closed */ }
+        state.popup = null;
+      }
+      if (placeCardHost) {
+        clear(placeCardHost);
+        placeCardHost.hidden = true;
+      }
+    }
+
+    function openPlaceCard(pin) {
+      closePlaceCard();
+      var card = placeCard(pin);
+      var view = doc.defaultView;
+      var compact = !!(view && typeof view.matchMedia === "function" &&
+        view.matchMedia("(max-width: 620px)").matches);
+      if (!compact && state.map && state.maplibre && typeof state.maplibre.Popup === "function") {
+        try {
+          var popup = new state.maplibre.Popup({ closeButton: false, maxWidth: "330px" });
+          popup.setLngLat([pin.longitude, pin.latitude]);
+          popup.setDOMContent(card);
+          popup.addTo(state.map);
+          state.popup = popup;
+          return;
+        } catch (e) { /* fall back to the in-page card host */ }
+      }
+      if (placeCardHost) {
+        clear(placeCardHost);
+        placeCardHost.appendChild(card);
+        placeCardHost.hidden = false;
+      }
+    }
+
+    function routeFacts(planning, poiId) {
+      var found = null;
+      var repaired = planning && planning.repaired_schedule;
+      var days = repaired && Array.isArray(repaired.days) ? repaired.days : [];
+      days.forEach(function (day) {
+        var stops = Array.isArray(day.stops) ? day.stops : [];
+        stops.forEach(function (stop) {
+          if (!found && stop && stop.poi_id === poiId) { found = stop; }
+        });
+      });
+      if (!found && planning && planning.totals &&
+          Array.isArray(planning.totals.legs)) {
+        planning.totals.legs.forEach(function (leg) {
+          if (!found && leg && leg.poi_id === poiId) { found = leg; }
+        });
+      }
+      return found;
+    }
+
+    function routeDistance(route) {
+      var distance = route.travel_from_prev_distance_km;
+      var minutes = route.travel_from_prev_minutes;
+      return (distance === null || distance === undefined ? "chưa rõ khoảng cách"
+        : distance + " km") + " · " +
+        (minutes === null || minutes === undefined ? "chưa rõ thời gian"
+          : minutes + " phút");
+    }
+
+    function appendFact(parent, label, value) {
+      var p = el("p", null, "fact");
+      p.appendChild(el("b", label + ": "));
+      p.appendChild(doc.createTextNode(value));
+      parent.appendChild(p);
+    }
+
+    function renderItinerary(body) {
+      var reply = body.reply && typeof body.reply === "object" ? body.reply : null;
+      var planning = body.planning && typeof body.planning === "object" ? body.planning : null;
+      state.itinerary = planning;
+      state.projection = projectStops(reply);
+      state.routeGeometry = safeRouteGeometry(planning);
+
+      show(itineraryWrap, true);
+      clear(stopsList);
+      clear(coordUnavailable);
+      clear(unknownsList);
+      closePlaceCard();
+
+      var stops = reply && Array.isArray(reply.stops) ? reply.stops : [];
+      stops.forEach(function (stop, index) {
+        var poi = stop && stop.poi ? stop.poi : {};
+        var pin = null;
+        state.projection.pins.forEach(function (candidate) {
+          if (candidate.index === index) { pin = candidate; }
+        });
+        var item = el("li");
+        item.setAttribute("data-poi-id", pin ? pin.id : String(poi.id || ""));
+        item.setAttribute("tabindex", "0");
+        item.setAttribute("role", "button");
+        item.setAttribute("aria-label", "Xem điểm " + (index + 1) + ": " + poiLabel(poi));
+        item.addEventListener("click", function () {
+          if (pin) { selectPoi(pin.id, { fly: true }); }
+        });
+        item.addEventListener("keydown", function (event) {
+          if (!pin) { return; }
+          if (event && (event.key === "Enter" || event.key === " ")) {
+            if (typeof event.preventDefault === "function") { event.preventDefault(); }
+            selectPoi(pin.id, { fly: true });
+          }
+        });
+
+        var head = el("div", null, "stop-head");
+        head.appendChild(el("span", (index + 1) + ". " + poiLabel(poi), "stop-name"));
+        head.appendChild(el("span", categoryLabel(poi), "tag"));
+        if (stop.date) { head.appendChild(el("span", stop.date, "tag")); }
+        item.appendChild(head);
+
+        appendFact(item, "Thời gian", clockLabel(stop.visit_time) + " – " +
+          clockLabel(stop.end_time));
+        appendFact(item, "Địa chỉ", streetAddress(poi));
+        appendFact(item, "Giờ mở cửa", poi.operation_time ||
+          "chưa rõ (chưa xác minh)");
+
+        var route = routeFacts(planning, poi.id);
+        appendFact(item, "Từ điểm trước", route ? routeDistance(route)
+          : "chưa có dữ liệu tuyến");
+
+        var price = menuPrice(poi);
+        appendFact(item, "Giá", price ? price + " (chưa xác minh)" : "chưa rõ");
+        if (stop.budget !== null && stop.budget !== undefined) {
+          appendFact(item, "Ước tính chi", String(stop.budget) + " (không phải giá đã xác minh)");
+        }
+        if (poi.source_snapshot_area && poi.source_snapshot_area.source_area_label) {
+          appendFact(item, "Vùng dữ liệu", poi.source_snapshot_area.source_area_label);
+        }
+        stopsList.appendChild(item);
+      });
+      if (!stops.length) {
+        stopsList.appendChild(el("li", "Không có điểm nào trong lịch trình.", "muted"));
+      }
+
+      var summary = [];
+      if (planning) {
+        if (planning.total_distance_km !== null && planning.total_distance_km !== undefined) {
+          summary.push("Tổng quãng đường: " + planning.total_distance_km + " km");
+        }
+        if (planning.total_travel_minutes !== null &&
+            planning.total_travel_minutes !== undefined) {
+          summary.push("Tổng thời gian di chuyển: " + planning.total_travel_minutes + " phút");
+        }
+        if (planning.total_cost_party !== null && planning.total_cost_party !== undefined) {
+          summary.push("Ước tính chi phí: " + planning.total_cost_party + " " +
+            (planning.total_cost_currency || ""));
+        }
+      }
+      summaryOut.textContent = summary.length ? summary.join(" · ") :
+        "Chưa có số liệu tổng hợp.";
+
+      state.projection.unavailable.forEach(function (missing) {
+        coordUnavailable.appendChild(el("li", (missing.index + 1) + ". " +
+          missing.name + " — " + missing.reason + ", không ghim lên bản đồ."));
+      });
+      if (!state.projection.pins.length && stops.length) {
+        coordUnavailable.appendChild(el("li",
+          "Không có điểm nào đủ toạ độ hợp lệ để ghim lên bản đồ."));
+      }
+
+      var unknowns = [];
+      var grounding = body.grounding && typeof body.grounding === "object" ? body.grounding : null;
+      if (grounding && Array.isArray(grounding.missing_data)) {
+        grounding.missing_data.forEach(function (item) { unknowns.push(String(item)); });
+      }
+      if (planning && Array.isArray(planning.unknown_reasons)) {
+        planning.unknown_reasons.forEach(function (item) { unknowns.push(String(item)); });
+      }
+      if (reply && Array.isArray(reply.unknown_reasons)) {
+        reply.unknown_reasons.forEach(function (item) { unknowns.push(String(item)); });
+      }
+      if (!unknowns.length) { unknowns.push("Không có mục thiếu dữ liệu được báo cáo."); }
+      unknowns.forEach(function (item) { unknownsList.appendChild(el("li", item)); });
+
+      var limitations = planning && Array.isArray(planning.limitations)
+        ? planning.limitations : [];
+      if (limitations.length) {
+        setStatus("Lịch trình có giới hạn: " + limitations.join(", "), "warn");
+      } else if (body.status === "success") {
+        setStatus("Đã tạo lịch trình. Chọn thẻ hoặc ghim đỏ để xem chi tiết điểm dừng.", "");
+      } else {
+        setStatus("Lịch trình chưa hoàn chỉnh.", "warn");
+      }
+      if (body.error) { showError(body.error.code, body.error.message, body.error.details); }
+
+      renderPins();
+      renderRouteGeometry();
+      renderRouteDirections(planning, state.routeGeometry);
+      fitItinerary();
+    }
+
+    function clearItineraryState(message) {
+      invalidateResults();
+      show(itineraryWrap, false);
+      if (message) { setStatus(message, "warn"); }
+    }
+
+    function optionalInt(id, min) {
+      var raw = byId(id).value.trim();
+      if (!raw) { return null; }
+      var value = Number(raw);
+      if (!Number.isInteger(value) || value < min) { return null; }
+      return value;
+    }
+
+    function requireSelection() {
+      if (!state.selection) {
+        setStatus("Hãy chọn ảnh dữ liệu và vùng nguồn trước.", "warn");
+        return false;
+      }
+      return true;
+    }
+
+    async function ask() {
+      if (state.chatBusy) { return; }
+      if (!requireSelection()) { return; }
+      var message = messageEl.value.trim();
+      if (!message) {
+        setStatus("Hãy nhập nhu cầu của bạn.", "warn");
+        messageEl.focus();
+        return;
+      }
+      hideError();
+      var token = ++state.chatToken;
+      var session = state.sessionId;
+      var selection = state.selection;
+      state.lastUserMessage = message;
+      appendBubble("user", message);
+      messageEl.value = "";
+      setChatBusy(true);
+      setStatus(state.planBusy
+        ? "Tin đã gửi; có thể chờ tác vụ tạo lịch hoàn tất. Hội thoại và tạo lịch trong cùng phiên được xử lý lần lượt."
+        : "Đang hỏi trợ lý…", "");
+      try {
+        var body = await requestJson("/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            session_id: session,
+            message: message,
+            memory_enabled: true,
+            source_scope: selection,
+            transport_mode: transportMode()
+          })
+        });
+        if (token !== state.chatToken || session !== state.sessionId) { return; }
+        var reply = safeText(body.reply) || "Trợ lý chưa trả lời nội dung nào.";
+        appendBubble("assistant", reply);
+        byId("reply").textContent = reply;
+        var meta = [];
+        if (body.intent) { meta.push("Ý định: " + body.intent); }
+        if (body.transport_mode) { meta.push("Di chuyển: " + body.transport_mode); }
+        if (body.status) { meta.push("Trạng thái: " + body.status); }
+        byId("chat-meta").textContent = meta.join(" · ");
+        show(byId("reply-wrap"), true);
+        if (body.error) { showError(body.error.code, body.error.message, body.error.details); }
+        if (body.status === "needs_clarification") {
+          setStatus("Cần làm rõ thêm yêu cầu.", "warn");
+        } else if (body.status === "success") {
+          setStatus("Đã có trả lời. Có thể hỏi tiếp hoặc tạo lịch trình.", "");
+        } else {
+          setStatus("Chưa tạo được câu trả lời.", "warn");
+        }
+      } catch (e) {
+        if (token !== state.chatToken || session !== state.sessionId) { return; }
+        appendBubble("assistant", "Không gọi được trợ lý. Kiểm tra kết nối rồi thử lại; các ô nhập vẫn dùng được.");
+        setStatus("Không gọi được trợ lý.", "bad");
+        showError(e.code, e.message, e.details);
+      } finally {
+        if (token === state.chatToken && session === state.sessionId) {
+          setChatBusy(false);
+        }
+      }
+    }
+
+    async function plan() {
+      if (state.planBusy) { return; }
+      if (!requireSelection()) { return; }
+      var startDate = byId("start-date").value;
+      if (!startDate) {
+        setStatus("Hãy chọn ngày bắt đầu.", "warn");
+        return;
+      }
+      var days = optionalInt("days", 1);
+      var travelers = optionalInt("travelers", 1);
+      if (!days || days > 14) { setStatus("Số ngày phải từ 1 đến 14.", "warn"); return; }
+      if (!travelers || travelers > 50) {
+        setStatus("Số người phải từ 1 đến 50.", "warn"); return;
+      }
+      var typed = messageEl.value.trim();
+      if (typed) { state.lastUserMessage = typed; }
+      var payload = {
+        session_id: state.sessionId,
+        travel_type: byId("travel-type").value.trim() || "self-explore",
+        num_travelers: travelers,
+        start_date: startDate,
+        duration_days: days,
+        budget_range: byId("budget").value.trim() || "chưa nêu",
+        user_description: typed || state.lastUserMessage ||
+          "Chuyến đi theo vùng dữ liệu đã chọn.",
+        memory_enabled: true,
+        source_scope: state.selection,
+        transport_mode: transportMode()
+      };
+      var visit = optionalInt("visit-minutes", 1);
+      if (visit) { payload.visit_minutes = visit; }
+      var minStops = optionalInt("min-stops", 0);
+      if (minStops !== null) { payload.minimum_stops = minStops; }
+      var maxStops = optionalInt("max-stops", 1);
+      if (maxStops !== null) { payload.maximum_stops = maxStops; }
+
+      hideError();
+      var token = ++state.planToken;
+      var session = state.sessionId;
+      var controller = typeof AbortController === "function"
+        ? new AbortController() : null;
+      state.planController = controller;
+      setPlanBusy(true);
+      setStatus("Đang tạo lịch trình… Lịch trình đang hiển thị (nếu có) được giữ nguyên cho tới khi có kết quả mới.", "");
+      try {
+        var body = await requestJson("/generate_itinerary", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+          signal: controller ? controller.signal : undefined
+        });
+        if (token !== state.planToken || session !== state.sessionId) { return; }
+        var stops = body && body.reply && Array.isArray(body.reply.stops)
+          ? body.reply.stops : null;
+        if (body && body.status === "success" && stops && stops.length) {
+          renderItinerary(body);
+        } else if (body && typeof body.reply === "string" && body.reply.trim()) {
+          appendBubble("assistant", body.reply);
+          show(byId("reply-wrap"), true);
+          byId("reply").textContent = body.reply;
+          clearItineraryState(body.status === "success"
+            ? "Chưa có điểm dừng để hiển thị trên bản đồ."
+            : "Chưa tạo được lịch trình có điểm dừng.");
+          if (body.error) { showError(body.error.code, body.error.message, body.error.details); }
+        } else {
+          clearItineraryState("Chưa tạo được lịch trình có điểm dừng.");
+          if (body && body.error) {
+            showError(body.error.code, body.error.message, body.error.details);
+          }
+        }
+      } catch (e) {
+        if (token !== state.planToken || session !== state.sessionId) { return; }
+        if (e && (e.name === "AbortError" ||
+            (e.code && String(e.code).indexOf("abort") !== -1))) {
+          setStatus("Đã dừng chờ lịch trình ở giao diện.", "warn");
+          return;
+        }
+        clearItineraryState("Không tạo được lịch trình. Các ô nhập vẫn dùng được.");
+        showError(e.code, e.message, e.details);
+      } finally {
+        if (token === state.planToken && session === state.sessionId) {
+          state.planController = null;
+          setPlanBusy(false);
+        }
+      }
+    }
+
+    function cancelPlanWait() {
+      if (!state.planBusy) { return; }
+      // Stop waiting locally only. The server may keep working; this is never
+      // presented as proof that the model/upstream was cancelled.
+      state.planToken += 1;
+      abortPlanWait();
+      state.planBusy = false;
+      syncBusy();
+      setStatus("Đã hủy chờ ở giao diện. Máy chủ có thể vẫn tiếp tục xử lý; chưa có xác nhận model hay dịch vụ upstream đã dừng. Kết quả đến muộn sẽ bị bỏ qua.", "warn");
+    }
+
+    function toggleMapMode() {
+      if (!state.map) {
+        setMapStatus("Bản đồ nền chưa sẵn sàng để đổi góc nhìn.", "warn");
+        return;
+      }
+      state.is3d = !state.is3d;
+      mapModeBtn.textContent = state.is3d ? "3D" : "2D";
+      mapModeBtn.setAttribute("aria-pressed", state.is3d ? "true" : "false");
+      try {
+        state.map.easeTo({
+          pitch: state.is3d ? HCMC_VIEW.pitch : 0,
+          bearing: state.is3d ? HCMC_VIEW.bearing : 0,
+          duration: 500
+        });
+      } catch (e) {
+        setMapStatus("Không đổi được góc nhìn bản đồ.", "warn");
+      }
+    }
+
+    function addBuildingLayer() {
+      var map = state.map;
+      if (!map) { return false; }
+      var style = typeof map.getStyle === "function" ? map.getStyle() : null;
+      var sources = style && style.sources ? style.sources : {};
+      var sourceId = null;
+      Object.keys(sources).forEach(function (id) {
+        if (!sourceId && sources[id] && sources[id].type === "vector") { sourceId = id; }
+      });
+      if (!sourceId) {
+        map.addSource("openfreemap", { type: "vector", url: MAP_SOURCE_URL });
+        sourceId = "openfreemap";
+      }
+      var labelLayerId = null;
+      var layers = style && Array.isArray(style.layers) ? style.layers : [];
+      layers.forEach(function (layer) {
+        if (!labelLayerId && layer && layer.type === "symbol") { labelLayerId = layer.id; }
+      });
+      map.addLayer({
+        id: "ui127-3d-buildings",
+        source: sourceId,
+        "source-layer": "building",
+        type: "fill-extrusion",
+        minzoom: 15,
+        filter: ["!=", ["get", "hide_3d"], true],
+        paint: {
+          "fill-extrusion-color": ["interpolate", ["linear"], ["get", "render_height"],
+            0, "#dfe4dc", 120, "#c3d2c1", 300, "#9fb6a3"],
+          "fill-extrusion-height": ["interpolate", ["linear"], ["zoom"],
+            15, 0, 16, ["get", "render_height"]],
+          "fill-extrusion-base": ["interpolate", ["linear"], ["zoom"],
+            15, 0, 16, ["get", "render_min_height"]],
+          "fill-extrusion-opacity": 0.62
+        }
+      }, labelLayerId || undefined);
+      return true;
+    }
+
+    function failMap(message) {
+      state.mapFailed = true;
+      state.mapReady = false;
+      state.maplibre = null;
+      var failedMap = state.map;
+      state.map = null;
+      if (failedMap && typeof failedMap.remove === "function") {
+        try { failedMap.remove(); } catch (e) { /* map already detached */ }
+      }
+      closePlaceCard();
+      setMapStatus(message || "Bản đồ nền không khả dụng (mạng, WebGL hoặc CDN). Trò chuyện và danh sách điểm vẫn dùng được.", "bad");
+      mapRetry.hidden = false;
+      mapModeBtn.disabled = true;
+    }
+
+    async function initMap() {
+      if (state.mapLoading || state.mapReady) { return; }
+      state.mapLoading = true;
+      state.mapFailed = false;
+      mapRetry.hidden = true;
+      setMapStatus("Đang tải bản đồ nền HCMC…", "");
+      try {
+        if (typeof loadMapLibre !== "function") { throw new Error("loader unavailable"); }
+        var maplibre = await loadMapLibre(MAPLIBRE_ESM);
+        if (!maplibre || typeof maplibre.Map !== "function") {
+          throw new Error("MapLibre module unavailable");
+        }
+        state.maplibre = maplibre;
+        state.map = new maplibre.Map({
+          container: mapEl,
+          style: MAP_STYLE,
+          center: HCMC_CENTER,
+          zoom: HCMC_VIEW.zoom,
+          pitch: HCMC_VIEW.pitch,
+          bearing: HCMC_VIEW.bearing,
+          attributionControl: true,
+          antialias: true
+        });
+        if (typeof maplibre.NavigationControl === "function") {
+          state.map.addControl(new maplibre.NavigationControl({ visualizePitch: true }), "top-right");
+        }
+        mapModeBtn.disabled = false;
+        state.map.on("error", function () {
+          if (!state.mapReady && !state.mapFailed) {
+            failMap("Không tải được phong cách bản đồ nền. Trò chuyện và danh sách điểm vẫn dùng được.");
+          }
+        });
+        state.map.on("load", function () {
+          state.mapReady = true;
+          state.mapFailed = false;
+          state.maplibre = maplibre;
+          var buildings = false;
+          try { buildings = addBuildingLayer(); } catch (e) { buildings = false; }
+          setMapStatus(buildings
+            ? "Bản đồ nền đã sẵn sàng. Độ cao khối nhà là ước lượng hiển thị."
+            : "Bản đồ nền đã sẵn sàng; lớp khối nhà 3D chưa bật.", "");
+          renderPins();
+          renderRouteGeometry();
+          fitItinerary();
+        });
+      } catch (e) {
+        failMap();
+      } finally {
+        state.mapLoading = false;
+      }
+    }
+
+    function retryMap() {
+      if (state.map || state.mapLoading) { return; }
+      initMap();
+    }
+
+    function onSnapshotChange() {
+      onSourceChange("Đã đổi ảnh dữ liệu nguồn; hội thoại cũ đã được xoá. Hãy chọn vùng và hỏi lại.");
+      loadAreas();
+    }
+
+    function onAreaChange() {
+      onSourceChange("Đã đổi vùng nguồn; hội thoại, lịch trình và tuyến cũ đã được xoá để tránh trộn dữ liệu.");
+      applyAreaSelection();
+    }
+
+    function onTransportChange() { onModeChange(); }
+
+    function onChipClick(event) {
+      var target = event && event.currentTarget ? event.currentTarget : event.target;
+      var text = target && target.getAttribute ? target.getAttribute("data-chip") : "";
+      if (text) {
+        messageEl.value = text;
+        if (typeof messageEl.focus === "function") { messageEl.focus(); }
+      }
+    }
+
+    function onComposerKeydown(event) {
+      if (event && event.key === "Enter" && !event.shiftKey && !event.isComposing) {
+        if (typeof event.preventDefault === "function") { event.preventDefault(); }
+        ask();
+      }
+    }
+
+    var chips = doc.querySelectorAll ? doc.querySelectorAll(".chip") : [];
+    for (var c = 0; c < chips.length; c += 1) {
+      chips[c].addEventListener("click", onChipClick);
+    }
+    snapshotSel.addEventListener("change", onSnapshotChange);
+    areaSel.addEventListener("change", onAreaChange);
+    areaAllBtn.addEventListener("click", selectAllAreas);
+    areaClearBtn.addEventListener("click", clearAreaSelection);
+    byId("transport-car").addEventListener("change", onTransportChange);
+    byId("transport-foot").addEventListener("change", onTransportChange);
+    askBtn.addEventListener("click", ask);
+    planBtn.addEventListener("click", plan);
+    cancelPlanBtn.addEventListener("click", cancelPlanWait);
+    messageEl.addEventListener("keydown", onComposerKeydown);
+    mapRetry.addEventListener("click", retryMap);
+    mapModeBtn.addEventListener("click", toggleMapMode);
+
+    var today = new Date();
+    var iso = today.getFullYear() + "-" +
+      String(today.getMonth() + 1).padStart(2, "0") + "-" +
+      String(today.getDate()).padStart(2, "0");
+    byId("start-date").value = iso;
+
+    loadSnapshots();
+    initMap();
+
+    return {
+      state: state,
+      ask: ask,
+      plan: plan,
+      initMap: initMap,
+      retryMap: retryMap,
+      selectPoi: selectPoi,
+      toggleMapMode: toggleMapMode,
+      cancelPlanWait: cancelPlanWait,
+      selectAllAreas: selectAllAreas,
+      clearAreaSelection: clearAreaSelection,
+      projectStops: projectStops
+    };
+  }
+
+  function start() {
+    if (typeof window === "undefined" || !window.document) { return null; }
+    if (typeof window.document.createElement !== "function") { return null; }
+    var app = createTravelApp({
+      document: window.document,
+      fetch: function (url, options) { return window.fetch(url, options); },
+      loadMapLibre: function (url) { return import(url); }
+    });
+    window.travelApp = app;
+    return app;
+  }
+
+  var TravelUI = { createTravelApp: createTravelApp, projectStops: projectStops, start: start };
+  if (typeof window !== "undefined") { window.TravelUI = TravelUI; }
+  if (typeof document !== "undefined") {
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", start);
+    } else {
+      start();
+    }
+  }
+})();
+</script>
+</body>
+</html>

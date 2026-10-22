@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>POI_service — Travel Lung Tung</title>
+<link rel="stylesheet" href="../assets/docs.css">
+</head>
+<body>
+<header class="top">
+  <div class="bar">
+    <div class="brand">POI_service<small>Đồ thị POI, REST và MCP</small></div>
+    <div class="spacer"></div>
+    <a class="btn" href="../index.html">Trang chủ</a>
+    <button class="btn" id="theme-toggle">Nền tối</button>
+  </div>
+</header>
+
+<div class="wrap">
+<nav class="toc">
+  <h4>Tổng quan</h4>
+  <a href="../index.html">Trang chủ</a>
+  <a href="../diagrams/index.html">Thư viện sơ đồ</a>
+  <a href="../diagrams/class-poi-service.architecture.html">Sơ đồ lớp</a>
+  <a href="../diagrams/poi-ingestion.lifecycle.html">Vòng đời nạp POI</a>
+  <h4>Module</h4>
+  <a href="crawler-service.html">crawler_service</a>
+  <a href="ai-service.html">ai_service</a>
+  <a href="backend-service.html">backend_service</a>
+  <a href="shared-lib.html">shared_lib</a>
+  <h4>Trên trang này</h4>
+  <a href="#vai-tro">Vai trò</a>
+  <a href="#cau-truc">Cấu trúc gói</a>
+  <a href="#do-thi">Lược đồ đồ thị</a>
+  <a href="#id">Quy tắc sinh ID</a>
+  <a href="#rest">REST</a>
+  <a href="#mcp">Công cụ MCP</a>
+  <a href="#nạp">Đường nạp dữ liệu</a>
+  <a href="#doc">Đường đọc cho agent</a>
+  <a href="#ha-tang">Hạ tầng và giao dịch</a>
+  <a href="#nen">Tác vụ nền</a>
+  <a href="#use-case">Ca sử dụng</a>
+  <a href="#khoang-trong">Khoảng trống</a>
+</nav>
+
+<main>
+<section id="vai-tro">
+  <h1>POI_service</h1>
+  <p class="lead">Sinh ra để giữ nguồn sự thật về điểm đến trong một đồ thị, và phục vụ dữ liệu đó cho cả người lập trình (qua REST) lẫn agent (qua MCP) — nhưng chỉ có một bộ nghiệp vụ duy nhất ở giữa.</p>
+
+  <h3>Vì sao là một dịch vụ chứ không phải hai</h3>
+  <p>Hai lối vào có nhu cầu khác nhau: REST nhận dữ liệu thô từ bước cào và ghi vào đồ thị; MCP cấp công cụ cho mô hình ngôn ngữ đọc dữ liệu. Nếu mỗi lối tự viết truy vấn thì quy tắc làm sạch dữ liệu sẽ tồn tại hai bản. Ở đây cả hai đều gọi <code>POIManagementService</code>.</p>
+  <table>
+    <thead><tr><th>Lối vào</th><th>Cổng</th><th>Xác thực</th><th>Phục vụ ai</th></tr></thead>
+    <tbody>
+      <tr><td>REST</td><td><code>:8000</code></td><td>JWT bắt buộc theo từng router</td><td>crawler_service, script vận hành, UI</td></tr>
+      <tr><td>MCP trên SSE</td><td><code>:8001</code></td><td>không có tầng xác thực riêng</td><td>ai_service</td></tr>
+    </tbody>
+  </table>
+  <p class="evidence">Nguồn: <code>app/main.py:100-103</code>; router REST ở <code>api/rest/v1/endpoint_ingestion.py:15</code>; máy chủ MCP ở <code>api/mcp/tools.py:26</code>.</p>
+
+  <div class="callout warn">
+    <p>Tầng xác thực của REST chạy ngay lúc khởi động: nếu thiếu <code>JWT_SECRET</code> thì tiến trình ném lỗi và không lên được (<code>app/core/security/auth.py:18-20</code>). Cổng MCP thì không kiểm tra gì, nên đường MCP cần được bảo vệ ở tầng mạng.</p>
+  </div>
+</section>
+
+<section id="cau-truc">
+  <h2>Cấu trúc gói</h2>
+  <table>
+    <thead><tr><th>Đường dẫn</th><th>Vai trò</th></tr></thead>
+    <tbody>
+      <tr><td><code>app/main.py</code></td><td>Khởi động, kết nối hai cơ sở dữ liệu, gắn bốn router, bắt lỗi toàn cục</td></tr>
+      <tr><td><code>app/api/rest/v1/</code></td><td><code>endpoint_ingestion</code>, <code>endpoint_management</code>, <code>endpoint_poi_router</code>, <code>endpoint_spatial_rebuild</code></td></tr>
+      <tr><td><code>app/api/mcp/</code></td><td><code>tools.py</code> (5 công cụ) và <code>tool_description.py</code> (mô tả cho mô hình)</td></tr>
+      <tr><td><code>app/api/dependencies/services.py</code></td><td>Nơi nối phụ thuộc: cấp Unit of Work và service cho router</td></tr>
+      <tr><td><code>app/core/services/</code></td><td><code>POIManagementService</code>, <code>POIIngestionService</code></td></tr>
+      <tr><td><code>app/core/domain/</code></td><td>Mô hình miền (<code>graph_entities.py</code>) và payload ra (<code>get_payload.py</code>)</td></tr>
+      <tr><td><code>app/core/interfaces/</code></td><td>Hợp đồng repository, Unit of Work, cập nhật không gian</td></tr>
+      <tr><td><code>app/core/infrastructure/db/</code></td><td>Kết nối, Unit of Work, repository Memgraph (997 dòng)</td></tr>
+      <tr><td><code>app/core/utils/</code></td><td>Chuẩn hoá chuỗi, cập nhật cạnh không gian, kênh SSE</td></tr>
+      <tr><td><code>app/core/base/</code></td><td>Khuôn mẫu CRUD và lớp repository nền</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="do-thi">
+  <h2>Lược đồ đồ thị</h2>
+  <p>Đây là phần quan trọng nhất khi đọc gói này: cấu trúc đồ thị do câu lệnh Cypher quyết định, không do mô hình Python. Bảng dưới lấy từ hai hàm ghi chính.</p>
+
+  <h3>Nút</h3>
+  <table>
+    <thead><tr><th>Nhãn</th><th>Thuộc tính</th><th>Khóa gộp</th></tr></thead>
+    <tbody>
+      <tr><td><code>POI</code></td><td><code>name</code>, <code>longitude</code>, <code>latitude</code>, <code>operation_time</code>, <code>full_address</code>, <code>contact_phone</code>, <code>contact_website</code>, và ở đường ghi đơn có thêm <code>rating</code>, <code>contact_fanpage</code>, <code>menu</code></td><td><code>id</code></td></tr>
+      <tr><td><code>Nation</code>, <code>City</code>, <code>District</code>, <code>Street</code></td><td><code>name</code>, kèm trường cha trực tiếp (<code>city</code>, <code>district</code>, <code>nation</code>)</td><td><code>id</code> dạng ghép chuỗi chữ thường</td></tr>
+      <tr><td><code>Category</code></td><td><code>name</code>, <code>context</code></td><td><code>name</code> khi ghi lô, <code>id</code> khi ghi đơn</td></tr>
+      <tr><td><code>Tag</code></td><td><code>name</code></td><td><code>name</code> khi ghi lô, <code>id</code> khi ghi đơn</td></tr>
+      <tr><td><code>Product</code></td><td><code>canonical_name</code> khi ghi lô, <code>product_name</code> khi ghi đơn</td><td><code>id</code></td></tr>
+      <tr><td><code>User</code></td><td><code>budget_level</code>, <code>travel_pace</code>, <code>requires_accessibility</code></td><td><code>id</code></td></tr>
+    </tbody>
+  </table>
+
+  <h3>Quan hệ</h3>
+  <table>
+    <thead><tr><th>Cạnh</th><th>Chiều</th><th>Thuộc tính</th><th>Do đâu tạo</th></tr></thead>
+    <tbody>
+      <tr><td><code>IN_NATION</code></td><td>City → Nation</td><td>—</td><td><code>batch_create</code></td></tr>
+      <tr><td><code>IN_CITY</code></td><td>District → City</td><td>—</td><td><code>batch_create</code></td></tr>
+      <tr><td><code>IN_DISTRICT</code></td><td>Street → District</td><td>—</td><td><code>batch_create</code></td></tr>
+      <tr><td><code>LOCATE_AT</code></td><td>POI → Street, hoặc POI → District khi thiếu tên đường</td><td>—</td><td><code>batch_create</code></td></tr>
+      <tr><td><code>HAS_CATEGORY</code></td><td>POI → Category</td><td>—</td><td><code>batch_create</code></td></tr>
+      <tr><td><code>HAS_TAG</code></td><td>POI → Tag</td><td>—</td><td><code>batch_create</code></td></tr>
+      <tr><td><code>OFFER</code></td><td>POI → Product</td><td><code>price</code>, <code>shop_specific_name</code></td><td><code>batch_create</code></td></tr>
+      <tr><td><code>NEAR_BY</code></td><td>POI → POI</td><td><code>distance_km</code></td><td><code>build_nearby_edges_for_district</code> (chạy tay)</td></tr>
+      <tr><td><code>PREFERS</code></td><td>User → Category hoặc Tag</td><td><code>weight</code></td><td><code>MemgraphUserBehaviorRepository.create</code></td></tr>
+    </tbody>
+  </table>
+  <p class="evidence">Nguồn: <code>core/infrastructure/db/repositories/memgraph.py:237-325</code> (ghi lô), <code>:330-423</code> (ghi đơn), <code>:183-235</code> (cạnh không gian), <code>:113-153</code> (ý thích người dùng).</p>
+
+  <h3>Hai đường ghi lệch nhau</h3>
+  <p>Đây là điểm cần thống nhất trước khi nạp dữ liệu thật, vì cùng một POI đi qua hai đường sẽ tạo ra dữ liệu khác nhau:</p>
+  <table>
+    <thead><tr><th>Khía cạnh</th><th><code>batch_create</code> (đường nạp lô)</th><th><code>create</code> (đường ghi đơn)</th></tr></thead>
+    <tbody>
+      <tr><td>Thuộc tính điểm đến</td><td>Bỏ <code>rating</code> và <code>contact_fanpage</code></td><td>Có cả hai</td></tr>
+      <tr><td>Khóa gộp <code>Tag</code></td><td><code>MERGE (t:Tag {name})</code>, <code>id</code> chỉ đặt khi tạo mới</td><td><code>MERGE (t:Tag {id})</code></td></tr>
+      <tr><td>Khóa gộp <code>Category</code></td><td><code>MERGE {name}</code></td><td><code>MERGE {id}</code></td></tr>
+      <tr><td>Tên sản phẩm</td><td>Đặt <code>canonical_name</code></td><td>Đặt <code>product_name</code></td></tr>
+      <tr><td>Khóa gộp <code>Product</code></td><td><code>MERGE {id}</code></td><td><code>MERGE {id}</code></td></tr>
+    </tbody>
+  </table>
+  <p><strong>Hệ quả quan sát được:</strong> truy vấn tìm POI theo sản phẩm đọc <code>prod.canonical_name</code> (<code>memgraph.py:823</code>), nên sản phẩm tạo bằng đường ghi đơn sẽ không xuất hiện trong kết quả. Tương tự, hai khóa gộp khác nhau của <code>Tag</code> và <code>Category</code> có thể sinh ra hai nút cùng nghĩa nếu dữ liệu đi qua cả hai đường.</p>
+  <p class="evidence">Nguồn: <code>memgraph.py:253-321</code> đối chiếu <code>:343-420</code>, và <code>:820-837</code>.</p>
+</section>
+
+<section id="id">
+  <h2>Quy tắc sinh ID</h2>
+  <p>ID của POI không phải chuỗi ngẫu nhiên: nó được ghép từ danh mục chính, tỉnh, quận, tên đường và ngày tạo. Quy tắc nằm trong bộ kiểm tra cấp mô hình, chạy mỗi khi tạo đối tượng.</p>
+  <div class="sig">id ≈ &lt;danh_mục&gt;_&lt;tỉnh&gt;_&lt;quận&gt;[_&lt;đường&gt;]_&lt;YYYYMMDD&gt;[_&lt;8 ký tự uuid&gt;]</div>
+  <details class="params">
+    <summary>Cách dựng từng phần <span class="count">4 bước</span></summary>
+    <div class="inner">
+      <ol>
+        <li>Danh mục chính là tên của phần tử đầu trong <code>poi_categories</code>; rỗng thì dùng <code>UNCATEGORIZED</code>.</li>
+        <li>Tỉnh và quận đi qua <code>normalize_for_id</code>: bỏ dấu, bỏ ký tự lạ, tra bảng ánh xạ tên gọi trước khi ghép.</li>
+        <li>Thiếu địa chỉ thì hai phần này thành <code>UNKNOWN</code>, không làm hỏng đối tượng.</li>
+        <li>Nếu ID được truyền vào không khớp tiền tố mong đợi, hệ thống <em>viết lại</em> ID theo tiền tố đúng và giữ lại phần hậu tố cũ.</li>
+      </ol>
+    </div>
+  </details>
+  <p><strong>Trả về:</strong> đối tượng POI đã có <code>id</code>. Không ném lỗi khi thiếu dữ liệu.</p>
+  <p class="evidence">Nguồn: <code>core/domain/graph_entities.py:181-220</code>; hàm chuẩn hoá ở <code>core/utils/helper.py:16-43</code>.</p>
+
+  <div class="callout warn">
+    <p><strong>ID POI và ID không gian không cùng hệ.</strong> Phần Cypher dựng ID cho City, District, Street bằng cách hạ chữ thường và nối bằng dấu gạch dưới, ví dụ <code>quan 1_ho chi minh city</code> (<code>memgraph.py:264-269</code>). Còn ID POI đi qua <code>normalize_for_id</code>, tức đã bỏ dấu và viết hoa chữ đầu. Hai hệ này không khớp nhau, nên đừng dùng ID POI để suy ra ID của nút địa lý — phải qua công cụ phân giải ID.</p>
+  </div>
+</section>
+
+<section id="rest">
+  <h2>REST — bốn điểm vào</h2>
+
+  <h3>POST /ingestion/batch</h3>
+  <div class="sig"><span class="kw">POST</span> /ingestion/batch → 202 <code>{"is_success", "job_id", "message", "canary_summary"}</code></div>
+  <details class="params">
+    <summary>Tham số và hợp đồng <span class="count">3 mục</span></summary>
+    <div class="inner">
+      <table>
+        <thead><tr><th>Mục</th><th>Kiểu</th><th>Ý nghĩa</th></tr></thead>
+        <tbody>
+          <tr><td>thân yêu cầu</td><td><code>list[dict]</code></td><td>Danh sách POI thô. Mỗi phần tử phải qua được <code>POI.model_validate</code>.</td></tr>
+          <tr><td> phần tử đầu</td><td>10 bản ghi</td><td>Canary: ghi ngay trong request để lộ lỗi schema sớm. Con số 10 nằm ở lời gọi <code>limit=10</code>.</td></tr>
+          <tr><td>header</td><td><code>Authorization: Bearer</code></td><td>JWT hợp lệ theo <code>JWT_SECRET</code> và thuật toán trong <code>.env</code>.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+  <p><strong>Trả về:</strong> 202 kèm <code>job_id</code> để mở dòng sự kiện, và bản tóm tắt canary (tổng nhận, ghi được, hỏng kiểm tra, hỏng ghi).<br>
+  <strong>Lỗi:</strong> 422 khi canary hỏng, kèm nguyên văn kết quả canary để tra ngay trường nào sai; 401 khi JWT thiếu hoặc hết hạn.</p>
+  <p class="evidence">Nguồn: <code>api/rest/v1/endpoint_ingestion.py:21-53</code>; hợp đồng 422 ở <code>:35-42</code>.</p>
+
+  <h3>GET /ingestion/stream/{job_id}</h3>
+  <div class="sig"><span class="kw">GET</span> /ingestion/stream/{job_id} → text/event-stream</div>
+  <p>Dòng sự kiện đẩy ba loại bản tin: <code>warning</code> khi một khối có bản ghi hỏng, <code>progress</code> kèm phần trăm sau mỗi khối ghi được, và <code>complete</code> khi hết việc. Dòng kết thúc thì hàng đợi của job bị xoá khỏi bộ nhớ.</p>
+  <p><strong>Lưu ý:</strong> mỗi lần gọi hàm <code>get_queue(job_id)</code> sẽ tạo hàng đợi mới nếu chưa có — nếu client mở dòng trước khi job chạy thì hai bên nói chuyện được; nhưng nếu mở dòng ở tiến trình khác với tiến trình chạy nền thì không, vì hàng đợi nằm trong bộ nhớ tiến trình (<code>core/utils/broadcaster.py:4-22</code>).</p>
+  <p class="evidence">Nguồn: <code>endpoint_ingestion.py:55-72</code>.</p>
+
+  <h3>POST /management/poi</h3>
+  <div class="sig"><span class="kw">POST</span> /management/poi → 201 payload thực thể</div>
+  <details class="params">
+    <summary>Tham số và ánh xạ lỗi <span class="count">2 mục</span></summary>
+    <div class="inner">
+      <table>
+        <thead><tr><th>Mục</th><th>Giá trị</th><th>Ý nghĩa</th></tr></thead>
+        <tbody>
+          <tr><td><code>payload</code></td><td><code>dict</code></td><td>Một POI đầy đủ; đi qua đúng luồng kiểm tra rồi mới ghi.</td></tr>
+          <tr><td>ánh xạ lỗi</td><td><code>unprocessable_entity → 422</code>, <code>conflict → 409</code>, <code>internal_error → 500</code></td><td>Kiểu lỗi nội bộ được dịch sang mã HTTP ngay ở router.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+  <p class="evidence">Nguồn: <code>api/rest/v1/endpoint_management.py:21-41</code>.</p>
+
+  <h3>GET /pois/{poi_id}</h3>
+  <div class="sig"><span class="kw">GET</span> /pois/{poi_id} → <code>POIGetResponse</code></div>
+  <p>Trả payload đầy đủ cho một POI: mô tả, thông tin liên hệ, danh sách ưu đãi và các POI gần đó trong bán kính 3 km, tối đa 5 mục. Không tìm thấy thì trả 404 với <code>success = false</code>.</p>
+  <p class="evidence">Nguồn: <code>api/rest/v1/endpoint_poi_router.py:21-65</code>; bán kính và giới hạn ở <code>core/services/management.py:105</code>.</p>
+
+  <h3>POST /management/pois/spatial-rebuild</h3>
+  <div class="sig"><span class="kw">POST</span> /management/pois/spatial-rebuild</div>
+  <details class="params">
+    <summary>Tham số <span class="count">1</span></summary>
+    <div class="inner">
+      <table>
+        <thead><tr><th>Tham số</th><th>Kiểu</th><th>Ý nghĩa</th></tr></thead>
+        <tbody>
+          <tr><td><code>districts</code></td><td><code>list[str]</code></td><td>Danh sách ID quận cần dựng lại cạnh lân cận. Mỗi quận là một lượt chạy nền riêng, thử lại 5 lần với thời gian chờ tăng dần.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+  <p><strong>Trả về:</strong> thông báo đã nhận việc, không chờ kết quả.<br>
+  <strong>Ghi chú:</strong> đây là đường duy nhất kích hoạt cập nhật cạnh <code>NEAR_BY</code>; đường nạp dữ liệu không tự gọi.</p>
+  <p class="evidence">Nguồn: <code>api/rest/v1/endpoint_spatial_rebuild.py:11-27</code>; vòng thử lại ở <code>core/utils/updater.py:41-52</code>.</p>
+</section>
+
+<section id="mcp">
+  <h2>Công cụ MCP</h2>
+  <p>Năm công cụ, mô tả bằng tiếng Anh vì chúng đi thẳng vào ngữ cảnh của mô hình. Tên công cụ là hợp đồng với <code>prompt.json</code> bên ai_service.</p>
+  <table>
+    <thead><tr><th>Công cụ</th><th>Dùng khi nào</th><th>Trả về</th></tr></thead>
+    <tbody>
+      <tr><td><code>resolve_geographic_id</code></td><td>Người dùng nhắc tên thành phố, quận, đường</td><td>Danh sách <code>{type, id, name}</code> để lấy ID thật</td></tr>
+      <tr><td><code>get_available_categories</code></td><td>Trước khi tìm theo danh mục</td><td>Danh sách <code>{id, name}</code> của những danh mục đang có POI</td></tr>
+      <tr><td><code>explore_pois</code></td><td>Tìm theo khu vực, danh mục hoặc từ khoá sản phẩm</td><td>Tối đa 15 POI dạng gọn</td></tr>
+      <tr><td><code>get_poi_details</code></td><td>Khi đã có ID cụ thể</td><td>Payload đầy đủ, chuỗi JSON, kèm <code>NEAR_BY</code> và <code>Offers</code></td></tr>
+      <tr><td><code>get_itinerary_route</code></td><td>Cần quãng đường, thời gian, chỉ dẫn</td><td>Km, phút, danh sách chỉ dẫn rẽ</td></tr>
+    </tbody>
+  </table>
+
+  <h3>explore_pois</h3>
+  <div class="sig">def explore_pois(city_id=None, district_id=None, street_id=None, category_id=None, product_keyword=None, limit=15) → str</div>
+  <details class="params">
+    <summary>Tham số và thứ tự ưu tiên <span class="count">6 tham số</span></summary>
+    <div class="inner">
+      <p>Chỉ <strong>một</strong> tham số định vị được dùng, theo thứ tự ưu tiên cố định: <code>street_id</code>, rồi <code>district_id</code>, rồi <code>city_id</code>, rồi <code>category_id</code>, cuối cùng <code>product_keyword</code>. Không truyền gì thì trả về lỗi có thông báo.</p>
+      <table>
+        <thead><tr><th>Tham số</th><th>Kiểu</th><th>Mặc định</th><th>Ý nghĩa</th></tr></thead>
+        <tbody>
+          <tr><td><code>city_id</code></td><td>str</td><td><code>None</code></td><td>ID thành phố theo đồ thị, ví dụ lấy từ công cụ phân giải.</td></tr>
+          <tr><td><code>district_id</code></td><td>str</td><td><code>None</code></td><td>ID quận; ưu tiên cao hơn thành phố.</td></tr>
+          <tr><td><code>street_id</code></td><td>str</td><td><code>None</code></td><td>ID đường; ưu tiên cao nhất.</td></tr>
+          <tr><td><code>category_id</code></td><td>str</td><td><code>None</code></td><td>ID danh mục; được cắt tiền tố <code>cat_</code> và đổi gạch dưới thành khoảng trắng trước khi đối chiếu trong bộ nhớ.</td></tr>
+          <tr><td><code>product_keyword</code></td><td>str</td><td><code>None</code></td><td>Đối chiếu trong tên sản phẩm và tên riêng của quán.</td></tr>
+          <tr><td><code>limit</code></td><td>int</td><td><code>15</code></td><td>Số POI trả về. Bên trong luôn lấy tối đa 200 bản ghi rồi mới cắt theo <code>limit</code>.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+  <p><strong>Trả về:</strong> chuỗi JSON <code>{"success", "count", "results"}</code>.<br>
+  <strong>Lọc thêm trong bộ nhớ:</strong> bản ghi có địa chỉ chứa <code>unknown unknown</code> hoặc tên bằng <code>unknown</code> bị âm thầm loại.</p>
+  <p class="evidence">Nguồn: <code>api/mcp/tools.py:132-215</code>; thứ tự ưu tiên ở <code>:151-164</code>; bộ gom rác dữ liệu ở <code>:177-182</code>.</p>
+
+  <h3>get_poi_details</h3>
+  <div class="sig">def get_poi_details(poi_id: str) → str</div>
+  <details class="params">
+    <summary>Tham số <span class="count">1</span></summary>
+    <div class="inner">
+      <table>
+        <thead><tr><th>Tham số</th><th>Ý nghĩa</th></tr></thead>
+        <tbody>
+          <tr><td><code>poi_id</code></td><td>ID chính xác của POI. Sai ID trả <code>{"success": false, "detail": ...}</code> chứ không ném lỗi ra ngoài.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+  <p>Trả chuỗi JSON của payload đầy đủ, có thụt lề để mô hình dễ đọc. Mã tổ chức Repository cho Document RAG được thay bằng lớp rỗng ném lỗi chưa hiện thực, nên ba trường mô tả văn bản luôn rỗng.</p>
+  <p class="evidence">Nguồn: <code>api/mcp/tools.py:37-64</code>; repository rỗng ở <code>:28-34</code>.</p>
+
+  <h3>get_itinerary_route</h3>
+  <div class="sig">def get_itinerary_route(ordered_poi_ids: list[str], vehicle="car") → str</div>
+  <details class="params">
+    <summary>Tham số <span class="count">2</span></summary>
+    <div class="inner">
+      <table>
+        <thead><tr><th>Tham số</th><th>Mặc định</th><th>Ý nghĩa</th></tr></thead>
+        <tbody>
+          <tr><td><code>ordered_poi_ids</code></td><td>bắt buộc</td><td>Thứ tự ghé thăm. Ít hơn 2 điểm thì trả lỗi ngay, không gọi GraphHopper.</td></tr>
+          <tr><td><code>vehicle</code></td><td><code>"car"</code></td><td>Ba giá trị hợp lệ theo mô tả công cụ: <code>car</code>, <code>foot</code>, <code>bike</code>.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+  <p><strong>Trả về:</strong> quãng đường làm tròn 2 chữ số, thời gian làm tròn phút, danh sách chỉ dẫn, số điểm đã ánh xạ.<br>
+  <strong>Hành vi khi thiếu dữ liệu:</strong> POI không có toạ độ bị bỏ khỏi danh sách điểm dừng; còn dưới 2 điểm thì trả lỗi.</p>
+  <p class="evidence">Nguồn: <code>api/mcp/tools.py:67-129</code>; địa chỉ GraphHopper ở <code>:76</code>.</p>
+</section>
+
+<section id="nạp">
+  <h2>Đường nạp dữ liệu</h2>
+  <div class="sig">class POIIngestionService(uow_factory: Callable[[], AbstractUnitOfWork], spatial_updater: ISpatialUpdate = SpatialUpdater())</div>
+  <p>Lớp này nhận một <em>hàm dựng</em> Unit of Work chứ không nhận sẵn đối tượng, vì mỗi khối dữ liệu cần một giao dịch riêng và phải sống độc lập với vòng đời của request.</p>
+
+  <h3>process_canary_and_split</h3>
+  <div class="sig">def process_canary_and_split(raw_payloads, limit=10) → (dict, list)</div>
+  <p>Cắt 10 bản ghi đầu, ghi đồng bộ, trả về kết quả canary và phần còn lại. Nhờ vậy lỗi schema lộ ra ngay trong request, không bị đẩy vào nền rồi im lặng.</p>
+  <details class="params">
+    <summary>Tham số <span class="count">2</span></summary>
+    <div class="inner">
+      <table>
+        <thead><tr><th>Tham số</th><th>Mặc định</th><th>Ý nghĩa</th></tr></thead>
+        <tbody>
+          <tr><td><code>raw_payloads</code></td><td>bắt buộc</td><td>Danh sách POI thô từ thân yêu cầu.</td></tr>
+          <tr><td><code>limit</code></td><td><code>10</code></td><td>Số bản ghi thử. Tăng lên thì phát hiện lỗi muộn nhưng đỡ phải chạy nền.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+  <p class="evidence">Nguồn: <code>core/services/ingestion.py:48-59</code>.</p>
+
+  <h3>process_background_remainder</h3>
+  <div class="sig"><span class="kw">async def</span> process_background_remainder(raw_payloads, job_id) → None</div>
+  <p>Chạy trong tác vụ nền của FastAPI. Với mỗi khối 500 bản ghi: kiểm tra dữ liệu, báo cảnh báo nếu có bản ghi hỏng, rồi ghi qua một luồng riêng để không chặn vòng lặp sự kiện; sau mỗi khối ghi được thì báo tiến độ. Hết việc thì báo hoàn tất.</p>
+  <details class="params">
+    <summary>Tham số <span class="count">2</span></summary>
+    <div class="inner">
+      <table>
+        <thead><tr><th>Tham số</th><th>Ý nghĩa</th></tr></thead>
+        <tbody>
+          <tr><td><code>raw_payloads</code></td><td>Phần dư sau canary, vẫn là dữ liệu thô nên phải kiểm tra lại theo từng khối.</td></tr>
+          <tr><td><code>job_id</code></td><td>Dùng làm kênh phát bản tin SSE; không có ai nghe thì bản tin bị bỏ qua, không gây lỗi.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+  <p><strong>Hành vi đáng lưu ý:</strong> lỗi ở một khối chỉ được ghi log và báo qua SSE, vòng lặp vẫn sang khối kế tiếp. Hệ quả là một job có thể kết thúc với trạng thái “hoàn tất” dù vài khối đã hỏng ghi.</p>
+  <p class="evidence">Nguồn: <code>core/services/ingestion.py:64-114</code>.</p>
+
+  <h3>_execute_chunk_with_retry — ranh giới giao dịch</h3>
+  <div class="sig"><span class="kw">@retry</span>(stop_after_attempt(3), wait_exponential(min=2, max=10)) def _execute_chunk_with_retry(chunk) → int</div>
+  <p>Mở một Unit of Work, gọi <code>batch_create</code>, thoát khối <code>with</code> là chốt giao dịch. Thử lại ba lần với thời gian chờ 2, 4 rồi 8 giây; hết lượt thì ném lỗi lên cho vòng lặp ngoài.</p>
+  <p class="evidence">Nguồn: <code>core/services/ingestion.py:169-173</code>.</p>
+</section>
+
+<section id="doc">
+  <h2>Đường đọc cho agent</h2>
+  <div class="sig">class POIManagementService(BaseManagementService[POI])</div>
+  <p>Cung cấp hai nhóm việc: CRUD theo khuôn mẫu, và các truy vấn đọc phục vụ agent.</p>
+
+  <h3>get_agentic_poi_details</h3>
+  <div class="sig">def get_agentic_poi_details(poi_id: str, doc_repo: IDocumentRepository) → POIGetResponse</div>
+  <p>Ghép hai nguồn dữ liệu: phần cấu trúc lấy từ đồ thị, phần văn bản lấy từ repository tài liệu. Phần tài liệu được bọc trong hai lớp bắt lỗi riêng để đồ thị vẫn trả được khi Document RAG chưa có — đây là cầu dao ngắt mạch đúng nghĩa.</p>
+  <details class="params">
+    <summary>Tham số <span class="count">2</span></summary>
+    <div class="inner">
+      <table>
+        <thead><tr><th>Tham số</th><th>Ý nghĩa</th></tr></thead>
+        <tbody>
+          <tr><td><code>poi_id</code></td><td>ID POI trong đồ thị.</td></tr>
+          <tr><td><code>doc_repo</code></td><td>Repository tài liệu. Hiện là lớp rỗng ném lỗi chưa hiện thực, nên ba trường văn bản luôn rỗng và điểm đánh giá bằng 0.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+  <p><strong>Trả về:</strong> <code>POIGetResponse</code>.<br>
+  <strong>Ném:</strong> <code>ValueError</code> khi không tìm thấy POI — router dịch thành 404.<br>
+  <strong>Chịu lỗi dữ liệu:</strong> ưu đãi thiếu tên hoặc giá được thay bằng giá trị mặc định; điểm gần đó thiếu khoá thì bị bỏ qua chứ không làm hỏng cả payload.</p>
+  <p class="evidence">Nguồn: <code>core/services/management.py:102-206</code>; cầu dao ở <code>:111-124</code>.</p>
+
+  <h3>Các hàm khám phá cho agent</h3>
+  <details class="params">
+    <summary>Danh sách hàm đọc <span class="count">9 hàm</span></summary>
+    <div class="inner">
+      <table>
+        <thead><tr><th>Hàm</th><th>Trả về</th><th>Ghi chú</th></tr></thead>
+        <tbody>
+          <tr><td><code>get_all_cities()</code></td><td><code>list[{id, name}]</code></td><td>Chỉ trả thành phố thật sự có POI ở dưới.</td></tr>
+          <tr><td><code>get_districts_by_city(city_id)</code></td><td><code>list[{id, name}]</code></td><td>Lọc theo ID thành phố, không theo tên.</td></tr>
+          <tr><td><code>get_streets_by_district(district_id)</code></td><td><code>list[{id, name}]</code></td><td>Chỉ trả đường có ít nhất một POI.</td></tr>
+          <tr><td><code>get_available_categories()</code></td><td><code>list[{id, name}]</code></td><td>Dùng làm nguồn cho công cụ MCP cùng tên.</td></tr>
+          <tr><td><code>explore_by_city_id / district_id / street_id</code></td><td><code>list[dict]</code> gọn</td><td>Luôn lấy tối đa 200 bản ghi rồi cắt theo <code>limit</code>.</td></tr>
+          <tr><td><code>explore_by_category(category_id)</code></td><td><code>list[dict]</code> gọn</td><td>Gồm cả ưu đãi dạng chuỗi “tên (giá)”.</td></tr>
+          <tr><td><code>explore_by_product(keyword)</code></td><td><code>list[dict]</code> gọn</td><td>Đối chiếu cả tên chuẩn và tên riêng của quán.</td></tr>
+          <tr><td><code>search_location_id(keyword)</code></td><td><code>list[dict]</code></td><td>Phân giải tên người dùng thành ID; tự thay chữ “district” bằng “quan”.</td></tr>
+          <tr><td><code>get_all(skip, limit)</code></td><td><code>list[dict]</code> đầy đủ</td><td>Phân trang bằng <code>SKIP</code> và <code>LIMIT</code> trong Cypher.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+  <p class="evidence">Nguồn: <code>core/services/management.py:52-96</code>, <code>:208-210</code>; truy vấn ở <code>memgraph.py:731-878</code>.</p>
+
+  <h3>Khuôn mẫu CRUD</h3>
+  <div class="sig">class BaseManagementService(ABC, Generic[T]) — create / update / delete</div>
+  <p>Ba hàm công khai dùng chung một trình tự: kiểm tra dữ liệu, mở giao dịch, kiểm tra tồn tại, rồi mới thực thi. Mọi lớp con chỉ phải cài đặt năm móc: <code>_validate_payload</code>, <code>_get_existing</code>, <code>_execute_create</code>, <code>_execute_update</code>, <code>_execute_delete</code>.</p>
+  <details class="params">
+    <summary>Hợp đồng trả về <span class="count">3 mã lỗi</span></summary>
+    <div class="inner">
+      <table>
+        <thead><tr><th>Trường hợp</th><th><code>error_type</code></th><th>Ý nghĩa</th></tr></thead>
+        <tbody>
+          <tr><td>Dữ liệu không qua kiểm tra</td><td><code>unprocessable_entity</code></td><td>Kèm danh sách trường và thông điệp lỗi của từng trường.</td></tr>
+          <tr><td>Đã tồn tại khi tạo, hoặc không thấy khi sửa/xoá</td><td><code>conflict</code> / <code>not_found</code></td><td>Kiểm tra tồn tại nằm trong cùng giao dịch nên không bị đua tranh.</td></tr>
+          <tr><td>Giao dịch đồ thị hỏng</td><td><code>internal_error</code></td><td>Không trả chi tiết ra ngoài, chỉ ghi log.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+  <p class="evidence">Nguồn: <code>core/base/service.py:19-162</code>; móc trừu tượng ở <code>:31-49</code>.</p>
+</section>
+
+<section id="ha-tang">
+  <h2>Hạ tầng và giao dịch</h2>
+  <div class="sig">class MemgraphUnitOfWork(connector: MemgraphConnector)</div>
+  <p>Mở phiên và giao dịch trong <code>__enter__</code>, rồi tiêm chính giao dịch đó vào bốn repository. Lớp cha quyết định chốt hay huỷ giao dịch dựa trên việc có exception hay không.</p>
+  <details class="params">
+    <summary>Các bước vào và ra <span class="count">6 bước</span></summary>
+    <div class="inner">
+      <ol>
+        <li>Kiểm tra driver đã sẵn sàng chưa; chưa thì ném <code>RuntimeError</code> với thông điệp nói rõ cổng bị offline.</li>
+        <li>Mở phiên trên driver.</li>
+        <li>Bắt đầu giao dịch.</li>
+        <li>Khởi tạo bốn repository: POI, người dùng, danh mục, thẻ.</li>
+        <li>Khi thoát: nếu có exception thì huỷ giao dịch, ngược lại chốt giao dịch.</li>
+        <li>Đóng giao dịch và phiên; lỗi khi đóng chỉ ghi cảnh báo, không ném ra ngoài.</li>
+      </ol>
+    </div>
+  </details>
+  <p class="evidence">Nguồn: <code>core/infrastructure/db/uow.py:13-58</code>; hợp đồng ngữ cảnh ở <code>core/interfaces/repositories.py:138-157</code>.</p>
+
+  <h3>Hai bộ kết nối</h3>
+  <table>
+    <thead><tr><th>Bộ kết nối</th><th>Cách hoạt động</th><th>Điểm đáng chú ý</th></tr></thead>
+    <tbody>
+      <tr><td><code>MemgraphConnector</code></td><td>Một thực thể duy nhất cho toàn tiến trình; <code>connect()</code> thử lại 10 lần cách nhau 5 giây</td><td>Lỗi xác thực thì dừng ngay, không thử lại; chuỗi kết nối dựng từ <code>MEMGRAPH_HOST</code> và <code>MEMGRAPH_PORT</code></td></tr>
+      <tr><td><code>FireStoreConnector</code></td><td>Cũng một thực thể duy nhất; khởi tạo rỗng, chỉ kết nối khi được gọi</td><td>Đọc khoá dịch vụ từ <code>secrets/serviceAccountKey.json</code>; thiếu tệp thì ném <code>FileNotFoundError</code> ngay lúc khởi động app</td></tr>
+    </tbody>
+  </table>
+  <p class="evidence">Nguồn: <code>core/infrastructure/db/database/connector.py:13-122</code>; vòng đời app ở <code>app/main.py:25-50</code>.</p>
+
+  <h3>Cập nhật cạnh không gian</h3>
+  <div class="sig">def build_nearby_edges_for_district(district_id: str, radius_km: float = 3.0) → int</div>
+  <p>Câu lệnh đáng đọc nhất trong gói: nó lọc thô bằng khung chữ nhật trước, rồi mới tính khoảng cách chính xác cho phần còn lại. Mỗi cặp chỉ xét một chiều nhờ so sánh số định danh nội bộ, nên số cạnh giảm một nửa.</p>
+  <details class="params">
+    <summary>Các bước của câu lệnh <span class="count">7 bước</span></summary>
+    <div class="inner">
+      <ol>
+        <li>Neo vào nút quận, duyệt từng POI một để không dựng cả ma trận trong bộ nhớ.</li>
+        <li>Với mỗi POI, mở truy vấn con tách biệt để giải phóng bộ nhớ sau mỗi lượt.</li>
+        <li>Lọc thô bằng khung: chênh lệch vĩ độ và kinh độ ≤ bán kính chia 111 độ.</li>
+        <li>Chỉ với các cặp sống sót mới tính khoảng cách vòng tròn.</li>
+        <li>Lọc lần cuối theo bán kính thật.</li>
+        <li>Gộp cạnh <code>NEAR_BY</code> và làm tròn khoảng cách 2 chữ số.</li>
+        <li>Cộng số cạnh của mọi truy vấn con thành kết quả trả về.</li>
+      </ol>
+    </div>
+  </details>
+  <p class="evidence">Nguồn: <code>memgraph.py:183-235</code>.</p>
+
+  <h3>Kênh báo tiến độ</h3>
+  <div class="sig">class IngestionBroadcaster — get_queue / publish / remove_queue</div>
+  <p>Một từ điển hàng đợi theo <code>job_id</code>, sống trong bộ nhớ tiến trình. Không có cơ chế lưu bền, nên dòng sự kiện chỉ hoạt động trong cùng một tiến trình và một lần chạy.</p>
+  <p class="evidence">Nguồn: <code>core/utils/broadcaster.py:4-22</code>.</p>
+</section>
+
+<section id="nen">
+  <h2>Tác vụ nền</h2>
+  <div class="sig">class SpatialUpdater(ISpatialUpdate) — trigger_update(...)</div>
+  <details class="params">
+    <summary>Tham số <span class="count">3</span></summary>
+    <div class="inner">
+      <table>
+        <thead><tr><th>Tham số</th><th>Ý nghĩa</th></tr></thead>
+        <tbody>
+          <tr><td><code>affected_districts</code></td><td>Danh sách ID quận cần dựng lại cạnh.</td></tr>
+          <tr><td><code>uow_factory</code></td><td>Hàm dựng Unit of Work, gọi lại cho từng quận để mỗi quận có giao dịch riêng.</td></tr>
+          <tr><td><code>background_tasks</code></td><td>Có thì đẩy vào nền; không có thì chạy ngay tại chỗ và ghi cảnh báo.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+  <p><strong>Trả về:</strong> không trả gì; kết quả là tổng số cạnh mới, được in ra cùng log.</p>
+  <p class="evidence">Nguồn: <code>core/utils/updater.py:12-52</code>; giao diện ở <code>core/interfaces/updater.py:7-17</code>.</p>
+
+  <div class="callout gap">
+    <p><strong>Dây nối còn thiếu.</strong> Trong <code>process_background_remainder</code>, tập quận bị ảnh hưởng được dựng đầy đủ ở các dòng 90–97, nhưng không được truyền cho <code>SpatialUpdater</code> ở bất kỳ dòng nào tiếp theo. Nghĩa là dữ liệu POI mới vào đồ thị mà quan hệ “gần nhau” vẫn giữ nguyên cho tới khi có người gọi tay endpoint dựng lại.</p>
+  </div>
+</section>
+
+<section id="use-case">
+  <h2>Ca sử dụng</h2>
+  <div class="grid two">
+    <div class="uc">
+      <h4>Nạp một gói POI và theo dõi tiến độ</h4>
+      <p>Canary chạy trước; dòng sự kiện mở theo <code>job_id</code> trả về.</p>
+      <pre><code>JOB=$(curl -s -X POST localhost:8000/ingestion/batch \
+  -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
+  -d @pois.json | python -c "import sys,json;print(json.load(sys.stdin)['job_id'])")
+curl -N localhost:8000/ingestion/stream/$JOB</code></pre>
+    </div>
+    <div class="uc">
+      <h4>Lấy chi tiết một POI cho agent</h4>
+      <p>Qua MCP, không cần thông tin đăng nhập cơ sở dữ liệu.</p>
+      <pre><code>call_tool("get_poi_details", {"poi_id": "cafe_hochiminh_quan1_..."})
+# → {"success": true, "result": {...,"NEAR_BY":[...], "Offers":[...]}}</code></pre>
+    </div>
+    <div class="uc">
+      <h4>Tìm POI trong một quận</h4>
+      <p>Hai bước bắt buộc: phân giải tên thành ID, rồi tìm theo ID. Truyền tên thường vào <code>explore_pois</code> sẽ không ra kết quả vì truy vấn so khớp theo ID.</p>
+      <pre><code>resolve_geographic_id("District 1")   # → id = "quan 1_ho chi minh city"
+explore_pois(district_id="quan 1_ho chi minh city", limit=15)</code></pre>
+    </div>
+    <div class="uc">
+      <h4>Dựng lại quan hệ lân cận sau khi nạp</h4>
+      <p>Bắt buộc sau mỗi lô dữ liệu mới, cho tới khi dây nối tự động được thêm vào.</p>
+      <pre><code>curl -X POST localhost:8000/management/pois/spatial-rebuild \
+  -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
+  -d '["quan 1_ho chi minh city"]'</code></pre>
+    </div>
+  </div>
+</section>
+
+<section id="khoang-trong">
+  <h2>Khoảng trống</h2>
+  <table>
+    <thead><tr><th>Điểm</th><th>Hệ quả</th><th>Bằng chứng</th></tr></thead>
+    <tbody>
+      <tr><td>Document RAG chưa có hiện thực, hai nơi dùng lớp rỗng</td><td><code>insight</code>, <code>seo_article</code> luôn rỗng; agent không có chất liệu văn bản</td><td><code>api/dependencies/services.py:17-23</code>; <code>api/mcp/tools.py:28-34</code></td></tr>
+      <tr><td>Cập nhật cạnh lân cận không tự chạy sau khi nạp</td><td>POI mới chưa xuất hiện trong câu trả lời “gần đây có gì”</td><td><code>core/services/ingestion.py:90-97</code></td></tr>
+      <tr><td>Hai đường ghi dùng khóa gộp khác nhau cho <code>Tag</code>, <code>Category</code> và khác tên trường sản phẩm</td><td>Nguy cơ nút trùng nghĩa và sản phẩm không tìm thấy theo tên chuẩn</td><td><code>memgraph.py:253-321</code> và <code>:343-420</code>, <code>:823</code></td></tr>
+      <tr><td>ID POI và ID nút địa lý khác hệ chuẩn hoá</td><td>Không thể suy ID địa lý từ ID POI</td><td><code>helper.py:16-43</code>; <code>memgraph.py:264-269</code></td></tr>
+      <tr><td>Tiến trình nền không lưu dấu vết job; hàng đợi SSE nằm trong bộ nhớ</td><td>Restart giữa chừng là mất dấu job, không có cách hỏi lại kết quả</td><td><code>core/utils/broadcaster.py:4-22</code>; <code>core/services/ingestion.py:64-114</code></td></tr>
+      <tr><td>Lỗi ghi của một khối không chặn job, cuối job vẫn báo hoàn tất</td><td>“Hoàn tất” không đồng nghĩa “đã ghi hết”</td><td><code>core/services/ingestion.py:108-114</code></td></tr>
+      <tr><td>Cổng MCP không có tầng xác thực</td><td>Phải chặn ở mạng; đặt lên Internet là hở toàn bộ đường đọc</td><td><code>api/mcp/tools.py:26</code>, <code>:266-271</code></td></tr>
+      <tr><td><code>cypher_query.py</code> rỗng 0 dòng, còn import sai đường dẫn gói <code>shared_lib</code> trong repository</td><td>Chỗ gom truy vấn chưa tồn tại; import cần kiểm chứng khi chạy</td><td><code>core/utils/cypher_query.py</code>; <code>memgraph.py:14</code></td></tr>
+    </tbody>
+  </table>
+  <footer class="foot">Đối chiếu bản mã <code>1d18ac3</code> ngày 04-10-2026. Số dòng trích dẫn tính theo tệp gốc trong <code>POI_service/</code>.</footer>
+</section>
+</main>
+</div>
+<script src="../assets/docs.js"></script>
+</body>
+</html>

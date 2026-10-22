@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<!--
+  SYNTHETIC FIXTURE (hand-written for tests). This is NOT a capture of any live
+  page: the place names, addresses, descriptions and coordinates below are
+  invented for exercising the Wikivoyage listing extractor offline. Markup
+  follows the Wikivoyage listing rendering (div.vcard with listing-name /
+  listing-address / listing-content / listing-geo children) so the profile has
+  a realistic shape to parse.
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Ho Chi Minh City / See (synthetic fixture)</title>
+</head>
+<body>
+<div id="mw-content-text">
+  <h2><span class="mw-headline" id="See">See</span></h2>
+
+  <!-- 1. complete listing: name, address, geo marker, description -->
+  <div class="vcard" id="war-remnants-museum">
+    <div class="listing-name">War Remnants Museum</div>
+    <div class="listing-address">28 Vo Van Tan, District 3, Ho Chi Minh City</div>
+    <div class="listing-phone">+84 28 0000 0001</div>
+    <div class="listing-geo">10.77917; 106.69250</div>
+    <div class="listing-content">Synthetic narrative used only by the test
+      fixture: three floors of exhibits and a yard of parked aircraft.</div>
+  </div>
+
+  <!-- 2. no address element: must stay missing_address, never borrow text -->
+  <div class="vcard" id="notre-dame-cathedral">
+    <div class="listing-name">Notre Dame Cathedral (fixture)</div>
+    <div class="listing-content">Synthetic red-brick church narrative with no
+      address element anywhere in the block.</div>
+    <span class="listing-geo" data-lat="10.77972" data-lon="106.69903"></span>
+  </div>
+
+  <!-- 3. no description element: must stay missing_description -->
+  <div class="vcard" id="ben-thanh-market">
+    <div class="listing-name">Ben Thanh Market (fixture)</div>
+    <div class="listing-address">Le Loi, District 1, Ho Chi Minh City</div>
+  </div>
+
+  <!-- 4. no authored id AND an unparsable marker: both must be reported -->
+  <div class="vcard">
+    <div class="listing-name">Bitexco Deck (fixture)</div>
+    <div class="listing-address">2 Hai Trieu, District 1, Ho Chi Minh City</div>
+    <div class="listing-geo">top floor of the tower</div>
+    <div class="listing-content">Synthetic observation deck narrative.</div>
+  </div>
+</div>
+</body>
+</html>

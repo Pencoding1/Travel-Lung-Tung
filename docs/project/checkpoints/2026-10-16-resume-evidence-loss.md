@@ -1,0 +1,7 @@
+# Confirmed resume evidence loss
+
+Date:2026-10-16. Independent isolated probe used docs/project/handoffs/OC-021/resume-probe only. Seeded calls.jsonl with one sentinel S01/hybrid/r0 record. Patched executable discovery and executor creation to fake implementations that assert no call; ran runner.main with --execute --resume --max-calls0 and matching existing key. Result: attempted0,skipped1,records0; calls.jsonl became0bytes. No real provider call or existing diagnostic directory was touched.
+
+Acceptance: FAILED for immutable evidence preservation. Source also writes manifest.json before validating resume compatibility. Required repair must preserve all prior raw and structured records, reject incompatible manifests/settings/source hashes, append/merge only absent keys atomically, preserve failures, and survive interruption without losing prior observations. Resume should never silently drop malformed historical rows. Add regression for a no-op resume and partial-run continuation. Existing46/65 test counts did not cover this end-to-end invariant.
+
+Additionally hybrid uses collector-specific schedule_from_order instead of production scheduler. This remains an experiment-fidelity gap. Do not claim H2 based on that substitute. OC021 correction already consumed one bounded pass; record remaining task as partial and design a focused evidence-ledger/production-integration task rather than an unbounded same-error retry.

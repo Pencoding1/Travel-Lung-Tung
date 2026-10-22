@@ -1,0 +1,109 @@
+{
+  "schema_version": 1,
+  "diagram_type": "sequence",
+  "meta": {
+    "title": "Tương tác giữa các API: hỏi đáp, tra POI, dựng lịch trình",
+    "output": "docs/diagrams/api-interaction.sequence.html",
+    "viewBox": [1080, 800],
+    "column_fit": "spread",
+    "quality_profile": "showcase",
+    "views": [
+      {
+        "id": "grounding",
+        "label": "Neo dữ liệu qua MCP",
+        "focus": ["client", "ai_hub", "gemini", "poi_mcp", "memgraph"],
+        "note": "Mọi câu trả lời đều đi qua MCP để lấy ID thật trong Memgraph."
+      },
+      {
+        "id": "routing",
+        "label": "Định tuyến",
+        "focus": ["ai_hub", "poi_mcp", "graphhopper"],
+        "note": "Tuyến đường do GraphHopper tính, MCP chỉ chuyển tiếp toạ độ."
+      },
+      {
+        "id": "handoff",
+        "label": "Bàn giao lịch trình",
+        "focus": ["ai_hub", "backend_it", "firestore"],
+        "note": "Phần lưu trữ lịch trình thuộc backend_service, không thuộc vùng AI."
+      }
+    ]
+  },
+  "participants": [
+    { "id": "client", "type": "frontend", "label": "OTA Client", "sublabel": "web" },
+    { "id": "ai_hub", "type": "backend", "label": "AI Hub", "sublabel": ":8002" },
+    { "id": "gemini", "type": "external", "label": "Gemini", "sublabel": "2.5 pro" },
+    { "id": "poi_mcp", "type": "backend", "label": "POI MCP", "sublabel": ":8001" },
+    { "id": "memgraph", "type": "database", "label": "Memgraph", "sublabel": "đồ thị POI" },
+    { "id": "graphhopper", "type": "backend", "label": "GraphHopper", "sublabel": ":8989" },
+    { "id": "backend_it", "type": "backend", "label": "Itinerary", "sublabel": "backend_service" },
+    { "id": "firestore", "type": "database", "label": "Firestore", "sublabel": "stops" }
+  ],
+  "segments": [
+    { "from": 150, "to": 236, "label": "Phân loại ý định" },
+    { "from": 245, "to": 390, "label": "Neo ID vào đồ thị" },
+    { "from": 395, "to": 655, "label": "Tra cứu POI và định tuyến" },
+    { "from": 658, "to": 750, "label": "Trả lời và bàn giao" }
+  ],
+  "messages": [
+    { "id": "m_chat", "from": "client", "to": "ai_hub", "y": 165, "label": "POST /chat", "variant": "emphasis", "note": "session_id và message" },
+    { "id": "m_intent", "from": "ai_hub", "to": "gemini", "y": 193, "label": "classify_intent", "variant": "dashed" },
+    { "id": "m_intent_back", "from": "gemini", "to": "ai_hub", "y": 221, "label": "{ intent: TRAVEL }", "variant": "return" },
+    { "id": "m_init", "from": "ai_hub", "to": "poi_mcp", "y": 249, "label": "MCP SSE: list_tools", "variant": "emphasis" },
+    { "id": "m_resolve", "from": "poi_mcp", "to": "memgraph", "y": 277, "label": "resolve_geographic_id" },
+    { "id": "m_resolve_back", "from": "memgraph", "to": "poi_mcp", "y": 305, "label": "id = quan_1_hcmc", "variant": "return" },
+    { "id": "m_loop", "from": "ai_hub", "to": "gemini", "y": 333, "label": "tools, tối đa 5 vòng", "variant": "dashed" },
+    { "id": "m_calls", "from": "gemini", "to": "ai_hub", "y": 361, "label": "tool_calls và args", "variant": "return" },
+    { "id": "m_explore", "from": "ai_hub", "to": "poi_mcp", "y": 389, "label": "explore_pois", "variant": "emphasis" },
+    { "id": "m_explore_q", "from": "poi_mcp", "to": "memgraph", "y": 417, "label": "get_by_district_id_lite" },
+    { "id": "m_explore_back", "from": "memgraph", "to": "poi_mcp", "y": 445, "label": "POILite và toạ độ", "variant": "return" },
+    { "id": "m_details", "from": "ai_hub", "to": "poi_mcp", "y": 473, "label": "get_poi_details", "variant": "emphasis" },
+    { "id": "m_details_q", "from": "poi_mcp", "to": "memgraph", "y": 501, "label": "get_poi_graph_payload" },
+    { "id": "m_details_back", "from": "memgraph", "to": "poi_mcp", "y": 529, "label": "POIResult và NEAR_BY", "variant": "return" },
+    { "id": "m_route", "from": "ai_hub", "to": "poi_mcp", "y": 557, "label": "get_itinerary_route", "variant": "emphasis" },
+    { "id": "m_route_q", "from": "poi_mcp", "to": "graphhopper", "y": 585, "label": "GET /route?point" },
+    { "id": "m_route_back", "from": "graphhopper", "to": "poi_mcp", "y": 613, "label": "distance và instructions", "variant": "return" },
+    { "id": "m_reply", "from": "ai_hub", "to": "client", "y": 641, "label": "reply JSON", "variant": "return" },
+    { "id": "m_handoff", "from": "ai_hub", "to": "backend_it", "y": 669, "label": "bàn giao lịch trình", "variant": "dashed" },
+    { "id": "m_save", "from": "backend_it", "to": "firestore", "y": 697, "label": "set() itineraries" }
+  ],
+  "activations": [
+    { "participant": "client", "from": 160, "to": 650, "type": "frontend" },
+    { "participant": "ai_hub", "from": 165, "to": 660, "type": "backend" },
+    { "participant": "gemini", "from": 188, "to": 226, "type": "external" },
+    { "participant": "gemini", "from": 328, "to": 366, "type": "external" },
+    { "participant": "poi_mcp", "from": 244, "to": 620, "type": "backend" },
+    { "participant": "memgraph", "from": 272, "to": 535, "type": "database" },
+    { "participant": "graphhopper", "from": 580, "to": 618, "type": "backend" },
+    { "participant": "backend_it", "from": 664, "to": 705, "type": "backend" },
+    { "participant": "firestore", "from": 692, "to": 730, "type": "database" }
+  ],
+  "cards": [
+    {
+      "dot": "violet",
+      "title": "Vì sao phải qua MCP",
+      "items": [
+        "AI Hub không giữ thông tin đăng nhập cơ sở dữ liệu, chỉ nói chuyện với MCP qua SSE",
+        "MCP gom 5 tool: resolve ID, liệt kê category, explore, chi tiết POI, định tuyến",
+        "Nhờ vậy agent buộc phải lấy ID thật thay vì tự đoán tên quận hay tên danh mục"
+      ]
+    },
+    {
+      "dot": "cyan",
+      "title": "Hai đường vào POI",
+      "items": [
+        "Đường tra cứu: explore_pois trả POILite gọn để tiết kiệm token",
+        "Đường chi tiết: get_poi_details trả POIResult kèm NEAR_BY và Offers",
+        "Document RAG cho insight và seo_article hiện là repository rỗng"
+      ]
+    },
+    {
+      "dot": "orange",
+      "title": "Ranh giới trách nhiệm",
+      "items": [
+        "GraphHopper chỉ nhận toạ độ; POI thiếu toạ độ thì bị bỏ khỏi danh sách điểm dừng",
+        "Lịch trình sau khi sinh ra được bàn giao cho backend_service để ghi Firestore",
+        "Crawler là dịch vụ duy nhất gọi thẳng REST của POI_service"
+      ]
+    }
+  ]
+}

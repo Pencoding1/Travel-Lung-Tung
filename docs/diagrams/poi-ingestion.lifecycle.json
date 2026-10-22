@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "diagram_type": "lifecycle",
+  "meta": {
+    "title": "Vòng đời gói nạp POI: canary, chạy nền và dòng SSE",
+    "output": "docs/diagrams/poi-ingestion.lifecycle.html",
+    "viewBox": [1060, 640],
+    "quality_profile": "showcase",
+    "views": [
+      {
+        "id": "main",
+        "label": "Đường chính",
+        "focus": ["s_send", "s_post", "s_canary", "s_dec", "s_202"],
+        "note": "Trình tự trên ray chính: nhận gói dữ liệu, thử canary, rồi mới trả 202."
+      },
+      {
+        "id": "canary",
+        "label": "Cổng canary",
+        "focus": ["s_post", "s_canary", "s_dec"],
+        "note": "Canary là cổng chặn: dữ liệu sai bị phát hiện trước khi trả 202."
+      },
+      {
+        "id": "background",
+        "label": "Phần chạy nền",
+        "focus": ["w_chunk", "w_done"],
+        "note": "Phần dư chia thành khối 500 bản ghi và báo tiến độ qua SSE."
+      }
+    ]
+  },
+  "lanes": [
+    { "id": "main", "label": "Ray chính, năm bước" },
+    { "id": "work", "label": "Việc chạy nền" }
+  ],
+  "states": [
+    { "id": "s_send", "type": "start", "label": "Gửi gói POI", "sublabel": "List[Dict] JSON", "lane": "main", "col": 0, "step": "01", "tag": "entry" },
+    { "id": "s_post", "type": "active", "label": "POST /ingestion/batch", "sublabel": "JWT rồi sinh job_id", "lane": "main", "col": 1, "step": "02", "width": 150, "tag": "handler 400 dòng" },
+    { "id": "s_canary", "type": "active", "label": "Canary 10 bản ghi", "sublabel": "ghi trong request", "lane": "main", "col": 2, "step": "03", "tag": "đồng bộ" },
+    { "id": "s_dec", "type": "decision", "label": "Canary đạt?", "sublabel": "is_success", "lane": "main", "col": 3, "step": "04", "tag": "cổng chặn" },
+    { "id": "s_202", "type": "success", "label": "202 Accepted", "sublabel": "job_id trả ngay", "lane": "main", "col": 4, "step": "05", "tag": "đã nhận" },
+    { "id": "w_chunk", "type": "active", "label": "Khối 500 bản ghi", "sublabel": "validate rồi UNWIND", "lane": "work", "col": 0, "step": "06", "tag": "thử lại 3 lần" },
+    { "id": "w_done", "type": "success", "label": "SSE complete", "sublabel": "type = complete", "lane": "work", "col": 2, "step": "07", "tag": "đóng kênh" }
+  ],
+  "transitions": [
+    { "id": "t_dec_work", "from": "s_dec", "to": "w_chunk", "label": "phần dư vào nền", "variant": "dashed", "fromSide": "bottom", "toSide": "top", "route": "drop" },
+    { "id": "t_chunk_done", "from": "w_chunk", "to": "w_done", "variant": "emphasis", "fromSide": "right", "toSide": "left", "route": "straight" }
+  ],
+  "cards": [
+    {
+      "dot": "emerald",
+      "title": "Vì sao có canary",
+      "items": [
+        "10 bản ghi đầu được ghi ngay trong request để lộ lỗi schema sớm",
+        "Canary hỏng thì trả 422 kèm nguyên văn kết quả, không đẩy việc sang nền",
+        "Canary đạt thì phần dư mới vào BackgroundTasks và trả 202 ngay"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "Bất đồng bộ có thể quan sát",
+      "items": [
+        "IngestionBroadcaster giữ một asyncio.Queue riêng cho mỗi job_id",
+        "GET /ingestion/stream/{job_id} đẩy warning, progress rồi complete",
+        "Chỉ bản ghi qua được POI.model_validate mới vào đồ thị"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Khoảng trống đã đối chiếu mã nguồn",
+      "items": [
+        "Tập quận bị ảnh hưởng được dựng nhưng không truyền cho SpatialUpdater",
+        "SpatialUpdater chỉ chạy khi gọi tay POST /management/pois/spatial-rebuild",
+        "Không có dấu vết job nếu tiến trình restart giữa các khối"
+      ]
+    }
+  ]
+}

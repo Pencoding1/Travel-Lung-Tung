@@ -1,0 +1,1402 @@
+{
+  "task": "OC-010",
+  "version": "oc-010.v1",
+  "data_source": "synthetic",
+  "label": "synthetic-engineering-fixtures",
+  "excluded_from_original_dataset": true,
+  "frozen_before_benchmark": true,
+  "warning": "All scenarios are hand-authored synthetic fixtures. They are NOT the original thesis dataset and this is an engineering harness, not a statistical experiment. No LLM-only condition, provider-token estimate, H2 or H3 claim is produced; those are unavailable.",
+  "unavailable_analyses": [
+    "llm_only_condition",
+    "provider_token_estimate",
+    "H2_significance",
+    "H3_significance",
+    "original_dataset_reproduction"
+  ],
+  "manifest_sha256": "a654c2f81721388c1df278383321512013f4f40c92a2de4ab1cfb3aafa4d4cca",
+  "source_sha256": {
+    "__init__.py": "d82c948b0793fc5428b727f171735094823aea62959021101024cf45779006c0",
+    "contracts.py": "544609a3e3a0f2b4cf99aba0e0b5cf52ed7a17534cd63f1ad57ef16b02fd9cd9",
+    "scheduler.py": "2dbeb8932727a53b888be1cbfe411a2a255ef3b45a08d95f35b39c50120e95cf",
+    "validator.py": "1154d19b5a5442122caf89a8f7412303114983ef7143514d1e790d902cb26d22"
+  },
+  "python": {
+    "version": "3.14.0 (tags/v3.14.0:ebf955d, Oct  7 2025, 10:15:03) [MSC v.1944 64 bit (AMD64)]",
+    "implementation": "CPython",
+    "platform": "Windows-11-10.0.26200-SP0"
+  },
+  "executed_at_utc": "2026-10-15T10:58:05.548994+00:00",
+  "scenarios": [
+    {
+      "scenario_id": "S01",
+      "seed": 1001,
+      "input_sha256": "ea4a9866b5d2a5353da733d7f9696306d60041bdaa25b8096b53e38fe3ce3257",
+      "author_expected": {
+        "status": "feasible",
+        "no_plan_reason": null,
+        "properties": [
+          "one day",
+          "party 2",
+          "P1 profile",
+          "one stop"
+        ]
+      },
+      "matched_author_expected": true,
+      "elapsed_seconds": 0.0003974999999627471,
+      "plan": {
+        "status": "feasible",
+        "no_plan_reason": null,
+        "sequence": [
+          "p_food",
+          "p_cafe"
+        ],
+        "days": [
+          {
+            "day_id": "d1",
+            "stops": [
+              {
+                "poi_id": "p_food",
+                "arrival_minute": 29891640,
+                "departure_minute": 29891700,
+                "visit_minutes": 60,
+                "travel_from_prev_minutes": null,
+                "travel_from_prev_distance_km": null,
+                "cost_party": "200000",
+                "cost_currency": "VND"
+              },
+              {
+                "poi_id": "p_cafe",
+                "arrival_minute": 29891710,
+                "departure_minute": 29891740,
+                "visit_minutes": 30,
+                "travel_from_prev_minutes": 10,
+                "travel_from_prev_distance_km": "1.0",
+                "cost_party": "100000",
+                "cost_currency": "VND"
+              }
+            ]
+          }
+        ],
+        "total_cost_party": "300000",
+        "total_cost_currency": "VND",
+        "total_travel_minutes": 10,
+        "iterations": 3,
+        "excluded": [],
+        "unknown_reasons": [],
+        "unsatisfied_required": [],
+        "notes": []
+      },
+      "independent_validation": {
+        "status": "feasible",
+        "no_plan_reason": null,
+        "known_violations": [],
+        "unknown_reasons": [],
+        "unsatisfied_required": [],
+        "recomputed_total_cost_party": "300000",
+        "recomputed_total_travel_minutes": 10,
+        "stop_count": 2,
+        "checks": {
+          "stops": 2,
+          "known_violations": 0,
+          "unknown": 0,
+          "unsatisfied": 0
+        }
+      }
+    },
+    {
+      "scenario_id": "S02",
+      "seed": 1002,
+      "input_sha256": "fb6684c12db72108962d25668f2df5de9ab331418c5955e3f2c444ef8c85ed0a",
+      "author_expected": {
+        "status": "feasible",
+        "no_plan_reason": null,
+        "properties": [
+          "two days",
+          "party 4",
+          "P2 profile",
+          "no depot"
+        ]
+      },
+      "matched_author_expected": true,
+      "elapsed_seconds": 0.0002629000000524684,
+      "plan": {
+        "status": "feasible",
+        "no_plan_reason": null,
+        "sequence": [
+          "p_cafe",
+          "p_food",
+          "p_museum"
+        ],
+        "days": [
+          {
+            "day_id": "d1",
+            "stops": [
+              {
+                "poi_id": "p_cafe",
+                "arrival_minute": 29891580,
+                "departure_minute": 29891625,
+                "visit_minutes": 45,
+                "travel_from_prev_minutes": null,
+                "travel_from_prev_distance_km": null,
+                "cost_party": "240000",
+                "cost_currency": "VND"
+              },
+              {
+                "poi_id": "p_food",
+                "arrival_minute": 29891640,
+                "departure_minute": 29891700,
+                "visit_minutes": 60,
+                "travel_from_prev_minutes": 15,
+                "travel_from_prev_distance_km": "2.0",
+                "cost_party": "480000",
+                "cost_currency": "VND"
+              },
+              {
+                "poi_id": "p_museum",
+                "arrival_minute": 29891730,
+                "departure_minute": 29891820,
+                "visit_minutes": 90,
+                "travel_from_prev_minutes": 30,
+                "travel_from_prev_distance_km": "4.5",
+                "cost_party": "320000",
+                "cost_currency": "VND"
+              }
+            ]
+          },
+          {
+            "day_id": "d2",
+            "stops": []
+          }
+        ],
+        "total_cost_party": "1040000",
+        "total_cost_currency": "VND",
+        "total_travel_minutes": 45,
+        "iterations": 6,
+        "excluded": [],
+        "unknown_reasons": [],
+        "unsatisfied_required": [],
+        "notes": []
+      },
+      "independent_validation": {
+        "status": "feasible",
+        "no_plan_reason": null,
+        "known_violations": [],
+        "unknown_reasons": [],
+        "unsatisfied_required": [],
+        "recomputed_total_cost_party": "1040000",
+        "recomputed_total_travel_minutes": 45,
+        "stop_count": 3,
+        "checks": {
+          "stops": 3,
+          "known_violations": 0,
+          "unknown": 0,
+          "unsatisfied": 0
+        }
+      }
+    },
+    {
+      "scenario_id": "S03",
+      "seed": 1003,
+      "input_sha256": "ad39d2991eba335471603d6d0482a6728f0a65428b3cc35dd6c5b4ec5efc708a",
+      "author_expected": {
+        "status": "no_plan",
+        "no_plan_reason": "impossible_constraints",
+        "properties": [
+          "low budget",
+          "single expensive required POI",
+          "budget_exceeded exclusion"
+        ]
+      },
+      "matched_author_expected": true,
+      "elapsed_seconds": 8.720000005268957e-05,
+      "plan": {
+        "status": "no_plan",
+        "no_plan_reason": "impossible_constraints",
+        "sequence": [],
+        "days": [],
+        "total_cost_party": null,
+        "total_cost_currency": null,
+        "total_travel_minutes": 0,
+        "iterations": 1,
+        "excluded": [
+          {
+            "poi_id": "p_museum",
+            "day_id": "d1",
+            "reason": "budget_exceeded"
+          }
+        ],
+        "unknown_reasons": [],
+        "unsatisfied_required": [
+          "required_category:cat_museum"
+        ],
+        "notes": []
+      },
+      "independent_validation": {
+        "status": "no_plan",
+        "no_plan_reason": "impossible_constraints",
+        "known_violations": [],
+        "unknown_reasons": [],
+        "unsatisfied_required": [
+          "required_category:cat_museum"
+        ],
+        "recomputed_total_cost_party": null,
+        "recomputed_total_travel_minutes": 0,
+        "stop_count": 0,
+        "checks": {
+          "stops": 0,
+          "known_violations": 0,
+          "unknown": 0,
+          "unsatisfied": 1
+        }
+      }
+    },
+    {
+      "scenario_id": "S04",
+      "seed": 1004,
+      "input_sha256": "cdbbd5fad395fdc25cdbceba8faf228594155674d2f0cbb307baf9e2912881d3",
+      "author_expected": {
+        "status": "feasible",
+        "no_plan_reason": null,
+        "properties": [
+          "high budget",
+          "party 3",
+          "P3 profile"
+        ]
+      },
+      "matched_author_expected": true,
+      "elapsed_seconds": 0.00014660000033472897,
+      "plan": {
+        "status": "feasible",
+        "no_plan_reason": null,
+        "sequence": [
+          "p_park",
+          "p_shop"
+        ],
+        "days": [
+          {
+            "day_id": "d1",
+            "stops": [
+              {
+                "poi_id": "p_park",
+                "arrival_minute": 29891580,
+                "departure_minute": 29891700,
+                "visit_minutes": 120,
+                "travel_from_prev_minutes": null,
+                "travel_from_prev_distance_km": null,
+                "cost_party": "0",
+                "cost_currency": "VND"
+              },
+              {
+                "poi_id": "p_shop",
+                "arrival_minute": 29891712,
+                "departure_minute": 29891757,
+                "visit_minutes": 45,
+                "travel_from_prev_minutes": 12,
+                "travel_from_prev_distance_km": "1.5",
+                "cost_party": "600000",
+                "cost_currency": "VND"
+              }
+            ]
+          }
+        ],
+        "total_cost_party": "600000",
+        "total_cost_currency": "VND",
+        "total_travel_minutes": 12,
+        "iterations": 3,
+        "excluded": [],
+        "unknown_reasons": [],
+        "unsatisfied_required": [],
+        "notes": []
+      },
+      "independent_validation": {
+        "status": "feasible",
+        "no_plan_reason": null,
+        "known_violations": [],
+        "unknown_reasons": [],
+        "unsatisfied_required": [],
+        "recomputed_total_cost_party": "600000",
+        "recomputed_total_travel_minutes": 12,
+        "stop_count": 2,
+        "checks": {
+          "stops": 2,
+          "known_violations": 0,
+          "unknown": 0,
+          "unsatisfied": 0
+        }
+      }
+    },
+    {
+      "scenario_id": "S05",
+      "seed": 1005,
+      "input_sha256": "9d3992d755cf17f4e7f99278c307f8fdf9b21a1fc5769ba0b7e10839b9bd7fa5",
+      "author_expected": {
+        "status": "feasible",
+        "no_plan_reason": null,
+        "properties": [
+          "directed asymmetry A->B long B->A short",
+          "one day"
+        ]
+      },
+      "matched_author_expected": true,
+      "elapsed_seconds": 0.00013699999999516876,
+      "plan": {
+        "status": "feasible",
+        "no_plan_reason": null,
+        "sequence": [
+          "p_a",
+          "p_b"
+        ],
+        "days": [
+          {
+            "day_id": "d1",
+            "stops": [
+              {
+                "poi_id": "p_a",
+                "arrival_minute": 29891580,
+                "departure_minute": 29891640,
+                "visit_minutes": 60,
+                "travel_from_prev_minutes": null,
+                "travel_from_prev_distance_km": null,
+                "cost_party": "0",
+                "cost_currency": "VND"
+              },
+              {
+                "poi_id": "p_b",
+                "arrival_minute": 29891820,
+                "departure_minute": 29891880,
+                "visit_minutes": 60,
+                "travel_from_prev_minutes": 180,
+                "travel_from_prev_distance_km": "40.0",
+                "cost_party": "0",
+                "cost_currency": "VND"
+              }
+            ]
+          }
+        ],
+        "total_cost_party": "0",
+        "total_cost_currency": "VND",
+        "total_travel_minutes": 180,
+        "iterations": 3,
+        "excluded": [],
+        "unknown_reasons": [],
+        "unsatisfied_required": [],
+        "notes": []
+      },
+      "independent_validation": {
+        "status": "feasible",
+        "no_plan_reason": null,
+        "known_violations": [],
+        "unknown_reasons": [],
+        "unsatisfied_required": [],
+        "recomputed_total_cost_party": "0",
+        "recomputed_total_travel_minutes": 180,
+        "stop_count": 2,
+        "checks": {
+          "stops": 2,
+          "known_violations": 0,
+          "unknown": 0,
+          "unsatisfied": 0
+        }
+      }
+    },
+    {
+      "scenario_id": "S06",
+      "seed": 1006,
+      "input_sha256": "40498f7fef786d0b2c6ddd402bf465c934cbd60d3c1942a6a18d0032cce12c9f",
+      "author_expected": {
+        "status": "feasible",
+        "no_plan_reason": null,
+        "properties": [
+          "exact closing boundary",
+          "departure equals window end"
+        ]
+      },
+      "matched_author_expected": true,
+      "elapsed_seconds": 8.140000045386842e-05,
+      "plan": {
+        "status": "feasible",
+        "no_plan_reason": null,
+        "sequence": [
+          "p_closed"
+        ],
+        "days": [
+          {
+            "day_id": "d1",
+            "stops": [
+              {
+                "poi_id": "p_closed",
+                "arrival_minute": 29891640,
+                "departure_minute": 29891700,
+                "visit_minutes": 60,
+                "travel_from_prev_minutes": null,
+                "travel_from_prev_distance_km": null,
+                "cost_party": "0",
+                "cost_currency": "VND"
+              }
+            ]
+          }
+        ],
+        "total_cost_party": "0",
+        "total_cost_currency": "VND",
+        "total_travel_minutes": 0,
+        "iterations": 1,
+        "excluded": [],
+        "unknown_reasons": [],
+        "unsatisfied_required": [],
+        "notes": []
+      },
+      "independent_validation": {
+        "status": "feasible",
+        "no_plan_reason": null,
+        "known_violations": [],
+        "unknown_reasons": [],
+        "unsatisfied_required": [],
+        "recomputed_total_cost_party": "0",
+        "recomputed_total_travel_minutes": 0,
+        "stop_count": 1,
+        "checks": {
+          "stops": 1,
+          "known_violations": 0,
+          "unknown": 0,
+          "unsatisfied": 0
+        }
+      }
+    },
+    {
+      "scenario_id": "S07",
+      "seed": 1007,
+      "input_sha256": "230aa5d01d5eecac9259bb5a1f5d4dc74b1338cb7f433a9481e52c02e62be132",
+      "author_expected": {
+        "status": "feasible",
+        "no_plan_reason": null,
+        "properties": [
+          "wait before opening",
+          "arrival earlier than opening"
+        ]
+      },
+      "matched_author_expected": true,
+      "elapsed_seconds": 7.370000002993038e-05,
+      "plan": {
+        "status": "feasible",
+        "no_plan_reason": null,
+        "sequence": [
+          "p_late"
+        ],
+        "days": [
+          {
+            "day_id": "d1",
+            "stops": [
+              {
+                "poi_id": "p_late",
+                "arrival_minute": 29891820,
+                "departure_minute": 29891880,
+                "visit_minutes": 60,
+                "travel_from_prev_minutes": null,
+                "travel_from_prev_distance_km": null,
+                "cost_party": "0",
+                "cost_currency": "VND"
+              }
+            ]
+          }
+        ],
+        "total_cost_party": "0",
+        "total_cost_currency": "VND",
+        "total_travel_minutes": 0,
+        "iterations": 1,
+        "excluded": [],
+        "unknown_reasons": [],
+        "unsatisfied_required": [],
+        "notes": []
+      },
+      "independent_validation": {
+        "status": "feasible",
+        "no_plan_reason": null,
+        "known_violations": [],
+        "unknown_reasons": [],
+        "unsatisfied_required": [],
+        "recomputed_total_cost_party": "0",
+        "recomputed_total_travel_minutes": 0,
+        "stop_count": 1,
+        "checks": {
+          "stops": 1,
+          "known_violations": 0,
+          "unknown": 0,
+          "unsatisfied": 0
+        }
+      }
+    },
+    {
+      "scenario_id": "S08",
+      "seed": 1008,
+      "input_sha256": "8de736593bc3b2f2c4948761c3589d6a53aed8588d315f06ca96e9a0c5f7e05a",
+      "author_expected": {
+        "status": "feasible",
+        "no_plan_reason": null,
+        "properties": [
+          "long transfer",
+          "only one stop fits"
+        ]
+      },
+      "matched_author_expected": true,
+      "elapsed_seconds": 0.00011050000011891825,
+      "plan": {
+        "status": "feasible",
+        "no_plan_reason": null,
+        "sequence": [
+          "p_far"
+        ],
+        "days": [
+          {
+            "day_id": "d1",
+            "stops": [
+              {
+                "poi_id": "p_far",
+                "arrival_minute": 29891580,
+                "departure_minute": 29891640,
+                "visit_minutes": 60,
+                "travel_from_prev_minutes": null,
+                "travel_from_prev_distance_km": null,
+                "cost_party": "0",
+                "cost_currency": "VND"
+              }
+            ]
+          }
+        ],
+        "total_cost_party": "0",
+        "total_cost_currency": "VND",
+        "total_travel_minutes": 0,
+        "iterations": 3,
+        "excluded": [
+          {
+            "poi_id": "p_near",
+            "day_id": "d1",
+            "reason": "opening_conflict"
+          }
+        ],
+        "unknown_reasons": [],
+        "unsatisfied_required": [],
+        "notes": []
+      },
+      "independent_validation": {
+        "status": "feasible",
+        "no_plan_reason": null,
+        "known_violations": [],
+        "unknown_reasons": [],
+        "unsatisfied_required": [],
+        "recomputed_total_cost_party": "0",
+        "recomputed_total_travel_minutes": 0,
+        "stop_count": 1,
+        "checks": {
+          "stops": 1,
+          "known_violations": 0,
+          "unknown": 0,
+          "unsatisfied": 0
+        }
+      }
+    },
+    {
+      "scenario_id": "S09",
+      "seed": 1009,
+      "input_sha256": "a0b5559ee0453c4e03a5bf042175fb3212dc1197254699aa3892ce70821cb4f7",
+      "author_expected": {
+        "status": "feasible",
+        "no_plan_reason": null,
+        "properties": [
+          "required meal window satisfied"
+        ]
+      },
+      "matched_author_expected": true,
+      "elapsed_seconds": 9.679999948275508e-05,
+      "plan": {
+        "status": "feasible",
+        "no_plan_reason": null,
+        "sequence": [
+          "p_food"
+        ],
+        "days": [
+          {
+            "day_id": "d1",
+            "stops": [
+              {
+                "poi_id": "p_food",
+                "arrival_minute": 29891760,
+                "departure_minute": 29891820,
+                "visit_minutes": 60,
+                "travel_from_prev_minutes": null,
+                "travel_from_prev_distance_km": null,
+                "cost_party": "0",
+                "cost_currency": "VND"
+              }
+            ]
+          }
+        ],
+        "total_cost_party": "0",
+        "total_cost_currency": "VND",
+        "total_travel_minutes": 0,
+        "iterations": 1,
+        "excluded": [],
+        "unknown_reasons": [],
+        "unsatisfied_required": [],
+        "notes": []
+      },
+      "independent_validation": {
+        "status": "feasible",
+        "no_plan_reason": null,
+        "known_violations": [],
+        "unknown_reasons": [],
+        "unsatisfied_required": [],
+        "recomputed_total_cost_party": "0",
+        "recomputed_total_travel_minutes": 0,
+        "stop_count": 1,
+        "checks": {
+          "stops": 1,
+          "known_violations": 0,
+          "unknown": 0,
+          "unsatisfied": 0
+        }
+      }
+    },
+    {
+      "scenario_id": "S10",
+      "seed": 1010,
+      "input_sha256": "1904817ca00509073e3fd6e450228d15dce6d8231aca4db3e872e4e86cb269ce",
+      "author_expected": {
+        "status": "partial",
+        "no_plan_reason": null,
+        "properties": [
+          "required meal window impossible",
+          "no matching category",
+          "unsatisfied meal_window"
+        ]
+      },
+      "matched_author_expected": true,
+      "elapsed_seconds": 8.940000043367036e-05,
+      "plan": {
+        "status": "partial",
+        "no_plan_reason": null,
+        "sequence": [
+          "p_museum"
+        ],
+        "days": [
+          {
+            "day_id": "d1",
+            "stops": [
+              {
+                "poi_id": "p_museum",
+                "arrival_minute": 29891580,
+                "departure_minute": 29891640,
+                "visit_minutes": 60,
+                "travel_from_prev_minutes": null,
+                "travel_from_prev_distance_km": null,
+                "cost_party": null,
+                "cost_currency": null
+              }
+            ]
+          }
+        ],
+        "total_cost_party": null,
+        "total_cost_currency": null,
+        "total_travel_minutes": 0,
+        "iterations": 1,
+        "excluded": [],
+        "unknown_reasons": [
+          "cost_unknown:p_museum",
+          "hours_unknown:p_museum"
+        ],
+        "unsatisfied_required": [
+          "meal_window:d1:cat_food"
+        ],
+        "notes": []
+      },
+      "independent_validation": {
+        "status": "partial",
+        "no_plan_reason": null,
+        "known_violations": [],
+        "unknown_reasons": [
+          "cost_unknown:p_museum",
+          "hours_unknown:p_museum"
+        ],
+        "unsatisfied_required": [
+          "meal_window:d1:cat_food"
+        ],
+        "recomputed_total_cost_party": null,
+        "recomputed_total_travel_minutes": 0,
+        "stop_count": 1,
+        "checks": {
+          "stops": 1,
+          "known_violations": 0,
+          "unknown": 2,
+          "unsatisfied": 1
+        }
+      }
+    },
+    {
+      "scenario_id": "S11",
+      "seed": 1011,
+      "input_sha256": "fcd06f3c8a65e8ef4d3c41a2c00511e62ee9478978cf7737e39276c36a030f22",
+      "author_expected": {
+        "status": "feasible",
+        "no_plan_reason": null,
+        "properties": [
+          "sparse single candidate"
+        ]
+      },
+      "matched_author_expected": true,
+      "elapsed_seconds": 8.04999999672873e-05,
+      "plan": {
+        "status": "feasible",
+        "no_plan_reason": null,
+        "sequence": [
+          "p_solo"
+        ],
+        "days": [
+          {
+            "day_id": "d1",
+            "stops": [
+              {
+                "poi_id": "p_solo",
+                "arrival_minute": 29891580,
+                "departure_minute": 29891625,
+                "visit_minutes": 45,
+                "travel_from_prev_minutes": null,
+                "travel_from_prev_distance_km": null,
+                "cost_party": "0",
+                "cost_currency": "VND"
+              }
+            ]
+          }
+        ],
+        "total_cost_party": "0",
+        "total_cost_currency": "VND",
+        "total_travel_minutes": 0,
+        "iterations": 1,
+        "excluded": [],
+        "unknown_reasons": [],
+        "unsatisfied_required": [],
+        "notes": []
+      },
+      "independent_validation": {
+        "status": "feasible",
+        "no_plan_reason": null,
+        "known_violations": [],
+        "unknown_reasons": [],
+        "unsatisfied_required": [],
+        "recomputed_total_cost_party": "0",
+        "recomputed_total_travel_minutes": 0,
+        "stop_count": 1,
+        "checks": {
+          "stops": 1,
+          "known_violations": 0,
+          "unknown": 0,
+          "unsatisfied": 0
+        }
+      }
+    },
+    {
+      "scenario_id": "S12",
+      "seed": 1012,
+      "input_sha256": "4e69b102fc40a033fef98519ba49b930d4135532979ad4adaada26e73e4d685c",
+      "author_expected": {
+        "status": "no_plan",
+        "no_plan_reason": "no_candidates",
+        "properties": [
+          "empty candidates"
+        ]
+      },
+      "matched_author_expected": true,
+      "elapsed_seconds": 4.1399999645364005e-05,
+      "plan": {
+        "status": "no_plan",
+        "no_plan_reason": "no_candidates",
+        "sequence": [],
+        "days": [],
+        "total_cost_party": null,
+        "total_cost_currency": null,
+        "total_travel_minutes": 0,
+        "iterations": 0,
+        "excluded": [],
+        "unknown_reasons": [],
+        "unsatisfied_required": [],
+        "notes": []
+      },
+      "independent_validation": {
+        "status": "no_plan",
+        "no_plan_reason": "no_candidates",
+        "known_violations": [],
+        "unknown_reasons": [],
+        "unsatisfied_required": [],
+        "recomputed_total_cost_party": null,
+        "recomputed_total_travel_minutes": 0,
+        "stop_count": 0,
+        "checks": {
+          "stops": 0,
+          "known_violations": 0,
+          "unknown": 0,
+          "unsatisfied": 0
+        }
+      }
+    },
+    {
+      "scenario_id": "S13",
+      "seed": 1013,
+      "input_sha256": "4b6df597b777e3b47d5157958edb070a9c414e9f0ab6dedbf5c2b3078824c9f7",
+      "author_expected": {
+        "status": "unverifiable",
+        "no_plan_reason": null,
+        "properties": [
+          "missing hours",
+          "hours_unknown reason",
+          "no known violation"
+        ]
+      },
+      "matched_author_expected": true,
+      "elapsed_seconds": 6.410000059986487e-05,
+      "plan": {
+        "status": "unverifiable",
+        "no_plan_reason": null,
+        "sequence": [
+          "p_nohours"
+        ],
+        "days": [
+          {
+            "day_id": "d1",
+            "stops": [
+              {
+                "poi_id": "p_nohours",
+                "arrival_minute": 29891580,
+                "departure_minute": 29891610,
+                "visit_minutes": 30,
+                "travel_from_prev_minutes": null,
+                "travel_from_prev_distance_km": null,
+                "cost_party": null,
+                "cost_currency": null
+              }
+            ]
+          }
+        ],
+        "total_cost_party": null,
+        "total_cost_currency": null,
+        "total_travel_minutes": 0,
+        "iterations": 1,
+        "excluded": [],
+        "unknown_reasons": [
+          "cost_unknown:p_nohours",
+          "hours_unknown:p_nohours"
+        ],
+        "unsatisfied_required": [],
+        "notes": []
+      },
+      "independent_validation": {
+        "status": "unverifiable",
+        "no_plan_reason": null,
+        "known_violations": [],
+        "unknown_reasons": [
+          "cost_unknown:p_nohours",
+          "hours_unknown:p_nohours"
+        ],
+        "unsatisfied_required": [],
+        "recomputed_total_cost_party": null,
+        "recomputed_total_travel_minutes": 0,
+        "stop_count": 1,
+        "checks": {
+          "stops": 1,
+          "known_violations": 0,
+          "unknown": 2,
+          "unsatisfied": 0
+        }
+      }
+    },
+    {
+      "scenario_id": "S14",
+      "seed": 1014,
+      "input_sha256": "f4eab1b0c82d010d6f3f171ae587d40dc7e575c538341220539dcb6b3efcddf3",
+      "author_expected": {
+        "status": "no_plan",
+        "no_plan_reason": "impossible_constraints",
+        "properties": [
+          "missing route edge",
+          "directed travel unknown",
+          "route_unknown exclusion"
+        ]
+      },
+      "matched_author_expected": true,
+      "elapsed_seconds": 0.000283800000033807,
+      "plan": {
+        "status": "no_plan",
+        "no_plan_reason": "impossible_constraints",
+        "sequence": [],
+        "days": [],
+        "total_cost_party": null,
+        "total_cost_currency": null,
+        "total_travel_minutes": 0,
+        "iterations": 1,
+        "excluded": [
+          {
+            "poi_id": "p_a",
+            "day_id": "d1",
+            "reason": "route_unknown:depot->p_a"
+          }
+        ],
+        "unknown_reasons": [],
+        "unsatisfied_required": [],
+        "notes": []
+      },
+      "independent_validation": {
+        "status": "no_plan",
+        "no_plan_reason": "impossible_constraints",
+        "known_violations": [],
+        "unknown_reasons": [],
+        "unsatisfied_required": [],
+        "recomputed_total_cost_party": null,
+        "recomputed_total_travel_minutes": 0,
+        "stop_count": 0,
+        "checks": {
+          "stops": 0,
+          "known_violations": 0,
+          "unknown": 0,
+          "unsatisfied": 0
+        }
+      }
+    },
+    {
+      "scenario_id": "S15",
+      "seed": 1015,
+      "input_sha256": "51679734e35e0a6d226df327ab86e77402c577c443930e60b36489444f4b4f39",
+      "author_expected": {
+        "status": "unverifiable",
+        "no_plan_reason": null,
+        "properties": [
+          "missing price with declared budget",
+          "cost_unknown reason"
+        ]
+      },
+      "matched_author_expected": true,
+      "elapsed_seconds": 0.00010459999975864775,
+      "plan": {
+        "status": "unverifiable",
+        "no_plan_reason": null,
+        "sequence": [
+          "p_noprice"
+        ],
+        "days": [
+          {
+            "day_id": "d1",
+            "stops": [
+              {
+                "poi_id": "p_noprice",
+                "arrival_minute": 29891640,
+                "departure_minute": 29891670,
+                "visit_minutes": 30,
+                "travel_from_prev_minutes": null,
+                "travel_from_prev_distance_km": null,
+                "cost_party": null,
+                "cost_currency": null
+              }
+            ]
+          }
+        ],
+        "total_cost_party": null,
+        "total_cost_currency": null,
+        "total_travel_minutes": 0,
+        "iterations": 1,
+        "excluded": [],
+        "unknown_reasons": [
+          "cost_unknown:p_noprice"
+        ],
+        "unsatisfied_required": [],
+        "notes": []
+      },
+      "independent_validation": {
+        "status": "unverifiable",
+        "no_plan_reason": null,
+        "known_violations": [],
+        "unknown_reasons": [
+          "cost_unknown:p_noprice"
+        ],
+        "unsatisfied_required": [],
+        "recomputed_total_cost_party": null,
+        "recomputed_total_travel_minutes": 0,
+        "stop_count": 1,
+        "checks": {
+          "stops": 1,
+          "known_violations": 0,
+          "unknown": 1,
+          "unsatisfied": 0
+        }
+      }
+    },
+    {
+      "scenario_id": "S16",
+      "seed": 1016,
+      "input_sha256": "d6a0654ab20368428f0462e96b1956278a824751f68246c2172ca15f5232d581",
+      "author_expected": {
+        "status": "no_plan",
+        "no_plan_reason": "impossible_constraints",
+        "properties": [
+          "all candidates closed during day window",
+          "opening_conflict"
+        ]
+      },
+      "matched_author_expected": true,
+      "elapsed_seconds": 6.310000026132911e-05,
+      "plan": {
+        "status": "no_plan",
+        "no_plan_reason": "impossible_constraints",
+        "sequence": [],
+        "days": [],
+        "total_cost_party": null,
+        "total_cost_currency": null,
+        "total_travel_minutes": 0,
+        "iterations": 1,
+        "excluded": [
+          {
+            "poi_id": "p_night",
+            "day_id": "d1",
+            "reason": "opening_conflict"
+          }
+        ],
+        "unknown_reasons": [],
+        "unsatisfied_required": [],
+        "notes": []
+      },
+      "independent_validation": {
+        "status": "no_plan",
+        "no_plan_reason": "impossible_constraints",
+        "known_violations": [],
+        "unknown_reasons": [],
+        "unsatisfied_required": [],
+        "recomputed_total_cost_party": null,
+        "recomputed_total_travel_minutes": 0,
+        "stop_count": 0,
+        "checks": {
+          "stops": 0,
+          "known_violations": 0,
+          "unknown": 0,
+          "unsatisfied": 0
+        }
+      }
+    },
+    {
+      "scenario_id": "S17",
+      "seed": 1017,
+      "input_sha256": "54ee6565febaea699d73503defd306dbef43fbd0080128adce99cac6b6272f9a",
+      "author_expected": {
+        "status": "partial",
+        "no_plan_reason": null,
+        "properties": [
+          "required category absent",
+          "still schedules others",
+          "required_category unmet"
+        ]
+      },
+      "matched_author_expected": true,
+      "elapsed_seconds": 6.719999964843737e-05,
+      "plan": {
+        "status": "partial",
+        "no_plan_reason": null,
+        "sequence": [
+          "p_museum"
+        ],
+        "days": [
+          {
+            "day_id": "d1",
+            "stops": [
+              {
+                "poi_id": "p_museum",
+                "arrival_minute": 29891580,
+                "departure_minute": 29891640,
+                "visit_minutes": 60,
+                "travel_from_prev_minutes": null,
+                "travel_from_prev_distance_km": null,
+                "cost_party": null,
+                "cost_currency": null
+              }
+            ]
+          }
+        ],
+        "total_cost_party": null,
+        "total_cost_currency": null,
+        "total_travel_minutes": 0,
+        "iterations": 1,
+        "excluded": [],
+        "unknown_reasons": [
+          "cost_unknown:p_museum",
+          "hours_unknown:p_museum"
+        ],
+        "unsatisfied_required": [
+          "required_category:cat_food"
+        ],
+        "notes": []
+      },
+      "independent_validation": {
+        "status": "partial",
+        "no_plan_reason": null,
+        "known_violations": [],
+        "unknown_reasons": [
+          "cost_unknown:p_museum",
+          "hours_unknown:p_museum"
+        ],
+        "unsatisfied_required": [
+          "required_category:cat_food"
+        ],
+        "recomputed_total_cost_party": null,
+        "recomputed_total_travel_minutes": 0,
+        "stop_count": 1,
+        "checks": {
+          "stops": 1,
+          "known_violations": 0,
+          "unknown": 2,
+          "unsatisfied": 1
+        }
+      }
+    },
+    {
+      "scenario_id": "S18",
+      "seed": 1018,
+      "input_sha256": "21cf192165ac3c4b24463b8fa5a9b58bf38d62b64eb326f9a4274c0ed2b589d7",
+      "author_expected": {
+        "status": "feasible",
+        "no_plan_reason": null,
+        "properties": [
+          "P4 food preference profile",
+          "preference ordering"
+        ]
+      },
+      "matched_author_expected": true,
+      "elapsed_seconds": 0.00013029999990976648,
+      "plan": {
+        "status": "feasible",
+        "no_plan_reason": null,
+        "sequence": [
+          "p_food",
+          "p_museum"
+        ],
+        "days": [
+          {
+            "day_id": "d1",
+            "stops": [
+              {
+                "poi_id": "p_food",
+                "arrival_minute": 29891580,
+                "departure_minute": 29891640,
+                "visit_minutes": 60,
+                "travel_from_prev_minutes": null,
+                "travel_from_prev_distance_km": null,
+                "cost_party": "0",
+                "cost_currency": "VND"
+              },
+              {
+                "poi_id": "p_museum",
+                "arrival_minute": 29891650,
+                "departure_minute": 29891710,
+                "visit_minutes": 60,
+                "travel_from_prev_minutes": 10,
+                "travel_from_prev_distance_km": "1.0",
+                "cost_party": "0",
+                "cost_currency": "VND"
+              }
+            ]
+          }
+        ],
+        "total_cost_party": "0",
+        "total_cost_currency": "VND",
+        "total_travel_minutes": 10,
+        "iterations": 3,
+        "excluded": [],
+        "unknown_reasons": [],
+        "unsatisfied_required": [],
+        "notes": []
+      },
+      "independent_validation": {
+        "status": "feasible",
+        "no_plan_reason": null,
+        "known_violations": [],
+        "unknown_reasons": [],
+        "unsatisfied_required": [],
+        "recomputed_total_cost_party": "0",
+        "recomputed_total_travel_minutes": 10,
+        "stop_count": 2,
+        "checks": {
+          "stops": 2,
+          "known_violations": 0,
+          "unknown": 0,
+          "unsatisfied": 0
+        }
+      }
+    },
+    {
+      "scenario_id": "S19",
+      "seed": 1019,
+      "input_sha256": "af59946a4ff389d4fecdcd903d4217e92dc69b52223c2fd48268673bd1e8ae23",
+      "author_expected": {
+        "status": "feasible",
+        "no_plan_reason": null,
+        "properties": [
+          "P5 culture preference profile",
+          "high preference closed POI cannot override closing",
+          "feasible alternative keeps plan valid"
+        ]
+      },
+      "matched_author_expected": true,
+      "elapsed_seconds": 0.0001084000004993868,
+      "plan": {
+        "status": "feasible",
+        "no_plan_reason": null,
+        "sequence": [
+          "p_open"
+        ],
+        "days": [
+          {
+            "day_id": "d1",
+            "stops": [
+              {
+                "poi_id": "p_open",
+                "arrival_minute": 29891580,
+                "departure_minute": 29891610,
+                "visit_minutes": 30,
+                "travel_from_prev_minutes": null,
+                "travel_from_prev_distance_km": null,
+                "cost_party": "0",
+                "cost_currency": "VND"
+              }
+            ]
+          }
+        ],
+        "total_cost_party": "0",
+        "total_cost_currency": "VND",
+        "total_travel_minutes": 0,
+        "iterations": 3,
+        "excluded": [
+          {
+            "poi_id": "p_closed",
+            "day_id": "d1",
+            "reason": "opening_conflict"
+          },
+          {
+            "poi_id": "p_closed",
+            "day_id": "d1",
+            "reason": "route_unknown:p_open->p_closed"
+          }
+        ],
+        "unknown_reasons": [],
+        "unsatisfied_required": [],
+        "notes": []
+      },
+      "independent_validation": {
+        "status": "feasible",
+        "no_plan_reason": null,
+        "known_violations": [],
+        "unknown_reasons": [],
+        "unsatisfied_required": [],
+        "recomputed_total_cost_party": "0",
+        "recomputed_total_travel_minutes": 0,
+        "stop_count": 1,
+        "checks": {
+          "stops": 1,
+          "known_violations": 0,
+          "unknown": 0,
+          "unsatisfied": 0
+        }
+      }
+    },
+    {
+      "scenario_id": "S20",
+      "seed": 1020,
+      "input_sha256": "7bc5c5f4ccbeb83c88958c6d16b5cffacaf71215b287451247cbafe779b5af9b",
+      "author_expected": {
+        "status": "feasible",
+        "no_plan_reason": null,
+        "properties": [
+          "two days",
+          "start and end depot",
+          "duplicates disallowed",
+          "return leg"
+        ]
+      },
+      "matched_author_expected": true,
+      "elapsed_seconds": 0.0002355999995415914,
+      "plan": {
+        "status": "feasible",
+        "no_plan_reason": null,
+        "sequence": [
+          "p_a",
+          "p_b"
+        ],
+        "days": [
+          {
+            "day_id": "d1",
+            "stops": [
+              {
+                "poi_id": "p_a",
+                "arrival_minute": 29891590,
+                "departure_minute": 29891650,
+                "visit_minutes": 60,
+                "travel_from_prev_minutes": 10,
+                "travel_from_prev_distance_km": "1.0",
+                "cost_party": "0",
+                "cost_currency": "VND"
+              },
+              {
+                "poi_id": "p_b",
+                "arrival_minute": 29891665,
+                "departure_minute": 29891710,
+                "visit_minutes": 45,
+                "travel_from_prev_minutes": 15,
+                "travel_from_prev_distance_km": "2.0",
+                "cost_party": "0",
+                "cost_currency": "VND"
+              }
+            ]
+          },
+          {
+            "day_id": "d2",
+            "stops": []
+          }
+        ],
+        "total_cost_party": "0",
+        "total_cost_currency": "VND",
+        "total_travel_minutes": 25,
+        "iterations": 3,
+        "excluded": [],
+        "unknown_reasons": [],
+        "unsatisfied_required": [],
+        "notes": []
+      },
+      "independent_validation": {
+        "status": "feasible",
+        "no_plan_reason": null,
+        "known_violations": [],
+        "unknown_reasons": [],
+        "unsatisfied_required": [],
+        "recomputed_total_cost_party": "0",
+        "recomputed_total_travel_minutes": 25,
+        "stop_count": 2,
+        "checks": {
+          "stops": 2,
+          "known_violations": 0,
+          "unknown": 0,
+          "unsatisfied": 0
+        }
+      }
+    }
+  ],
+  "summary": {
+    "total": 20,
+    "retained": 20,
+    "status_counts": {
+      "feasible": 12,
+      "no_plan": 4,
+      "partial": 2,
+      "unverifiable": 2
+    },
+    "no_plan_reasons": {
+      "impossible_constraints": 3,
+      "no_candidates": 1
+    },
+    "known_violation_scenarios": 0,
+    "unknown_scenarios": 4,
+    "unsatisfied_scenarios": 3,
+    "author_expected_match": 20,
+    "author_expected_mismatch": []
+  }
+}

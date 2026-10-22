@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "validate",
+  "type": "architecture",
+  "input": "docs/reports/2026-10-18/architecture.json",
+  "checksPassed": 9,
+  "compositionProfile": "showcase",
+  "compositionStatus": "pass",
+  "errors": 0,
+  "warnings": 0
+}

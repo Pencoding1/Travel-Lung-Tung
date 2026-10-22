@@ -1,0 +1,1200 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sơ đồ gọi module — Travel Lung Tung</title>
+<style>
+  :root {
+    --bg: #0a0f1e;
+    --panel: #111a2e;
+    --panel-2: #16223c;
+    --ink: #e9eefb;
+    --muted: #9dacc9;
+    --line: #2b3b5c;
+    --focus: #ffd479;
+    --c-presentation: #7c9cff;
+    --c-api: #4fc3a1;
+    --c-ai: #c792ea;
+    --c-guard: #f0a35e;
+    --c-tools: #4fb3d9;
+    --c-infrastructure: #9aa7b8;
+    --c-planning: #e0716f;
+    --f-chat: #6ea8fe;
+    --f-plan: #4fc3a1;
+    --f-catalog: #f0a35e;
+    --f-multi: #a9b8d6;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: radial-gradient(1200px 600px at 15% -10%, #16233f 0%, var(--bg) 60%) no-repeat, var(--bg);
+    color: var(--ink);
+    font-family: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  .page { width: min(1400px, calc(100% - 48px)); margin: 0 auto; padding: 22px 0 40px; }
+  header.masthead { border-bottom: 1px solid var(--line); padding-bottom: 14px; margin-bottom: 16px; }
+  .kicker {
+    margin: 0 0 6px; font-size: 11px; letter-spacing: .16em; text-transform: uppercase;
+    color: var(--muted); font-weight: 600;
+  }
+  h1 { margin: 0 0 6px; font-size: 25px; line-height: 1.25; letter-spacing: -.01em; }
+  .author { margin: 0 0 6px; font-size: 13px; color: var(--muted); }
+  .lede { margin: 0; font-size: 13.5px; color: #c3cfe8; max-width: 92ch; }
+
+  .controls {
+    display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px 18px;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
+    padding: 12px 14px; margin-bottom: 14px;
+  }
+  .field { display: flex; flex-direction: column; gap: 4px; min-width: 168px; }
+  .field > label { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  select {
+    appearance: none; background: var(--panel-2) url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%239dacc9' stroke-width='1.6'/%3E%3C/svg%3E") no-repeat right 10px center;
+    color: var(--ink); border: 1px solid #35486d; border-radius: 8px; padding: 8px 30px 8px 10px;
+    font: inherit; font-size: 13.5px; min-height: 38px;
+  }
+  select:focus-visible, button:focus-visible, dialog button:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  button#reset-filters {
+    background: var(--panel-2); color: var(--ink); border: 1px solid #3d537d;
+    border-radius: 8px; padding: 9px 16px; font: inherit; font-size: 13.5px; font-weight: 600;
+    cursor: pointer; min-height: 38px;
+  }
+  button#reset-filters:hover { background: #1e2c4a; }
+  .counts { margin: 0 0 2px auto; font-size: 13px; color: var(--muted); }
+  .counts b { color: var(--ink); font-variant-numeric: tabular-nums; }
+
+  .graph-wrap { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 6px 8px; }
+  svg#callgraph { display: block; width: 100%; height: auto; overflow: visible; }
+  #empty-state {
+    margin: 0; padding: 16px 14px; border-radius: 8px; background: #1b2440;
+    border: 1px dashed #43598a; color: #d6e0f5; font-size: 13.5px;
+  }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 6px 14px; padding: 10px 6px 2px; font-size: 12px; color: var(--muted); }
+  .legend .item { display: inline-flex; align-items: center; gap: 6px; }
+  .swatch { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+  .sw-line { width: 18px; height: 0; border-top-width: 3px; border-top-style: solid; display: inline-block; }
+
+  /* Node + edge styling */
+  .node { cursor: pointer; }
+  .node .card { fill: #16223c; stroke: #33507f; stroke-width: 1.4; }
+  .node .accent { stroke: none; }
+  .node .layer-tag { fill: #93a6c8; font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase; font-weight: 600; }
+  .node .node-label { fill: #eef3ff; font-size: 13px; font-weight: 600; }
+  .node:hover .card, .node.is-hot .card { fill: #1d2d4d; stroke: #7aa2e8; stroke-width: 2; }
+  .node:focus-visible { outline: none; }
+  .node:focus-visible .card { stroke: var(--focus); stroke-width: 2.4; }
+  .node.is-dim { opacity: .22; }
+
+  .edge { fill: none; stroke-width: 1.9; stroke-linecap: round; }
+  .edge.is-dim { opacity: .12; }
+  .edge.is-hot { stroke-width: 3.4; filter: drop-shadow(0 0 5px rgba(160,200,255,.55)); }
+  .flow-chat { stroke: var(--f-chat); }
+  .flow-plan { stroke: var(--f-plan); }
+  .flow-catalog { stroke: var(--f-catalog); }
+  .flow-multi { stroke: var(--f-multi); }
+  .edge-chip { cursor: default; }
+  .edge-chip rect { fill: #0d1526; stroke: #46608f; stroke-width: 1.2; }
+  .edge-chip text { fill: #dbe6ff; font-size: 10.5px; font-weight: 700; }
+  .edge-chip.is-hot rect { fill: #24406e; stroke: #8fb4ff; }
+  .edge-chip.is-dim { opacity: .2; }
+
+  .relations { margin-top: 16px; }
+  .relations h2 { font-size: 15px; margin: 0 0 3px; }
+  .relations .hint { margin: 0 0 10px; font-size: 12.5px; color: var(--muted); }
+  ol.rel-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px 14px; }
+  li.rel {
+    display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 2px 8px;
+    align-items: baseline; background: var(--panel); border: 1px solid var(--line);
+    border-left: 3px solid var(--f-multi); border-radius: 8px; padding: 6px 10px;
+  }
+  li.rel[hidden] { display: none; }
+  li.rel .rel-n { font-weight: 700; font-size: 12px; color: #b9c9e8; font-variant-numeric: tabular-nums; }
+  li.rel .rel-path { font-size: 11.5px; color: var(--muted); letter-spacing: .02em; }
+  li.rel .rel-label { font-size: 13px; color: #e6edfb; overflow-wrap: anywhere; }
+  li.rel .rel-flows { grid-column: 2; display: flex; flex-wrap: wrap; gap: 4px; margin-top: 3px; }
+  li.rel .fchip { font-size: 10.5px; padding: 1px 6px; border-radius: 999px; border: 1px solid #3b5382; color: #c6d4ee; }
+  li.rel.is-hot { background: #1d2d4d; border-color: #7aa2e8; }
+
+  .notes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-top: 20px; }
+  .note-card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+  .note-card h2 { margin: 0 0 6px; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+  .note-card p { margin: 0; font-size: 13px; color: #d3ddf2; }
+  .note-card ul { margin: 0; padding-left: 18px; font-size: 13px; color: #d3ddf2; }
+  .note-card li + li { margin-top: 5px; }
+
+  /* Dialog */
+  dialog#module-dialog {
+    border: 1px solid #3a5484; border-radius: 14px; padding: 0;
+    background: #101a2e; color: var(--ink); width: min(900px, calc(100vw - 40px));
+    max-height: calc(100vh - 48px);
+  }
+  dialog#module-dialog::backdrop { background: rgba(4, 8, 18, .74); }
+  .dialog-inner { padding: 18px 20px 20px; }
+  .dialog-head { display: flex; align-items: flex-start; gap: 14px; border-bottom: 1px solid var(--line); padding-bottom: 10px; margin-bottom: 12px; }
+  .dialog-head .eyebrow { margin: 0 0 3px; font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+  #dialog-title { margin: 0; font-size: 21px; line-height: 1.25; }
+  #dialog-close {
+    margin-left: auto; flex: 0 0 auto; width: 34px; height: 34px; border-radius: 8px;
+    background: #1d2b47; color: var(--ink); border: 1px solid #3d537d; font-size: 17px; line-height: 1;
+    cursor: pointer;
+  }
+  #dialog-close:hover { background: #26385c; }
+  #module-summary { margin: 0 0 14px; font-size: 14px; color: #dbe5f8; }
+  .io-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .io-grid section, .src-block { min-width: 0; }
+  .io-grid h3, .src-block h3 { margin: 0 0 6px; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+  pre#module-input, pre#module-output {
+    margin: 0; background: #0a121f; border: 1px solid #2c3f63; border-radius: 8px;
+    padding: 10px 12px; font-size: 12px; line-height: 1.55; color: #cfe0ff; overflow: auto; max-height: 240px;
+    font-family: "Cascadia Mono", Consolas, "Courier New", monospace; white-space: pre-wrap; overflow-wrap: anywhere;
+  }
+  .src-block { margin-top: 14px; }
+  ul#module-sources { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 6px; }
+  ul#module-sources li {
+    font-family: "Cascadia Mono", Consolas, "Courier New", monospace; font-size: 11.5px;
+    background: #0d1626; border: 1px solid #2c3f63; border-radius: 6px; padding: 3px 8px; color: #b9cdec;
+  }
+  #dialog-notice { margin: 14px 0 0; padding: 10px 12px; border-left: 3px solid var(--c-guard); background: #1a2138; border-radius: 6px; font-size: 12.5px; color: #e3d7c4; }
+
+  /* Playback controls and step focus */
+  .playback {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
+    padding: 10px 14px 12px; margin-bottom: 14px;
+  }
+  .play-toolbar { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px 14px; }
+  .play-toolbar .field { min-width: 190px; }
+  .play-toolbar .field-narrow { min-width: 92px; flex: 0 0 auto; }
+  .play-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
+  .play-buttons button {
+    background: var(--panel-2); color: var(--ink); border: 1px solid #3d537d;
+    border-radius: 8px; padding: 9px 16px; font: inherit; font-size: 13.5px; font-weight: 600;
+    cursor: pointer; min-height: 38px;
+  }
+  .play-buttons button:hover { background: #1e2c4a; }
+  .play-buttons button#play-toggle { border-color: #6f8ec7; background: #22304f; }
+  .play-buttons button#play-toggle:hover { background: #2a3d63; }
+  .play-status {
+    margin: 0 0 2px auto; font-size: 11px; letter-spacing: .1em; text-transform: uppercase;
+    color: var(--muted); font-weight: 600; white-space: nowrap;
+  }
+  .play-body { display: grid; gap: 6px; margin-top: 10px; min-width: 0; }
+  .play-context { margin: 0; font-size: 12.5px; color: var(--muted); overflow-wrap: anywhere; }
+  .play-step {
+    display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px;
+    border-left: 3px solid #3f5a8a; background: #0e1729; border-radius: 8px;
+    padding: 8px 12px; min-height: 46px;
+  }
+  .play-step.is-active { border-left-color: var(--focus); }
+  .play-count {
+    font-weight: 700; font-size: 12px; letter-spacing: .04em; color: #b9c9e8;
+    font-variant-numeric: tabular-nums; white-space: nowrap;
+  }
+  .play-dir {
+    font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; padding: 1px 7px;
+    border-radius: 999px; border: 1px solid #4d6695; color: #cfe0ff; white-space: nowrap;
+  }
+  .play-dir[hidden] { display: none; }
+  .play-text { flex: 1 1 320px; min-width: 0; font-size: 13.5px; color: #e6edfb; overflow-wrap: anywhere; }
+  .play-notice { margin: 0; font-size: 12px; color: #a9bad8; overflow-wrap: anywhere; }
+
+  /* Focus for the single animated edge and its two endpoints */
+  .play-particle { fill: var(--focus); pointer-events: none; }
+  #callgraph.has-play-focus .node:not(.is-play-focus):not(.is-dim) { opacity: .34; }
+  #callgraph.has-play-focus .edge:not(.is-play-focus):not(.is-dim) { opacity: .16; }
+  #callgraph.has-play-focus .edge-chip:not(.is-play-focus):not(.is-dim) { opacity: .2; }
+  #callgraph.has-play-focus .node.is-play-focus .card {
+    fill: #22304f; stroke: var(--focus); stroke-width: 2.6;
+  }
+  #callgraph.has-play-focus .edge.is-play-focus {
+    opacity: 1; stroke-width: 4; filter: drop-shadow(0 0 7px rgba(255, 212, 121, .55));
+  }
+  #callgraph.has-play-focus .edge-chip.is-play-focus { opacity: 1; }
+  #callgraph.has-play-focus .edge-chip.is-play-focus rect { fill: #3a3018; stroke: var(--focus); }
+  li.rel.is-play-focus { background: #262a3a; border-color: var(--focus); }
+
+  @media (max-width: 900px) {
+    .page { width: calc(100% - 24px); }
+    ol.rel-list { grid-template-columns: 1fr; }
+    .notes { grid-template-columns: 1fr; }
+    .io-grid { grid-template-columns: 1fr; }
+    .counts { margin-left: 0; }
+    .play-status { margin-left: 0; }
+    .play-text { flex-basis: 100%; }
+    .play-toolbar .field { min-width: 0; flex: 1 1 160px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="masthead">
+    <p class="kicker">Biểu đồ gọi module · tương tác</p>
+    <h1 id="doc-title"></h1>
+    <p class="author" id="doc-author"></p>
+    <p class="lede" id="doc-description"></p>
+  </header>
+
+  <section class="controls" aria-label="Bộ lọc sơ đồ">
+    <div class="field">
+      <label for="module-filter">Mô-đun</label>
+      <select id="module-filter"></select>
+    </div>
+    <div class="field">
+      <label for="layer-filter">Lớp xử lý</label>
+      <select id="layer-filter"></select>
+    </div>
+    <div class="field">
+      <label for="flow-filter">Luồng</label>
+      <select id="flow-filter"></select>
+    </div>
+    <button id="reset-filters" type="button">Đặt lại bộ lọc</button>
+    <p class="counts" id="visible-count" aria-live="polite" data-visible-nodes="12" data-visible-edges="19"></p>
+  </section>
+
+  <section class="playback" aria-label="Phát hoạt ảnh từng chức năng">
+    <div class="play-toolbar">
+      <div class="field">
+        <label for="play-function">Chức năng</label>
+        <select id="play-function"></select>
+      </div>
+      <div class="play-buttons" role="group" aria-label="Điều khiển phát">
+        <button id="play-toggle" type="button">Phát</button>
+        <button id="play-next" type="button">Tiếp bước</button>
+        <button id="play-restart" type="button">Chạy lại</button>
+      </div>
+      <div class="field field-narrow">
+        <label for="play-speed">Tốc độ</label>
+        <select id="play-speed">
+          <option value="1">1x</option>
+          <option value="2">2x</option>
+        </select>
+      </div>
+      <p class="play-status" id="play-status">Đã dừng</p>
+    </div>
+    <div class="play-body">
+      <p class="play-context" id="play-context"></p>
+      <div class="play-step" id="play-step" aria-live="polite" aria-atomic="true">
+        <span class="play-count" id="play-step-count"></span>
+        <span class="play-dir" id="play-direction" hidden></span>
+        <span class="play-text" id="play-step-text"></span>
+      </div>
+      <p class="play-notice" id="play-notice"></p>
+    </div>
+  </section>
+
+  <section class="graph-wrap" aria-label="Sơ đồ gọi module">
+    <svg id="callgraph" viewBox="0 0 1400 600" preserveAspectRatio="xMidYMid meet" role="img"
+         aria-labelledby="graph-title graph-desc">
+      <title id="graph-title"></title>
+      <desc id="graph-desc"></desc>
+      <defs>
+        <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#9fb6dd"></path>
+        </marker>
+        <marker id="arrow-fin" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.4" markerHeight="6.4" orient="auto-start-reverse">
+          <path d="M 0 0 L 10 5 L 0 10 z" fill="#0d1526"></path>
+        </marker>
+      </defs>
+      <g id="lane-edges"></g>
+      <g id="lane-chips"></g>
+      <g id="lane-nodes"></g>
+      <g id="lane-motion"></g>
+    </svg>
+    <p id="empty-state" hidden></p>
+    <div class="legend" id="legend" aria-label="Chú giải"></div>
+  </section>
+
+  <section class="relations">
+    <h2>Danh sách quan hệ</h2>
+    <p class="hint">Số trên sơ đồ khớp với số thứ tự dưới đây; nhãn đầy đủ giữ nguyên theo nội dung gốc. Di chuột vào một cạnh hoặc một dòng để làm nổi bật cả hai.</p>
+    <ol class="rel-list" id="rel-list"></ol>
+  </section>
+
+  <section class="notes">
+    <div class="note-card">
+      <h2>Lưu ý về dữ liệu mẫu</h2>
+      <p id="sample-notice"></p>
+    </div>
+    <div class="note-card">
+      <h2>Giới hạn đã công bố</h2>
+      <ul id="limitations"></ul>
+    </div>
+  </section>
+</div>
+
+<dialog id="module-dialog" aria-labelledby="dialog-title" aria-describedby="module-summary">
+  <div class="dialog-inner">
+    <div class="dialog-head">
+      <div>
+        <p class="eyebrow" id="dialog-layer"></p>
+        <h2 id="dialog-title"></h2>
+      </div>
+      <button id="dialog-close" type="button" aria-label="Đóng hộp thoại">&#10005;</button>
+    </div>
+    <p id="module-summary"></p>
+    <div class="io-grid">
+      <section>
+        <h3>Đầu vào minh họa</h3>
+        <pre id="module-input"></pre>
+      </section>
+      <section>
+        <h3>Đầu ra minh họa</h3>
+        <pre id="module-output"></pre>
+      </section>
+    </div>
+    <section class="src-block">
+      <h3>Nguồn trong mã nguồn</h3>
+      <ul id="module-sources"></ul>
+    </section>
+    <p id="dialog-notice"></p>
+  </div>
+</dialog>
+
+<script id="graph-content" type="application/json">{"title":"Travel Lung Tung — Call graph hệ thống","author":"Nội dung do Codex quyết định và đối chiếu mã nguồn ngày 21/10/2026","description":"Sơ đồ gọi ở mức module của luồng demo hiện tại; không phải trace chạy thật hay đồ thị mọi hàm trong repository.","sample_notice":"Các input/output là ví dụ minh họa rút gọn của dữ liệu đi qua module, không phải toàn bộ JSON API hoặc kết quả một lần chạy; riêng GraphHopper có số đo thật được ghi rõ.","limitations":["Chat du lịch chưa tự gọi pipeline tạo lịch typed; người dùng bấm Tạo lịch trình. CHAT153 còn trong backlog.","Giao diện cho gửi chat khi đang tạo lịch nhưng tác vụ cùng phiên có bộ nhớ vẫn xử lý lần lượt. Hủy chờ chỉ hủy chờ ở trình duyệt.","Vùng nguồn là nhãn của snapshot dữ liệu, không phải tuyên bố địa giới hành chính hiện tại.","Giờ mở cửa và chi phí thiếu được giữ là chưa biết; lịch khả thi còn phụ thuộc giả định đã công bố.","Crawler và cơ chế grow-with-user mới thuộc Finalizing phase, không nằm trên đường gọi demo hiện tại."],"layers":[{"id":"presentation","label":"Giao diện"},{"id":"api","label":"API và phiên"},{"id":"ai","label":"Điều phối AI"},{"id":"guard","label":"Kiểm soát bằng chứng"},{"id":"tools","label":"Công cụ MCP"},{"id":"infrastructure","label":"Dữ liệu và engine"},{"id":"planning","label":"Lập lịch và kiểm định"}],"flows":[{"id":"chat","label":"Trò chuyện"},{"id":"plan","label":"Tạo lịch trình"},{"id":"catalog","label":"Chọn dữ liệu"}],"nodes":[{"id":"ui","label":"Giao diện chatbot + bản đồ","layer":"presentation","summary":"Nhận yêu cầu, chọn một/nhiều vùng, gửi chat hoặc tạo lịch; hiển thị ghim, thẻ POI và đường đi.","input":{"message":"Tôi muốn đi tham quan một ngày, ưu tiên bảo tàng","selected_areas":["vùng nguồn A","vùng nguồn B"],"transport_mode":"foot"},"output":{"action":"POST /generate_itinerary khi bấm Tạo lịch trình","render":["lịch theo ngày","ghim POI","planning.route_geometry","planning.route_instructions"]},"sources":["ai_service/static/travel.html:1510","ai_service/static/travel.html:1580","ai_service/static/travel.html:988"]},{"id":"api","label":"FastAPI — API và ngữ cảnh","layer":"api","summary":"Kiểm tra payload, source scope, phương tiện và danh tính; điều phối hai endpoint độc lập /chat và /generate_itinerary.","input":{"endpoint":"POST /chat","body":{"session_id":"demo-example","message":"Gợi ý địa điểm tham quan","transport_mode":"foot","memory_enabled":true}},"output":{"fields":["status","reply","intent","source_scope","memory","tool_chain"],"note":"Tạo lịch trả thêm planning; lỗi/thiếu dữ liệu có trạng thái riêng."},"sources":["ai_service/main.py:2015","ai_service/main.py:2265","ai_service/domains/payloads.py:179","ai_service/domains/payloads.py:202"]},{"id":"jev","label":"Jev — phân loại ý định","layer":"ai","summary":"Phân biệt TRAVEL và CHITCHAT cho /chat. Kết quả không rõ hoặc dịch vụ lỗi được chặn trước bước sinh câu trả lời.","input":{"message":"Có bảo tàng nào phù hợp cho buổi sáng?"},"output":{"intent":"TRAVEL","note":"Giá trị minh họa; router còn có trạng thái, độ tin cậy và provenance. Không tự khởi tạo lịch typed."},"sources":["ai_service/domains/jev_intent.py:785","ai_service/main.py:562","ai_service/main.py:2140","ai_service/main.py:2198"]},{"id":"memory","label":"Bộ nhớ phiên và hồ sơ","layer":"api","summary":"WorkingMemory giữ hội thoại và khóa theo phiên; hồ sơ SQLite chỉ dùng khi có danh tính đã xác thực và bật bộ nhớ. Đổi scope ngăn tái dùng bằng chứng cũ.","input":{"session_id":"demo-example","memory_enabled":true,"subject":"chỉ có nếu đã xác thực","message":"Tôi thích bảo tàng"},"output":{"data":"messages có ngữ cảnh phù hợp; có thể thêm profile_block","constraints":["cùng phiên xử lý lần lượt","không có danh tính thì không nạp hồ sơ người dùng"]},"sources":["ai_service/domains/memory.py:197","ai_service/domains/memory.py:252","ai_service/domains/memory.py:471","ai_service/main.py:2310"]},{"id":"chat","label":"Chat agent — vòng gọi công cụ","layer":"ai","summary":"Luồng TRAVEL dùng vòng ReAct có giới hạn, bootstrap POI theo scope, gọi model/công cụ và thu bằng chứng. CHITCHAT gọi model trực tiếp.","input":{"messages":[{"role":"user","content":"Gợi ý bảo tàng trong vùng đã chọn"}],"tools":["explore_pois","get_poi_details","get_itinerary_route"]},"output":{"fields":["status","reply","tool_chain","source_evidence_ids","scope_gate"],"note":"Đây là gợi ý hội thoại, không phải kết quả scheduler typed."},"sources":["ai_service/main.py:759","ai_service/domains/chat_agent.py:247","ai_service/main.py:2212"]},{"id":"provider","label":"Model sinh — OpenCode CLI","layer":"ai","summary":"Adapter gọi model sinh qua OpenCode CLI; tên hàm gemini_chat_completion vẫn được giữ để tương thích. Launcher demo chọn Go V4.1, không đồng nghĩa dùng Gemini.","input":{"messages":[{"role":"user","content":"Đề xuất lịch từ các POI đã cung cấp"}],"tools":"có khi luồng gọi cần công cụ"},"output":{"data":"assistant message hoặc tool_calls để lớp điều phối xử lý","note":"Đề xuất model còn phải đối chiếu POI và kiểm định lịch; không tự là bằng chứng đúng."},"sources":["ai_service/main.py:474","ai_service/domains/providers/opencode_cli.py:1","scripts/native_runtime/README.md:40"]},{"id":"gate","label":"SourceGate và grounding","layer":"guard","summary":"Chat dùng ScopeGate để dựng lại tham số và lọc kết quả công cụ; tạo lịch dùng grounding đối chiếu POI, nguồn và đề xuất. Hai cơ chế không phải cùng một hàm.","input":{"selection":"snapshot + hash + danh sách source_area_ids hợp lệ","tool":"explore_pois","candidate":"POI thuộc hoặc không thuộc vùng đã chọn"},"output":{"accepted":"chỉ bằng chứng đúng snapshot/vùng và id hợp lệ","rejected":"kết quả ngoài phạm vi hoặc đề xuất không có bằng chứng"},"sources":["ai_service/domains/source_gate.py:109","ai_service/main.py:769","ai_service/domains/grounding.py:177","ai_service/main.py:1143"]},{"id":"mcp","label":"POI MCP — công cụ có kiểu","layer":"tools","summary":"Cung cấp khám phá POI, chi tiết, phân loại vùng và tuyến đường; giao tiếp với AI service qua MCP SSE.","input":{"name":"get_itinerary_route","arguments":{"ordered_poi_ids":["POI_A","POI_B"],"vehicle":"foot"}},"output":{"data":"JSON công cụ gồm POI hoặc tuyến đường, tùy tool","route_fields":["distance_km","time_minutes","route_geometry","turn_by_turn"]},"sources":["POI_service/app/api/mcp/tools.py:257","POI_service/app/api/mcp/tools.py:296","POI_service/app/api/mcp/tools.py:499","ai_service/main.py:432"]},{"id":"storage","label":"POI service + Memgraph","layer":"infrastructure","summary":"ManagementService qua UnitOfWork/repository truy vấn graph; lọc union nhiều vùng bằng tham số, giữ namespace/hash và giới hạn kết quả.","input":{"source_scope":"snapshot + input_sha256 + source_area_ids cụ thể","limit":15,"category":"tùy chọn"},"output":{"data":"danh sách POI thuộc phạm vi và chi tiết nguồn","note":"Snapshot chính đã nhập 6.367 POI; đây là số liệu checkpoint, không phải một truy vấn vừa chạy."},"sources":["POI_service/app/core/services/management.py:281","POI_service/app/core/infrastructure/db/repositories/memgraph.py:1622","docs/project/handoffs/DEMO-152/parent-runtime-result.json:1"]},{"id":"routing","label":"GraphHopper — đường đi thật","layer":"infrastructure","summary":"MCP lấy tọa độ POI rồi gọi GraphHopper theo car/foot; trả polyline GeoJSON và hướng dẫn. Thiếu geometry thì không nối ghim bằng đường thẳng giả.","input":{"ordered_poi_ids":["POI_A","POI_B"],"vehicle":"foot","points_encoded":false},"output":{"distance_km":3.033919,"time_minutes":36.40705,"geometry_point_count":61,"instruction_count":29,"evidence":"Số đo thật của cặp POI kiểm tra DEMO152; tên POI_A/B chỉ là ký hiệu hiển thị, không phải ID gửi API."},"sources":["POI_service/app/api/mcp/tools.py:390","POI_service/app/api/mcp/tools.py:484","docs/project/handoffs/DEMO-152/parent-runtime-result.json:1"]},{"id":"adapter","label":"Pipeline tạo lịch + adapter","layer":"planning","summary":"Endpoint tạo lịch thu POI, gọi model đề xuất, đối chiếu dữ liệu; thu tuyến có hướng rồi dựng Scenario. Sau scheduler, xuất geometry chỉ cho các chặng được chọn theo ngày.","input":{"travel_type":"sightseeing","num_travelers":1,"start_date":"2026-10-22","duration_days":1,"budget_range":"tiết kiệm","user_description":"Ưu tiên bảo tàng","source_scope":"selection hợp lệ","transport_mode":"foot"},"output":{"fields":["planning.repaired_schedule","planning.validation","planning.selected_plan_route","planning.route_geometry","planning.route_instructions","planning.assumptions"],"note":"Input là trích đoạn ItineraryRequest; cần session_id và các trường theo hợp đồng API."},"sources":["ai_service/main.py:1143","ai_service/main.py:1691","ai_service/main.py:1751","ai_service/domains/planning_adapter.py:1192"]},{"id":"planner","label":"Scheduler và Validator","layer":"planning","summary":"Scheduler tạo lịch có ràng buộc từ Scenario; Validator độc lập kiểm tra lịch. Trạng thái khả thi luôn đi cùng các giả định và dữ kiện chưa biết.","input":{"scenario":"POI đã xác minh + thời gian đi + cửa sổ ngày + ràng buộc","plan":"lịch theo ngày để validator kiểm tra"},"output":{"data":"Plan và ValidationReport","statuses":"feasible hoặc trạng thái vi phạm/không đủ dữ liệu theo hợp đồng","note":"Giờ mở cửa/chi phí chưa biết không tự biến thành đã xác minh."},"sources":["ai_service/domains/planning/scheduler.py:198","ai_service/domains/planning/validator.py:105","ai_service/main.py:1720","ai_service/main.py:1784"]}],"edges":[{"from":"ui","to":"api","label":"HTTP /chat","flows":["chat"]},{"from":"ui","to":"api","label":"HTTP /generate_itinerary — nút riêng","flows":["plan"]},{"from":"ui","to":"api","label":"GET /catalog/*","flows":["catalog"]},{"from":"api","to":"jev","label":"route_intent → classify_intent","flows":["chat"]},{"from":"api","to":"memory","label":"lease / compose / commit khi bật bộ nhớ","flows":["chat","plan"]},{"from":"api","to":"chat","label":"TRAVEL → _run_travel_turn","flows":["chat"]},{"from":"api","to":"provider","label":"CHITCHAT → completion trực tiếp","flows":["chat"]},{"from":"chat","to":"provider","label":"call_model — sinh lời đáp/tool_calls","flows":["chat"]},{"from":"chat","to":"gate","label":"prepare và filter_result","flows":["chat"]},{"from":"gate","to":"mcp","label":"call_tool sau khi kiểm scope (chat)","flows":["chat"]},{"from":"api","to":"mcp","label":"discovery snapshot và vùng nguồn","flows":["catalog"]},{"from":"api","to":"adapter","label":"_generate_itinerary_impl → _run_itinerary","flows":["plan"]},{"from":"adapter","to":"mcp","label":"thu POI, chi tiết và các cặp tuyến","flows":["plan"]},{"from":"adapter","to":"provider","label":"synthesis từ bằng chứng POI","flows":["plan"]},{"from":"adapter","to":"gate","label":"grounding kiểm request/POI/đề xuất","flows":["plan"]},{"from":"adapter","to":"planner","label":"build_scenario → schedule → validate","flows":["plan"]},{"from":"mcp","to":"storage","label":"ManagementService / UnitOfWork / repository","flows":["chat","plan","catalog"]},{"from":"mcp","to":"routing","label":"HTTP /route sau khi lấy tọa độ POI","flows":["chat","plan"]},{"from":"api","to":"ui","label":"JSON trả về → lịch, ghim, đường và thông báo","flows":["chat","plan","catalog"]}]}</script>
+<script id="playback-content" type="application/json">{
+  "author": "Nội dung và thứ tự hoạt ảnh do Codex quyết định theo mã nguồn.",
+  "title": "Xem luồng xử lý từng bước",
+  "notice": "Hoạt ảnh minh họa một đường xử lý thành công, không chạy API hoặc model thật. Số trên cạnh là mã quan hệ để tra cứu, không phải thứ tự thực thi.",
+  "step_label": "Bước",
+  "filter_notice": "Đã đặt lại bộ lọc để hiển thị đầy đủ luồng được phát.",
+  "pause_filter_notice": "Đã dừng hoạt ảnh vì bạn thay đổi bộ lọc.",
+  "finished_notice": "Đã xem hết luồng. Bấm Chạy lại để xem từ đầu.",
+  "functions": [
+    {"id":"catalog","label":"Chọn dữ liệu","flow":"catalog","context":"Luồng đọc danh sách snapshot và vùng nguồn; chọn vùng không tạo lịch.","steps":[
+      {"edge":3,"direction":"call","text":"Giao diện yêu cầu danh sách snapshot hoặc vùng nguồn qua GET /catalog/*."},
+      {"edge":11,"direction":"call","text":"API mở phiên MCP và gọi công cụ discovery dữ liệu nguồn."},
+      {"edge":17,"direction":"call","text":"POI service truy vấn Memgraph để lấy metadata trong dữ liệu đã nhập."},
+      {"edge":17,"direction":"return","text":"Metadata snapshot/vùng được trả lại cho công cụ MCP."},
+      {"edge":11,"direction":"return","text":"MCP trả metadata cho API; API kiểm tra và dựng catalog cho giao diện."},
+      {"edge":19,"direction":"call","text":"Giao diện nhận catalog, cho chọn một hoặc nhiều vùng trong đúng snapshot."}
+    ]},
+    {"id":"travel_chat","label":"Chat du lịch","flow":"chat","context":"Ví dụ TRAVEL có bootstrap POI theo nguồn. Vòng gọi model/công cụ có thể lặp có giới hạn; hoạt ảnh không diễn lại mọi nhánh hoặc mọi lượt gọi.","steps":[
+      {"edge":1,"direction":"call","text":"Gửi tin nhắn, phiên, vùng nguồn và phương tiện tới POST /chat."},
+      {"edge":4,"direction":"call","text":"API gọi Jev để phân loại ý định của tin nhắn."},
+      {"edge":4,"direction":"return","text":"Ví dụ này Jev trả TRAVEL. Nếu không rõ hoặc dịch vụ lỗi, API yêu cầu làm rõ hoặc báo chưa sẵn sàng, không đi tiếp đường thành công này."},
+      {"edge":5,"direction":"call","text":"Nếu bật bộ nhớ, API lấy khóa phiên và ghép ngữ cảnh; hồ sơ chỉ được thêm khi có danh tính hợp lệ. Cùng phiên vẫn xử lý lần lượt."},
+      {"edge":6,"direction":"call","text":"API chuyển tin TRAVEL sang vòng chat agent."},
+      {"edge":9,"direction":"call","text":"Bootstrap POI đi qua SourceGate: dựng lại tham số theo vùng nguồn người dùng đã chọn."},
+      {"edge":10,"direction":"call","text":"Gọi công cụ MCP với tham số đã được kiểm soát."},
+      {"edge":17,"direction":"call","text":"Công cụ khám phá POI qua service/repository và truy vấn Memgraph."},
+      {"edge":17,"direction":"return","text":"Danh sách POI và metadata nguồn quay lại MCP."},
+      {"edge":10,"direction":"return","text":"Kết quả MCP quay về SourceGate để lọc lại bằng chứng ngoài phạm vi."},
+      {"edge":9,"direction":"return","text":"Chat agent chỉ nhận bằng chứng đã qua SourceGate."},
+      {"edge":8,"direction":"call","text":"Chat agent gọi model sinh với hội thoại và bằng chứng POI. Model có thể yêu cầu thêm công cụ trong giới hạn của vòng lặp."},
+      {"edge":8,"direction":"return","text":"Ví dụ này model trả lời gợi ý du lịch dựa trên bằng chứng đã có."},
+      {"edge":6,"direction":"return","text":"Kết quả hội thoại và tool chain quay lại API."},
+      {"edge":5,"direction":"call","text":"Nếu bật bộ nhớ, API commit lượt hội thoại vào phiên rồi nhả khóa."},
+      {"edge":19,"direction":"call","text":"Giao diện hiển thị câu trả lời. Chat du lịch chưa tự gọi pipeline tạo lịch typed; muốn có lịch, bấm Tạo lịch trình."}
+    ]},
+    {"id":"chitchat","label":"Chat thông thường","flow":"chat","context":"Ví dụ Jev nhận diện CHITCHAT. Nhánh này không khám phá POI, không gọi planner hoặc routing.","steps":[
+      {"edge":1,"direction":"call","text":"Giao diện gửi lời chào hoặc câu trò chuyện thông thường tới POST /chat."},
+      {"edge":4,"direction":"call","text":"API gọi Jev để nhận diện ý định."},
+      {"edge":4,"direction":"return","text":"Jev trả CHITCHAT trong ví dụ thành công này."},
+      {"edge":5,"direction":"call","text":"Nếu bật bộ nhớ, API lấy khóa phiên và ghép lịch sử hội thoại phù hợp; không thêm hồ sơ du lịch vào nhánh CHITCHAT."},
+      {"edge":7,"direction":"call","text":"API gọi model sinh trực tiếp cho nhánh CHITCHAT, không đi qua vòng công cụ du lịch."},
+      {"edge":7,"direction":"return","text":"Model trả lời trò chuyện thông thường."},
+      {"edge":5,"direction":"call","text":"Nếu bật bộ nhớ, API lưu lượt hội thoại vào phiên rồi nhả khóa."},
+      {"edge":19,"direction":"call","text":"API trả JSON để giao diện hiển thị lời đáp."}
+    ]},
+    {"id":"plan","label":"Tạo lịch trình","flow":"plan","context":"Bắt đầu từ nút Tạo lịch trình, không đi qua Jev. Đây là đường thành công minh họa; lỗi dữ liệu, model hoặc ràng buộc được trả riêng. Các cặp tuyến có thể được thu nhiều lần trong giới hạn.","steps":[
+      {"edge":2,"direction":"call","text":"Bấm Tạo lịch trình: gửi yêu cầu có kiểu, ngày đi, vùng nguồn và phương tiện tới POST /generate_itinerary."},
+      {"edge":5,"direction":"call","text":"Nếu bật bộ nhớ, API chuẩn bị ngữ cảnh và khóa phiên; hồ sơ chỉ được nạp khi đủ điều kiện xác thực."},
+      {"edge":12,"direction":"call","text":"API gọi pipeline tạo lịch riêng. Luồng này không gọi Jev để nhận diện ý định."},
+      {"edge":15,"direction":"call","text":"Grounding kiểm tra request và source selection trước khi thu dữ liệu."},
+      {"edge":13,"direction":"call","text":"Pipeline gọi MCP để lấy ứng viên POI và chi tiết trong phạm vi đã chọn."},
+      {"edge":17,"direction":"call","text":"MCP lấy POI qua service/repository, lọc snapshot, hash và vùng nguồn trong Memgraph."},
+      {"edge":17,"direction":"return","text":"Memgraph trả dữ liệu POI về MCP."},
+      {"edge":13,"direction":"return","text":"Pipeline nhận dữ liệu công cụ và kiểm tra bằng chứng; dữ kiện thiếu được giữ là chưa biết."},
+      {"edge":14,"direction":"call","text":"Pipeline gửi bằng chứng POI cho model để sinh đề xuất lịch ban đầu."},
+      {"edge":14,"direction":"return","text":"Model trả đề xuất; đây chưa phải lịch đã được kiểm định."},
+      {"edge":15,"direction":"call","text":"Grounding đối chiếu ID và tái dựng đề xuất từ POI đã xác minh, không nhận dữ kiện do model tự tạo."},
+      {"edge":13,"direction":"call","text":"Adapter thu thời gian, khoảng cách và hình học tuyến qua MCP cho các cặp POI có hướng."},
+      {"edge":17,"direction":"call","text":"MCP lấy tọa độ của các POI cần tính tuyến."},
+      {"edge":18,"direction":"call","text":"MCP gọi GraphHopper /route theo đúng phương tiện car hoặc foot."},
+      {"edge":18,"direction":"return","text":"GraphHopper trả đường đi thật, thời gian, khoảng cách và hướng dẫn; thiếu geometry thì không dựng đường thẳng giả."},
+      {"edge":13,"direction":"return","text":"MCP chuyển bằng chứng tuyến về adapter để dựng Scenario."},
+      {"edge":16,"direction":"call","text":"Scheduler tạo lịch từ Scenario; Validator kiểm độc lập lịch vừa tạo với các ràng buộc và giả định công bố."},
+      {"edge":16,"direction":"return","text":"Pipeline nhận lịch và báo cáo kiểm định; chỉ chọn geometry của các chặng thực tế trong từng ngày."},
+      {"edge":12,"direction":"return","text":"Pipeline trả lịch, validation, route geometry, hướng dẫn và các giới hạn về API."},
+      {"edge":5,"direction":"call","text":"Nếu bật bộ nhớ, API commit ngữ cảnh lịch vào phiên rồi nhả khóa."},
+      {"edge":19,"direction":"call","text":"Giao diện hiển thị lịch theo ngày, ghim POI, thẻ địa điểm và đường đi thật nếu có đủ bằng chứng tuyến."}
+    ]}
+  ]
+}</script>
+<script>
+(function () {
+  "use strict";
+
+  var content = JSON.parse(document.getElementById("graph-content").textContent);
+  var NS = "http://www.w3.org/2000/svg";
+
+  /* ---------- author content ---------- */
+  document.title = content.title;
+  document.getElementById("doc-title").textContent = content.title;
+  document.getElementById("doc-author").textContent = content.author;
+  document.getElementById("doc-description").textContent = content.description;
+  document.getElementById("sample-notice").textContent = content.sample_notice;
+  document.getElementById("dialog-notice").textContent = content.sample_notice;
+  document.getElementById("graph-title").textContent = content.title;
+  document.getElementById("graph-desc").textContent = content.description;
+
+  var limList = document.getElementById("limitations");
+  content.limitations.forEach(function (t) {
+    var li = document.createElement("li");
+    li.textContent = t;
+    limList.appendChild(li);
+  });
+
+  var nodeById = {};
+  content.nodes.forEach(function (n) { nodeById[n.id] = n; });
+  var layerById = {};
+  content.layers.forEach(function (l) { layerById[l.id] = l; });
+  var flowById = {};
+  content.flows.forEach(function (f) { flowById[f.id] = f; });
+
+  /* ---------- authored geometry (layout only, no semantics) ---------- */
+  var CARD = { w: 240, h: 100 };
+  var COLX = [20, 380, 740, 1100];
+  var ROWY = [16, 226, 436];
+  var SLOT = {
+    ui: [0, 0], api: [1, 0], jev: [2, 0], memory: [3, 0],
+    chat: [0, 1], provider: [1, 1], gate: [2, 1], mcp: [3, 1],
+    adapter: [0, 2], planner: [1, 2], storage: [2, 2], routing: [3, 2]
+  };
+  var pos = {};
+  content.nodes.forEach(function (n, i) {
+    var s = SLOT[n.id] || [i % 4, Math.floor(i / 4)];
+    pos[n.id] = { x: COLX[s[0]], y: ROWY[s[1]] };
+  });
+
+  // Explicit orthogonal waypoints, keyed by edge index (1-based in authored order).
+  var ROUTES = {
+    1: [[260, 48], [380, 48]],
+    2: [[260, 70], [380, 70]],
+    3: [[260, 92], [380, 92]],
+    4: [[620, 66], [740, 66]],
+    5: [[500, 116], [500, 160], [1220, 160], [1220, 116]],
+    6: [[400, 116], [240, 226]],
+    7: [[560, 116], [560, 226]],
+    8: [[260, 276], [380, 276]],
+    9: [[160, 326], [160, 380], [860, 380], [860, 326]],
+    10: [[980, 276], [1100, 276]],
+    11: [[600, 116], [600, 196], [1180, 196], [1180, 226]],
+    12: [[620, 100], [700, 100], [700, 550], [140, 550], [140, 536]],
+    13: [[60, 536], [60, 574], [1370, 574], [1370, 276], [1340, 276]],
+    14: [[260, 456], [380, 306]],
+    15: [[200, 436], [200, 410], [900, 410], [900, 326]],
+    16: [[260, 506], [380, 506]],
+    17: [[1160, 326], [900, 436]],
+    18: [[1260, 326], [1260, 436]],
+    19: [[380, 26], [260, 26]]
+  };
+
+  function el(name, attrs) {
+    var node = document.createElementNS(NS, name);
+    for (var k in attrs) { if (Object.prototype.hasOwnProperty.call(attrs, k)) node.setAttribute(k, attrs[k]); }
+    return node;
+  }
+
+  function roundedPath(pts, radius) {
+    var r = radius == null ? 12 : radius;
+    var d = "M " + pts[0][0] + " " + pts[0][1];
+    for (var i = 1; i < pts.length - 1; i++) {
+      var prev = pts[i - 1], cur = pts[i], next = pts[i + 1];
+      var inLen = Math.hypot(cur[0] - prev[0], cur[1] - prev[1]);
+      var outLen = Math.hypot(next[0] - cur[0], next[1] - cur[1]);
+      var rr = Math.min(r, inLen / 2, outLen / 2);
+      var ax = cur[0] - (cur[0] - prev[0]) / (inLen || 1) * rr;
+      var ay = cur[1] - (cur[1] - prev[1]) / (inLen || 1) * rr;
+      var bx = cur[0] + (next[0] - cur[0]) / (outLen || 1) * rr;
+      var by = cur[1] + (next[1] - cur[1]) / (outLen || 1) * rr;
+      d += " L " + ax.toFixed(2) + " " + ay.toFixed(2) + " Q " + cur[0] + " " + cur[1] + " " + bx.toFixed(2) + " " + by.toFixed(2);
+    }
+    var last = pts[pts.length - 1];
+    d += " L " + last[0] + " " + last[1];
+    return d;
+  }
+
+  function wrapLabel(text, maxChars) {
+    var words = text.split(" ");
+    var lines = [], line = "";
+    words.forEach(function (w) {
+      var cand = line ? line + " " + w : w;
+      if (cand.length > maxChars && line) { lines.push(line); line = w; }
+      else { line = cand; }
+    });
+    if (line) lines.push(line);
+    return lines;
+  }
+
+  // Measurement-based wrapping keeps every authored label inside its card without
+  // shrinking typography. Returns the line breaks; the text itself is untouched.
+  function layoutNodeLabel(group, text) {
+    var maxWidth = CARD.w - 32;
+    var label = el("text", { "class": "node-label", x: 16, y: 46 });
+    group.appendChild(label);
+    var words = text.split(" ");
+    var lines = [], current = "";
+    for (var i = 0; i < words.length; i++) {
+      var cand = current ? current + " " + words[i] : words[i];
+      label.textContent = cand;
+      var width = 0;
+      try { width = label.getComputedTextLength(); } catch (err) { width = cand.length * 6.8; }
+      if (width > maxWidth && current) { lines.push(current); current = words[i]; }
+      else { current = cand; }
+    }
+    if (current) lines.push(current);
+    while (label.firstChild) label.removeChild(label.firstChild);
+    lines.forEach(function (lineText, idx) {
+      var tspan = el("tspan", { x: 16, dy: idx === 0 ? 0 : 17 });
+      tspan.textContent = lineText;
+      label.appendChild(tspan);
+    });
+    return lines;
+  }
+
+  /* ---------- legend ---------- */
+  var legend = document.getElementById("legend");
+  content.layers.forEach(function (l) {
+    var span = document.createElement("span");
+    span.className = "item";
+    var sw = document.createElement("span");
+    sw.className = "swatch";
+    sw.style.background = "var(--c-" + l.id + ")";
+    span.appendChild(sw);
+    span.appendChild(document.createTextNode(l.label));
+    legend.appendChild(span);
+  });
+  content.flows.forEach(function (f) {
+    var span = document.createElement("span");
+    span.className = "item";
+    var sw = document.createElement("span");
+    sw.className = "sw-line";
+    sw.style.borderTopColor = "var(--f-" + f.id + ")";
+    span.appendChild(sw);
+    span.appendChild(document.createTextNode(f.label));
+    legend.appendChild(span);
+  });
+  var multiItem = document.createElement("span");
+  multiItem.className = "item";
+  var multiSw = document.createElement("span");
+  multiSw.className = "sw-line";
+  multiSw.style.borderTopColor = "var(--f-multi)";
+  multiItem.appendChild(multiSw);
+  multiItem.appendChild(document.createTextNode("Nhiều luồng"));
+  legend.appendChild(multiItem);
+
+  /* ---------- nodes ---------- */
+  var nodeLayer = document.getElementById("lane-nodes");
+  var edgeLayer = document.getElementById("lane-edges");
+  var chipLayer = document.getElementById("lane-chips");
+  var nodeEls = {};
+  var nodeOrder = [];
+
+  content.nodes.forEach(function (n) {
+    var p = pos[n.id];
+    var g = el("g", {
+      "class": "node",
+      "data-node-id": n.id,
+      role: "button",
+      tabindex: "0",
+      "aria-label": n.label + " — mở chi tiết mô-đun",
+      "aria-haspopup": "dialog",
+      transform: "translate(" + p.x + "," + p.y + ")"
+    });
+    var title = el("title", {});
+    title.textContent = n.label;
+    g.appendChild(title);
+
+    // appended first so that label measurement runs against a rendered element
+    nodeLayer.appendChild(g);
+
+    g.appendChild(el("rect", { "class": "card", x: 0, y: 0, width: CARD.w, height: CARD.h, rx: 12, ry: 12 }));
+    g.appendChild(el("rect", { "class": "accent", x: 0, y: 12, width: 4, height: CARD.h - 24, rx: 2, ry: 2, fill: "var(--c-" + n.layer + ")" }));
+
+    var tag = el("text", { "class": "layer-tag", x: 16, y: 24 });
+    tag.textContent = layerById[n.layer] ? layerById[n.layer].label : n.layer;
+    g.appendChild(tag);
+
+    layoutNodeLabel(g, n.label);
+
+    g.addEventListener("click", function () { openDialog(n.id, g); });
+    g.addEventListener("keydown", function (ev) {
+      if (ev.key === "Enter" || ev.key === " " || ev.key === "Spacebar") {
+        ev.preventDefault();
+        openDialog(n.id, g);
+      }
+    });
+    nodeEls[n.id] = g;
+    nodeOrder.push(n.id);
+  });
+
+  /* ---------- edges ---------- */
+  var edgeEls = [];   // { idx, g, path, chip, chipText }
+  var edgeData = [];
+  content.edges.forEach(function (e, i) {
+    var idx = i + 1;
+    var pts = ROUTES[idx];
+    if (!pts) {
+      var a = pos[e.from], b = pos[e.to];
+      pts = [[a.x + CARD.w, a.y + CARD.h / 2], [b.x, b.y + CARD.h / 2]];
+    }
+    var flowClass = "flow-" + (e.flows.length === 1 ? e.flows[0] : "multi");
+    var g = el("g", { "class": "edge-group", "data-edge": String(idx) });
+    var path = el("path", {
+      "class": "edge " + flowClass,
+      d: roundedPath(pts, 12),
+      "marker-end": "url(#arrow)",
+      "data-from": e.from,
+      "data-to": e.to
+    });
+    var title = el("title", {});
+    title.textContent = idx + ". " + e.from + " → " + e.to + " — " + e.label;
+    path.appendChild(title);
+    g.appendChild(path);
+
+    var chipG = el("g", { "class": "edge-chip", "data-edge": String(idx) });
+    var chip = el("rect", { x: -11, y: -9, width: 22, height: 18, rx: 5, ry: 5 });
+    var chipText = el("text", { x: 0, y: 4, "text-anchor": "middle" });
+    chipText.textContent = String(idx);
+    chipG.appendChild(chip);
+    chipG.appendChild(chipText);
+
+    edgeLayer.appendChild(g);
+    chipLayer.appendChild(chipG);
+
+    var rec = { idx: idx, g: g, path: path, chip: chipG, edge: e };
+    edgeEls.push(rec);
+    edgeData.push(rec);
+
+    path.addEventListener("mouseenter", function () { highlightEdge(idx, true); });
+    path.addEventListener("mouseleave", function () { highlightEdge(idx, false); });
+    chipG.addEventListener("mouseenter", function () { highlightEdge(idx, true); });
+    chipG.addEventListener("mouseleave", function () { highlightEdge(idx, false); });
+  });
+
+  // place chips at half of each path's length
+  edgeEls.forEach(function (rec) {
+    var len = rec.path.getTotalLength ? rec.path.getTotalLength() : 0;
+    if (!len) return;
+    var pt = rec.path.getPointAtLength(len * 0.5);
+    rec.chip.setAttribute("transform", "translate(" + pt.x.toFixed(1) + "," + pt.y.toFixed(1) + ")");
+  });
+
+  /* ---------- relation list ---------- */
+  var relList = document.getElementById("rel-list");
+  var relEls = {};
+  content.edges.forEach(function (e, i) {
+    var idx = i + 1;
+    var li = document.createElement("li");
+    li.className = "rel";
+    li.setAttribute("data-edge", String(idx));
+    li.style.borderLeftColor = "var(--f-" + (e.flows.length === 1 ? e.flows[0] : "multi") + ")";
+
+    var n = document.createElement("span");
+    n.className = "rel-n";
+    n.textContent = String(idx);
+
+    var body = document.createElement("span");
+    var pathSpan = document.createElement("span");
+    pathSpan.className = "rel-path";
+    pathSpan.textContent = (nodeById[e.from] ? nodeById[e.from].label : e.from) + " → " + (nodeById[e.to] ? nodeById[e.to].label : e.to);
+    var labelSpan = document.createElement("span");
+    labelSpan.className = "rel-label";
+    labelSpan.textContent = e.label;
+    body.appendChild(pathSpan);
+    body.appendChild(document.createElement("br"));
+    body.appendChild(labelSpan);
+
+    var flows = document.createElement("span");
+    flows.className = "rel-flows";
+    e.flows.forEach(function (f) {
+      var c = document.createElement("span");
+      c.className = "fchip";
+      c.textContent = flowById[f] ? flowById[f].label : f;
+      flows.appendChild(c);
+    });
+    body.appendChild(flows);
+
+    li.appendChild(n);
+    li.appendChild(body);
+    li.addEventListener("mouseenter", function () { highlightEdge(idx, true); });
+    li.addEventListener("mouseleave", function () { highlightEdge(idx, false); });
+    relList.appendChild(li);
+    relEls[idx] = li;
+  });
+
+  function highlightEdge(idx, on) {
+    var rec = edgeData[idx - 1];
+    if (!rec) return;
+    if (rec.path.classList.contains("is-dim")) return;
+    rec.path.classList.toggle("is-hot", on);
+    rec.chip.classList.toggle("is-hot", on);
+    var li = relEls[idx];
+    if (li) li.classList.toggle("is-hot", on);
+  }
+
+  /* ---------- dialog ---------- */
+  var dialog = document.getElementById("module-dialog");
+  var dlgTitle = document.getElementById("dialog-title");
+  var dlgLayer = document.getElementById("dialog-layer");
+  var dlgSummary = document.getElementById("module-summary");
+  var dlgInput = document.getElementById("module-input");
+  var dlgOutput = document.getElementById("module-output");
+  var dlgSources = document.getElementById("module-sources");
+  var lastTrigger = null;
+  var lastNodeId = null;
+
+  function openDialog(nodeId, triggerEl) {
+    var n = nodeById[nodeId];
+    if (!n) return;
+    pausePlaybackForOverlay();
+    lastTrigger = triggerEl || null;
+    lastNodeId = nodeId;
+    dlgTitle.textContent = n.label;
+    dlgLayer.textContent = layerById[n.layer] ? layerById[n.layer].label : n.layer;
+    dlgSummary.textContent = n.summary;
+    dlgInput.textContent = JSON.stringify(n.input, null, 2);
+    dlgOutput.textContent = JSON.stringify(n.output, null, 2);
+    while (dlgSources.firstChild) dlgSources.removeChild(dlgSources.firstChild);
+    n.sources.forEach(function (s) {
+      var li = document.createElement("li");
+      li.textContent = s;
+      dlgSources.appendChild(li);
+    });
+    if (typeof dialog.showModal === "function") dialog.showModal();
+    else dialog.setAttribute("open", "");
+    var closeBtn = document.getElementById("dialog-close");
+    if (closeBtn) closeBtn.focus();
+  }
+
+  function closeDialog() {
+    if (dialog.open && typeof dialog.close === "function") dialog.close();
+    else dialog.removeAttribute("open");
+  }
+
+  dialog.addEventListener("cancel", function (ev) {
+    ev.preventDefault();
+    closeDialog();
+  });
+  dialog.addEventListener("click", function (ev) {
+    if (ev.target === dialog) closeDialog();
+  });
+  document.getElementById("dialog-close").addEventListener("click", closeDialog);
+  dialog.addEventListener("close", function () {
+    if (lastTrigger && typeof lastTrigger.focus === "function") lastTrigger.focus();
+  });
+
+  /* ---------- filters ---------- */
+  var moduleSel = document.getElementById("module-filter");
+  var layerSel = document.getElementById("layer-filter");
+  var flowSel = document.getElementById("flow-filter");
+  var resetBtn = document.getElementById("reset-filters");
+  var countEl = document.getElementById("visible-count");
+  var emptyEl = document.getElementById("empty-state");
+  var svgEl = document.getElementById("callgraph");
+
+  function opt(value, label) {
+    var o = document.createElement("option");
+    o.value = value;
+    o.textContent = label;
+    return o;
+  }
+
+  moduleSel.appendChild(opt("all", "Tất cả (" + content.nodes.length + " mô-đun)"));
+  content.nodes.forEach(function (n) { moduleSel.appendChild(opt(n.id, n.label)); });
+  layerSel.appendChild(opt("all", "Tất cả (" + content.layers.length + " lớp)"));
+  content.layers.forEach(function (l) { layerSel.appendChild(opt(l.id, l.label)); });
+  flowSel.appendChild(opt("all", "Tất cả (" + content.flows.length + " luồng)"));
+  content.flows.forEach(function (f) { flowSel.appendChild(opt(f.id, f.label)); });
+
+  function neighboursOf(id) {
+    var set = {};
+    content.edges.forEach(function (e) {
+      if (e.from === id) set[e.to] = true;
+      if (e.to === id) set[e.from] = true;
+    });
+    return set;
+  }
+
+  function applyFilters() {
+    var m = moduleSel.value, l = layerSel.value, f = flowSel.value;
+    var allowed = {};   // null-ish sentinel handled below
+    var restrict = false;
+
+    function keep(set, pred) {
+      if (!restrict) { allowed = set; restrict = true; return; }
+      var next = {};
+      for (var k in allowed) if (allowed[k] && set[k]) next[k] = true;
+      allowed = next;
+    }
+
+    if (m !== "all") {
+      var s = {}; s[m] = true;
+      var nb = neighboursOf(m);
+      for (var k in nb) s[k] = true;
+      keep(s);
+    }
+    if (f !== "all") {
+      var sf = {};
+      content.edges.forEach(function (e) {
+        if (e.flows.indexOf(f) !== -1) { sf[e.from] = true; sf[e.to] = true; }
+      });
+      keep(sf);
+    }
+    if (l !== "all") {
+      var sl = {};
+      content.nodes.forEach(function (n) { if (n.layer === l) sl[n.id] = true; });
+      keep(sl);
+    }
+    if (!restrict) content.nodes.forEach(function (n) { allowed[n.id] = true; });
+
+    var visNodes = 0, visEdges = 0;
+    content.nodes.forEach(function (n) {
+      var on = !!allowed[n.id];
+      if (on) visNodes++;
+      nodeEls[n.id].classList.toggle("is-dim", !on);
+      nodeEls[n.id].setAttribute("aria-hidden", on ? "false" : "true");
+      nodeEls[n.id].style.pointerEvents = on ? "" : "none";
+      nodeEls[n.id].setAttribute("tabindex", on ? "0" : "-1");
+    });
+    edgeData.forEach(function (rec) {
+      var e = rec.edge;
+      var on = !!allowed[e.from] && !!allowed[e.to] && (f === "all" || e.flows.indexOf(f) !== -1);
+      if (on) visEdges++;
+      rec.g.classList.toggle("is-dim", !on);
+      rec.chip.classList.toggle("is-dim", !on);
+      rec.g.style.pointerEvents = on ? "" : "none";
+      rec.chip.style.pointerEvents = on ? "" : "none";
+      // dimmed nodes still keep edges hidden to avoid misleading lines
+      if (!allowed[e.from] || !allowed[e.to]) { rec.g.classList.add("is-dim"); rec.chip.classList.add("is-dim"); }
+      if (relEls[rec.idx]) relEls[rec.idx].hidden = !on;
+    });
+
+    countEl.textContent = visNodes + "/" + content.nodes.length + " mô-đun · " + visEdges + "/" + content.edges.length + " quan hệ";
+    countEl.setAttribute("data-visible-nodes", String(visNodes));
+    countEl.setAttribute("data-visible-edges", String(visEdges));
+
+    var empty = visNodes === 0 || visEdges === 0;
+    emptyEl.hidden = !empty;
+    if (empty) {
+      emptyEl.textContent = visNodes === 0
+        ? "Không có mô-đun nào khớp tổ hợp bộ lọc hiện tại. Hãy đặt lại bộ lọc để xem toàn bộ " + content.nodes.length + " mô-đun và " + content.edges.length + " quan hệ."
+        : "Có " + visNodes + " mô-đun khớp bộ lọc nhưng không còn quan hệ nào giữa chúng với luồng đang chọn. Hãy đặt lại bộ lọc để xem toàn bộ sơ đồ.";
+      svgEl.style.display = visNodes === 0 ? "none" : "";
+    } else {
+      svgEl.style.display = "";
+    }
+  }
+
+  moduleSel.addEventListener("change", onManualFilterChange);
+  layerSel.addEventListener("change", onManualFilterChange);
+  flowSel.addEventListener("change", onManualFilterChange);
+  resetBtn.addEventListener("click", function () {
+    moduleSel.value = "all";
+    layerSel.value = "all";
+    flowSel.value = "all";
+    onManualFilterChange();
+  });
+
+  applyFilters();
+
+  /* ---------- playback (PLAY-156) ---------- */
+  var playContent = JSON.parse(document.getElementById("playback-content").textContent);
+  var playFnSel = document.getElementById("play-function");
+  var playSpeedSel = document.getElementById("play-speed");
+  var playToggleBtn = document.getElementById("play-toggle");
+  var playNextBtn = document.getElementById("play-next");
+  var playRestartBtn = document.getElementById("play-restart");
+  var playStatusEl = document.getElementById("play-status");
+  var playContextEl = document.getElementById("play-context");
+  var playNoticeEl = document.getElementById("play-notice");
+  var playStepEl = document.getElementById("play-step");
+  var playCountEl = document.getElementById("play-step-count");
+  var playDirEl = document.getElementById("play-direction");
+  var playTextEl = document.getElementById("play-step-text");
+  var motionLayer = document.getElementById("lane-motion");
+  var PLAY_BASE_MS = 2600;
+
+  var rafFn = window.requestAnimationFrame || function (cb) {
+    return window.setTimeout(function () { cb(Date.now()); }, 16);
+  };
+  var cafFn = window.cancelAnimationFrame || function (id) { window.clearTimeout(id); };
+
+  var reducedQuery = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
+  function reduceMotion() { return !!(reducedQuery && reducedQuery.matches); }
+
+  var player = { index: -1, status: "idle", gen: 0, raf: 0, focus: null };
+  var playbackById = {};
+  playContent.functions.forEach(function (f) { playbackById[f.id] = f; });
+  playContent.functions.forEach(function (f) {
+    var o = document.createElement("option");
+    o.value = f.id;
+    o.textContent = f.label;
+    playFnSel.appendChild(o);
+  });
+
+  var particle = el("circle", { r: 5, cx: -30, cy: -30, "class": "play-particle" });
+  particle.style.opacity = "0";
+  motionLayer.appendChild(particle);
+
+  function selectedFunction() {
+    return playbackById[playFnSel.value] || null;
+  }
+
+  function playSpeed() {
+    var v = Number(playSpeedSel.value);
+    return v === 2 ? 2 : 1;
+  }
+
+  function setParticleVisible(on) {
+    particle.style.opacity = on ? "1" : "0";
+  }
+
+  function clearFocus() {
+    var f = player.focus;
+    if (f) {
+      f.edge.path.classList.remove("is-play-focus");
+      f.edge.chip.classList.remove("is-play-focus");
+      if (relEls[f.edge.idx]) relEls[f.edge.idx].classList.remove("is-play-focus");
+      if (f.a) f.a.classList.remove("is-play-focus");
+      if (f.b) f.b.classList.remove("is-play-focus");
+    }
+    player.focus = null;
+    svgEl.classList.remove("has-play-focus");
+    setParticleVisible(false);
+  }
+
+  function paintStep(step) {
+    var rec = edgeData[step.edge - 1];
+    if (!rec) return false;
+    rec.path.classList.add("is-play-focus");
+    rec.chip.classList.add("is-play-focus");
+    if (relEls[rec.idx]) relEls[rec.idx].classList.add("is-play-focus");
+    var a = nodeEls[rec.edge.from] || null;
+    var b = nodeEls[rec.edge.to] || null;
+    if (a) a.classList.add("is-play-focus");
+    if (b) b.classList.add("is-play-focus");
+    player.focus = { edge: rec, a: a, b: b };
+    svgEl.classList.add("has-play-focus");
+    return true;
+  }
+
+  function updateStepText(fn, index) {
+    var step = fn.steps[index];
+    playCountEl.textContent = playContent.step_label + " " + (index + 1) + "/" + fn.steps.length;
+    playDirEl.textContent = step.direction === "return" ? "Trả kết quả" : "Gọi / chuyển dữ liệu";
+    playDirEl.hidden = false;
+    playTextEl.textContent = step.text;
+    playStepEl.classList.add("is-active");
+  }
+
+  function updateIdleText() {
+    var fn = selectedFunction();
+    playCountEl.textContent = playContent.step_label + " 0/" + (fn ? fn.steps.length : 0);
+    playDirEl.hidden = true;
+    playDirEl.textContent = "";
+    playTextEl.textContent = "";
+    playStepEl.classList.remove("is-active");
+  }
+
+  function updateControls() {
+    playToggleBtn.textContent = player.status === "playing" ? "Tạm dừng" : "Phát";
+    playStatusEl.textContent = player.status === "playing"
+      ? "Đang phát"
+      : (player.status === "paused" ? "Đã tạm dừng" : "Đã dừng");
+  }
+
+  function stopLoop() {
+    player.gen += 1;
+    if (player.raf) {
+      cafFn(player.raf);
+      player.raf = 0;
+    }
+    setParticleVisible(false);
+  }
+
+  function placeParticle(rec, step, progress) {
+    var len = 0;
+    try { len = rec.path.getTotalLength ? rec.path.getTotalLength() : 0; } catch (err) { len = 0; }
+    if (!len || !rec.path.getPointAtLength) { setParticleVisible(false); return; }
+    var t = step.direction === "return" ? 1 - progress : progress;
+    var pt = rec.path.getPointAtLength(len * t);
+    particle.setAttribute("cx", pt.x.toFixed(1));
+    particle.setAttribute("cy", pt.y.toFixed(1));
+    setParticleVisible(true);
+  }
+
+  function startLoop(fn, index) {
+    stopLoop();
+    var gen = player.gen;
+    var step = fn.steps[index];
+    var rec = player.focus ? player.focus.edge : null;
+    var reduce = reduceMotion();
+    var duration = PLAY_BASE_MS / playSpeed();
+    var startedAt = null;
+
+    function frame(now) {
+      if (gen !== player.gen) return;
+      if (player.status !== "playing") return;
+      if (startedAt === null) startedAt = now;
+      var elapsed = now - startedAt;
+      if (!reduce && rec) {
+        var p = Math.min(1, elapsed / Math.max(1, duration * 0.72));
+        placeParticle(rec, step, p);
+      }
+      if (elapsed >= duration) {
+        player.raf = 0;
+        if (index + 1 < fn.steps.length) showStep(fn, index + 1, true);
+        else finish(fn);
+        return;
+      }
+      player.raf = rafFn(frame);
+    }
+    player.raf = rafFn(frame);
+  }
+
+  function showStep(fn, index, playing) {
+    if (!fn || index < 0 || index >= fn.steps.length) return;
+    player.index = index;
+    clearFocus();
+    var step = fn.steps[index];
+    paintStep(step);
+    updateStepText(fn, index);
+    player.status = playing ? "playing" : "paused";
+    updateControls();
+    if (playing) startLoop(fn, index);
+    else stopLoop();
+  }
+
+  function pausePlay() {
+    if (player.status !== "playing") return;
+    stopLoop();
+    player.status = "paused";
+    updateControls();
+  }
+
+  function pausePlaybackForOverlay() {
+    pausePlay();
+  }
+
+  function finish(fn) {
+    stopLoop();
+    player.status = "finished";
+    updateControls();
+    playNoticeEl.textContent = playContent.finished_notice;
+  }
+
+  function applyPlayFilters(fn) {
+    if (moduleSel.value !== "all") moduleSel.value = "all";
+    if (layerSel.value !== "all") layerSel.value = "all";
+    if (flowSel.value !== fn.flow) flowSel.value = fn.flow;
+    applyFilters();
+  }
+
+  function onManualFilterChange() {
+    applyFilters();
+    if (!player) return;
+    var active = player.status === "playing" || (player.status === "paused" && player.index >= 0);
+    if (!active) return;
+    stopLoop();
+    player.status = "paused";
+    updateControls();
+    playNoticeEl.textContent = playContent.pause_filter_notice;
+  }
+
+  playToggleBtn.addEventListener("click", function () {
+    var fn = selectedFunction();
+    if (!fn) return;
+    if (player.status === "playing") { pausePlay(); return; }
+    applyPlayFilters(fn);
+    playNoticeEl.textContent = playContent.filter_notice;
+    if (player.status === "paused" && player.index >= 0) {
+      player.status = "playing";
+      updateControls();
+      startLoop(fn, player.index);
+    } else {
+      showStep(fn, 0, true);
+    }
+  });
+
+  playNextBtn.addEventListener("click", function () {
+    var fn = selectedFunction();
+    if (!fn) return;
+    applyPlayFilters(fn);
+    playNoticeEl.textContent = playContent.filter_notice;
+    var target = player.index < 0 ? 0 : player.index + 1;
+    if (target >= fn.steps.length) { finish(fn); return; }
+    showStep(fn, target, false);
+  });
+
+  playRestartBtn.addEventListener("click", function () {
+    var fn = selectedFunction();
+    if (!fn) return;
+    applyPlayFilters(fn);
+    playNoticeEl.textContent = playContent.filter_notice;
+    showStep(fn, 0, false);
+  });
+
+  playFnSel.addEventListener("change", function () {
+    stopLoop();
+    clearFocus();
+    player.index = -1;
+    player.status = "idle";
+    updateControls();
+    updateIdleText();
+    var fn = selectedFunction();
+    playContextEl.textContent = fn ? fn.context : "";
+    playNoticeEl.textContent = playContent.notice;
+  });
+
+  playSpeedSel.addEventListener("change", function () {
+    if (player.status !== "playing") return;
+    var fn = selectedFunction();
+    if (fn) startLoop(fn, player.index);
+  });
+
+  document.addEventListener("visibilitychange", function () {
+    if (document.hidden) pausePlay();
+  });
+
+  var initialFn = selectedFunction();
+  playContextEl.textContent = initialFn ? initialFn.context : "";
+  playNoticeEl.textContent = playContent.notice;
+  updateControls();
+  updateIdleText();
+
+  window.__playback = Object.freeze({
+    status: function () { return player.status; },
+    step: function () { return player.index; },
+    total: function () { var fn = selectedFunction(); return fn ? fn.steps.length : 0; },
+    functionId: function () { return playFnSel.value; }
+  });
+
+  // expose a tiny read-only hook for deterministic artifact QA
+  window.__callgraph = Object.freeze({
+    nodeCount: content.nodes.length,
+    edgeCount: content.edges.length,
+    visibleNodes: function () {
+      return content.nodes.filter(function (n) { return !nodeEls[n.id].classList.contains("is-dim"); }).map(function (n) { return n.id; });
+    },
+    visibleEdges: function () {
+      return edgeData.filter(function (r) { return !r.g.classList.contains("is-dim"); }).map(function (r) { return r.idx; });
+    },
+    hasOverflow: function () {
+      return document.documentElement.scrollWidth > window.innerWidth;
+    }
+  });
+
+  // dialog opened by keyboard must also work when the node is focused programmatically
+  document.addEventListener("keydown", function (ev) {
+    if (ev.key === "Escape" && dialog.open) closeDialog();
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<!--
+  SYNTHETIC FIXTURE (hand-written for tests). Not a capture of any live page.
+  Second article used to prove the profile extracts several pages of the same
+  site without mixing their listings, and to exercise the missing-name and
+  missing-geo paths.
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Ho Chi Minh City / Eat (synthetic fixture)</title>
+</head>
+<body>
+<div id="mw-content-text">
+  <h2><span class="mw-headline" id="Eat">Eat</span></h2>
+
+  <!-- 5. complete listing without any coordinate marker -->
+  <div class="vcard" id="banh-mi-huynh-hoa">
+    <div class="listing-name">Banh Mi Huynh Hoa (fixture)</div>
+    <div class="listing-address">26 Le Thi Rieng, District 1, Ho Chi Minh City</div>
+    <div class="listing-content">Synthetic banh mi narrative for tests.</div>
+  </div>
+
+  <!-- 6. no address element: missing_address on the second page too -->
+  <div class="vcard" id="quan-an-ngon">
+    <div class="listing-name">Quan An Ngon (fixture)</div>
+    <div class="listing-content">Synthetic street-food narrative without an
+      address element.</div>
+    <span class="geo">10.77611, 106.69163</span>
+  </div>
+
+  <!-- 7. no listing-name element: missing_name, address must not become a name -->
+  <div class="vcard" id="anonymous-listing">
+    <div class="listing-address">99 Vo Thi Sau, District 3, Ho Chi Minh City</div>
+    <div class="listing-content">Synthetic narrative for a block with no name.
+    </div>
+  </div>
+</div>
+</body>
+</html>

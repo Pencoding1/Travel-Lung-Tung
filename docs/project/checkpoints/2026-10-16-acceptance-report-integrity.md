@@ -1,0 +1,7 @@
+# Acceptance and report integrity checkpoint
+
+Date:2026-10-16. Updated central EVIDENCE_REGISTER withE031–E037 and ACCEPTANCE_TRACKER current supplement. Explicitlimits: real28page manuscriptstillvisualR1;2DeepSeektimeouts/0records;83collectorengineeringtests notscientificresults; scenario-selectioncompatibilityR1pending; evaluator61tests withreportlabelgate. Earlierstale entries remainhistorical andarenotcurrentacceptance.
+
+OC024reportingcompletiondispatchedprocess99050 (sessionin events.log), owns onlybenchmarks/evaluation,tests/evaluation,EVALUATION_RUNBOOK andownhandoff. Brief requiresdetermined-subsetdenominator/coverage, labelledobservedlowerbound, H3all-selectedcoverage/bounds, exactrenderedreporttests andfreshsyntheticdemo. No changes to rawscientificevidence,collector,manuscript orlivecalls.
+
+OC023R1process35345 andOC022R1process13739 bothconfirmedlive thisphase. No duplicatewriters. PreviousphasePROGRESS from83independenttests/noopprobe/newrunplangap; currentphasePROGRESS centraltraceabilityreconciledandremainingreportdefectscoped. Continue untilfullmasterrequirementsverified; donotmarkcompletebasedonartifactavailability.

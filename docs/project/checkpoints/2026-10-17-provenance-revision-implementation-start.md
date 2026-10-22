@@ -1,0 +1,9 @@
+# Provenance and revision implementation ownership
+
+Date: 2026-10-17. Full goal ACTIVE/INCOMPLETE; current phase PROGRESS. OC037 local identity correction is accepted and terminal.
+
+OC038 active process14937, exact session in its events.log. Owns POI graph domain/get_payload/repository, necessary ingestion/management/MCP fields, new tests/primary_provenance, PRIMARY_GRAPH_PROVENANCE_CONTRACT and own handoff. It must carry typed optional metadata/raw lineage through existing production writes/reads, preserve unknowns, treat ALL supplied source area labels as source-only (no dated current mapping verified), protect current jurisdiction queries and handle null address. No crawler/data/registry/publication writes; no live calls. Actual adapter to prepared data waits for local acceptance.
+
+OC039 active process74098, exact session in its events.log. Disjoint bounded alternative for the partial registry revision capability: chronological superseded hash history supports explicit A->B->A->B; strict existing nonnull hash/version/scope, prospective/save validation and full-content-bound immutable backups. Owns registry.py, necessary prepare preflight, primary tests, revision sections of PRIMARY_IMPORT_CONTRACT and own handoff only. Actual raw/prepared artifacts immutable; test copies only. This is a reviewed semantic alternative, not a blind rerun of OC034R1. Recurring failure must stop that path and preserve evidence.
+
+Next actions: verify both existing handles (do not duplicate writers); inspect reports/diffs and rerun focused relevant tests/direct counterexamples independently; checkpoint each acceptance or rejection. Continue all remaining full SG/AC requirements. Docker and human study remain external dependencies, but local integration work is feasible; goal is not at an impasse.

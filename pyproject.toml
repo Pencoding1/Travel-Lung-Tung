@@ -7,7 +7,7 @@ requires-python=">=3.11"
 package=false
 dependencies = [
     "fastmcp>=3.1.1",
-    "mcp>=1.26.0",
+    "mcp>=1.26.0,<2",
     "phonenumbers>=9.0.26",
     "tenacity>=9.1.4",
 ]

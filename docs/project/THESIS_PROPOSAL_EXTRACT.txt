@@ -1,0 +1,249 @@
+TRƯỜNG ĐẠI HỌC NGUYỄN TẤT THÀNH
+KHOA CÔNG NGHỆ THÔNG TIN
+RÀ SOÁT, ĐỐI CHIẾU QUY ĐỊNH VÀ CHỈNH SỬA
+ĐỀ CƯƠNG CHI TIẾT KHÓA LUẬN TỐT NGHIỆP
+Sinh viên: SV01   |   Chuyên ngành: Trí tuệ nhân tạo
+Căn cứ: Quy định nội dung khóa luận tốt nghiệp của Khoa Công nghệ thông tin
+Ngày rà soát: 21/09/2026
+ĐỀ CƯƠNG CHI TIẾT KHÓA LUẬN TỐT NGHIỆP (BẢN CHỈNH SỬA)
+Toàn bộ nội dung kỹ thuật của đề cương gốc (kiến trúc, lược đồ đồ thị, thuật toán, tài liệu tham khảo) được giữ nguyên vì đây là phần mạnh nhất. Bản chỉnh sửa tập trung: (1) rút gọn mục tiêu cho khớp khung trang; (2) bổ sung khảo sát công trình cụ thể ở Chương 2; (3) bổ sung định nghĩa hình thức và ràng buộc ở Chương 3; (4) thiết kế lại phần đánh giá ở Chương 4 theo phương pháp rõ ràng; (5) viết lại Chương 5 theo mức bằng chứng thực có.
+B.1. Thông tin chung
+
+Kiểm tra tên đề tài theo công thức của Khoa
+
+B.2. Tóm tắt đề tài
+Khóa luận xây dựng hệ thống trợ lý du lịch thông minh đa tác tử (Travel AI) cho địa bàn Thành phố Hồ Chí Minh, tích hợp bốn cơ chế AI cốt lõi: (1) tương tác đa tác tử qua giao thức Model Context Protocol; (2) mô hình hóa không gian bằng đồ thị tri thức (Graph RAG) để loại bỏ ảo giác về địa điểm; (3) cơ chế gợi ý lai kết hợp mô hình ngôn ngữ lớn với các giải thuật heuristic và engine định tuyến GraphHopper; (4) kiến trúc bộ nhớ tác tử hai tầng (ngắn hạn và dài hạn) lấy cảm hứng từ mô hình trí nhớ nhận thức Atkinson-Shiffrin để duy trì ngữ cảnh và cá nhân hóa.
+Bản chỉnh sửa giữ nguyên kiến trúc kỹ thuật đã có (là phần mạnh nhất của đề cương), nhưng: (i) thu hẹp phạm vi phát biểu cho khớp quy mô thử nghiệm (~200 điểm quan tâm tại Quận 1, 3); (ii) bổ sung phương pháp đánh giá rõ ràng (cỡ mẫu, đối chứng công bằng, phép thử đối kháng cho "chống ảo giác"); (iii) làm rõ ranh giới giữa chỉ số hệ thống và trải nghiệm người dùng thật; (iv) cập nhật phiên bản mô hình ngôn ngữ đang thực sự sử dụng.
+B.3. Cấu trúc khóa luận, phân bổ số trang và truy vết mục tiêu
+Phân bổ số trang (tổng 60–70 trang)
+
+Ma trận truy vết: mục tiêu → câu hỏi/giả thuyết → nội dung → kết luận
+
+B.4. Nội dung chi tiết các chương
+CHƯƠNG 1. GIỚI THIỆU CHUNG VỀ ĐỀ TÀI (≈ 8 trang)
+Giữ nguyên mục 1.1, 1.4, 1.6, 1.7 của đề cương gốc (viết tốt, không cần sửa nội dung). Chỉnh sửa mục 1.2 (rút gọn mục tiêu), 1.3 (thêm ghi chú phạm vi), 1.5 (giữ 4 câu hỏi chính, làm rõ câu hỏi thành phần 1.2 theo hướng đo được).
+1.2. Mục tiêu nghiên cứu (rút gọn từ 11 xuống 6 mục tiêu cấp cao)
+Mục tiêu tổng quát giữ nguyên. Mục tiêu cụ thể rút gọn để mỗi mục tiêu ứng với một hoặc một nhóm câu hỏi nghiên cứu; các đầu việc kỹ thuật chi tiết (crawler, Docker, canary batch...) chuyển thành nhiệm vụ triển khai trong Chương 3, không liệt kê riêng ở Chương 1.
+
+1.3. Đối tượng và phạm vi nghiên cứu
+Giữ nguyên mục 1.3.1 (đối tượng nghiên cứu và bảng cấu trúc dịch vụ) và phần lớn mục 1.3.2 của đề cương gốc. Bổ sung một đoạn ghi chú phạm vi ngay sau bảng, để mọi khẳng định định lượng ở các chương sau được hiểu đúng ngữ cảnh:
+Mọi kết quả và khẳng định về độ chính xác không gian, tính khả thi lịch trình trong khóa luận này được hiểu trong phạm vi ~200 điểm quan tâm đã nạp tại Quận 1 và Quận 3, Thành phố Hồ Chí Minh. Đây là minh chứng khái niệm (proof of concept) cho kiến trúc đề xuất, chưa phải đánh giá ở quy mô toàn thành phố hay sẵn sàng triển khai thương mại.
+1.5. Câu hỏi nghiên cứu (giữ nguyên cấu trúc 4 câu hỏi chính, điều chỉnh câu hỏi thành phần 1.2)
+Giữ nguyên câu hỏi 1, 2, 3, 4 và các câu hỏi thành phần 1.1, 2.1, 2.2, 3.1, 3.2, 4.1, 4.2 của đề cương gốc. Điều chỉnh câu hỏi thành phần 1.2 để có thể đo được bằng cả hai nguồn bằng chứng (hệ thống và người dùng):
+Câu hỏi thành phần 1.2 (sửa): Mức độ minh bạch thông tin qua việc trực quan hóa chuỗi công cụ thực thi (tool_chain) tác động như thế nào đến độ tin cậy cảm nhận và sự hài lòng của người dùng — đo bằng khảo sát trên một nhóm người dùng thử nghiệm (thang đo Likert, tối thiểu 10–15 người), đối chiếu giữa phiên bản có và không hiển thị tool_chain?
+H1: hiển thị tool_chain làm tăng điểm tin cậy cảm nhận trung bình so với không hiển thị (kiểm định trên nhóm người dùng thử). H2: Pipeline Vi Vu (LLM + Heuristics) có tỷ lệ vi phạm ràng buộc thời gian thấp hơn có ý nghĩa so với baseline LLM thuần dùng cùng dữ liệu POI. H3: kích hoạt bộ nhớ dài hạn làm tăng tỷ lệ địa điểm thuộc danh mục ưa thích trong lịch trình đề xuất, nhất quán trên nhiều hồ sơ người dùng khác nhau, không chỉ một trường hợp. Kết quả "bác bỏ giả thuyết" vẫn là kết luận khoa học hợp lệ.
+CHƯƠNG 2. CƠ SỞ LÝ LUẬN, NGHIÊN CỨU LIÊN QUAN VÀ ĐỀ XUẤT GIẢI PHÁP (≈ 15 trang)
+Giữ nguyên toàn bộ nội dung 2.1–2.8 và 2.10 của đề cương gốc (chính xác, viết tốt). Bổ sung mục 2.9 mới (khảo sát công trình cụ thể) trước bảng so sánh hiện có (đổi thành 2.10), và bổ sung một cột "Đánh đổi/hạn chế" vào bảng so sánh.
+2.1–2.8. Giữ nguyên nội dung gốc
+2.1. Tổng quan về bài toán hỗ trợ và hoạch định du lịch thông minh — giữ nguyên.
+2.2. Mô hình ngôn ngữ lớn và thách thức "Ảo giác" — giữ nguyên.
+2.3. Sinh văn bản có tăng cường truy hồi: Vector RAG và Graph RAG — giữ nguyên.
+2.4. Cơ sở dữ liệu đồ thị Memgraph và ngôn ngữ Cypher — giữ nguyên; xác nhận lại phiên bản Memgraph thực dùng tại thời điểm hoàn thiện báo cáo.
+2.5. Hệ đa tác tử và Model Context Protocol — giữ nguyên.
+2.6. Kiến trúc Bộ nhớ cho Tác tử AI (Atkinson-Shiffrin) — giữ nguyên.
+2.7. Cơ chế Gợi ý Lai — giữ nguyên.
+2.8. Thu thập dữ liệu web động và Xử lý ngôn ngữ tự nhiên tiếng Việt — giữ nguyên.
+2.9. Khảo sát các công trình liên quan (mục mới)
+18 tài liệu tham khảo hiện có của đề cương đều là công trình nền tảng (Transformer, RAG, ReAct, MCP, Contraction Hierarchies, mô hình trí nhớ nhận thức...), rất phù hợp làm cơ sở lý thuyết ở mục 2.1–2.8, nhưng chưa có công trình nào khảo sát cụ thể hệ thống hoặc nghiên cứu về gợi ý/hoạch định du lịch bằng AI. Sinh viên bổ sung khảo sát ≥ 12 công trình thuộc các nhóm sau, đọc nguyên văn và tổng hợp vào bảng.
+
+
+Cơ sở dữ liệu gợi ý: Google Scholar, ACL Anthology, arXiv (đánh dấu bản chưa bình duyệt), ACM Digital Library, các hội nghị về hệ thống gợi ý (RecSys) và du lịch thông minh.
+2.10. Bảng so sánh định hướng giải pháp (bổ sung cột đánh đổi)
+Giữ nguyên bảng so sánh 6 tiêu chí của đề cương gốc; bổ sung một tiêu chí mới để bảng cân bằng hơn:
+
+Sáu hàng còn lại (Nguồn sự thật, Kiểm soát ảo giác, Tương tác đa tác tử, Mô hình hóa không gian, Định tuyến đường bộ, Cơ chế gợi ý, Kiến trúc bộ nhớ AI) giữ nguyên như đề cương gốc.
+2.11. Vấn đề nghiên cứu cần giải quyết và định hướng giải pháp
+Giữ nguyên nội dung mục 2.10 gốc (vấn đề trọng tâm và định hướng giải pháp theo 4 trụ cột) — nội dung này đã đáp ứng đúng yêu cầu phát biểu vấn đề và đề xuất giải pháp của quy định.
+CHƯƠNG 3. MÔ HÌNH LÝ THUYẾT VÀ GIẢI PHÁP ĐỀ XUẤT (≈ 25 trang)
+Giữ nguyên toàn bộ 12 mục (3.1–3.12) của đề cương gốc — đây là phần trình bày kỹ thuật chi tiết và chính xác nhất của đề cương. Bổ sung ba mục mới (3.13–3.15): định nghĩa hình thức, lý giải tham số, và ràng buộc/rủi ro.
+3.1–3.12. Giữ nguyên nội dung gốc
+3.1. Kiến trúc tổng thể của hệ thống Travel AI — giữ nguyên (luồng tương tác chính, kiến trúc vi dịch vụ DDD, uv workspace).
+3.2. Thiết kế Lược đồ Đồ thị Tri thức POI — giữ nguyên (7 loại nút, 7 loại quan hệ, định danh tất định).
+3.3. Module thu thập dữ liệu (crawler_service) — giữ nguyên.
+3.4. Module nạp dữ liệu hàng loạt và Quản trị đồ thị (POI_service) — giữ nguyên (Canary Batch, UoW, UNWIND, SSE).
+3.5. Thuật toán xây dựng mạng lưới quan hệ không gian NEAR_BY — giữ nguyên (lọc bounding-box, Haversine, vật chất hóa cạnh).
+3.6. Module truy hồi phục vụ tác tử và Máy chủ công cụ MCP — giữ nguyên (5 công cụ chuẩn hóa).
+3.7. Module điều phối đa tác tử (ai_service) và Vòng lặp ReAct — giữ nguyên (Intent Router, ReAct, Persona, tool_chain).
+3.8. Thiết kế Kiến trúc Bộ nhớ Tác tử AI — giữ nguyên (Working Memory nén tiến trình; Long-term Profile Memory trên đồ thị).
+3.9. Cơ chế Gợi ý Lai: Pipeline "Vi Vu" 4 giai đoạn — giữ nguyên.
+3.10. Tích hợp engine định tuyến đường bộ GraphHopper — giữ nguyên.
+3.11. Module nghiệp vụ và Lưu trữ (backend_service) — giữ nguyên.
+3.12. Đóng gói triển khai và Tiêu chí đánh giá hệ thống — giữ nguyên; xem thêm mục 3.14 (tiêu chí đánh giá được định nghĩa chi tiết hơn).
+3.13. Định nghĩa hình thức cho các thành phần định lượng được
+Lọc bounding-box: với bán kính R (km) và điểm p1 = (lat1, lon1), p2 = (lat2, lon2), điều kiện lọc thô: |lat1 − lat2| ≤ R/111 và |lon1 − lon2| ≤ R/111 (xấp xỉ 1° vĩ độ ≈ 111 km). Đây là phép lọc cần thiết trước khi tính khoảng cách chính xác, không phải điều kiện đủ.
+Khoảng cách Haversine: d = 2r·arcsin(√(sin²(Δφ/2) + cos φ1·cos φ2·sin²(Δλ/2))), r là bán kính Trái Đất (≈ 6.371 km), φ là vĩ độ, λ là kinh độ, tính qua hàm point.distance của Memgraph. Vật chất hóa cạnh NEAR_BY khi d ≤ R.
+Điểm số gợi ý lai: với ứng viên POI c thuộc danh mục yêu cầu, điểm ưu tiên khi truy vấn explore_pois (nếu có bộ nhớ dài hạn): score(c) = base_score(c) + Σ_{(cat, w) ∈ PREFERS(u)} w · match(c, cat), trong đó base_score là thứ hạng mặc định (ví dụ theo đánh giá/rating), match(c, cat) = 1 nếu c thuộc danh mục/nhãn cat, w là trọng số cạnh PREFERS. Đây là công thức lý thuyết tổng quát hóa mô tả ở mục 3.8/3.9 — sinh viên đối chiếu và điều chỉnh theo cách hiện thực thực tế trong mã nguồn.
+Ràng buộc khả thi thời gian (Heuristic Giai đoạn 4): với chuỗi điểm dừng đã sắp (s_1, …, s_n), thời điểm đến t_i, thời lượng ghé thăm dur_i và thời gian di chuyển travel(s_i, s_{i+1}) lấy từ GraphHopper, lịch trình khả thi nếu với mọi i: open(s_i) ≤ t_i ≤ close(s_i) − dur_i và t_{i+1} ≥ t_i + dur_i + travel(s_i, s_{i+1}). Tỷ lệ vi phạm ràng buộc là số điểm dừng không thỏa điều kiện trên chia tổng số điểm dừng trong tập kịch bản kiểm thử — đây là định nghĩa chính xác cho con số "35% vi phạm" / "100% khả thi" ở mục 4.5.
+3.14. Lý giải các tham số và ngưỡng đã chọn
+
+3.15. Ràng buộc, giả định và quản trị rủi ro
+
+CHƯƠNG 4. MÔ HÌNH THỰC NGHIỆM, KẾT QUẢ VÀ THẢO LUẬN (≈ 18 trang)
+Giữ cấu trúc 4 thực nghiệm tương ứng 4 câu hỏi nghiên cứu của đề cương gốc, cùng bảng trạng thái hoàn thiện (4.7, giữ nguyên — đây là điểm mạnh về tính minh bạch) và phần bàn luận (4.8, giữ phần lớn). Mỗi thực nghiệm được viết lại kèm phương pháp đánh giá rõ ràng; số liệu gốc được giữ làm "kết quả ban đầu", có thêm các cột/mục mới cần điền sau khi bổ sung phương pháp.
+4.1. Môi trường thực nghiệm (cập nhật)
+Giữ nguyên cấu hình phần cứng và phần mềm của đề cương gốc (Ryzen 7/Core i7, 32GB RAM, Docker, Memgraph, GraphHopper...). Sửa: thay "Google Gemini 1.5 Pro / Flash API" bằng tên mô hình đang thực sự sử dụng tại thời điểm chạy thực nghiệm cuối cùng (xem V6, Phần A), ghi rõ phiên bản và ngày truy cập API.
+4.2. Dữ liệu thực nghiệm và Kết quả nạp Đồ thị tri thức
+Giữ nguyên nội dung gốc (200+ POI, Canary Test 120ms, 200 nút POI/4 District/45 Street/3 Category/180 Product, SSE 100% không lỗi).
+4.3. Thực nghiệm 1: Tương tác Đa tác tử và Trải nghiệm Người dùng
+Giữ nguyên các chỉ số hệ thống đã có (phân loại CHITCHAT/TRAVEL, độ trễ, số bước ReAct, thời gian phản hồi). Bổ sung phần khảo sát người dùng để trả lời đúng câu hỏi thành phần 1.2:
+
+Nếu không đủ thời gian thực hiện khảo sát, mục này phải ghi rõ: "câu hỏi thành phần 1.2 chưa được kiểm chứng bằng người dùng thật, chỉ số hệ thống ở trên là bằng chứng gián tiếp" — và Chương 5 không được khẳng định đã "giải quyết thấu đáo" câu hỏi nghiên cứu 1.
+4.4. Thực nghiệm 2: Mô hình hóa Không gian và Triệt tiêu Ảo giác bằng Graph RAG
+Giữ nguyên số liệu gốc về hiệu năng lọc NEAR_BY (thống nhất lại tỷ lệ loại bỏ — xem lỗi hình thức ở Phần A: 300/40.000 ≈ 99,25%, không phải 98,6%; dùng một con số nhất quán). Về phần "Zero Hallucination", trình bày lại theo hai lớp bằng chứng:
+Bằng chứng theo thiết kế (giữ nguyên số liệu gốc): 100% địa điểm trong lịch trình tồn tại trong Memgraph — nêu rõ đây là hệ quả của ràng buộc chọn-trong-danh-sách, không phải phép thử độc lập.
+Bằng chứng đối kháng (mới, xem chi tiết ở mục 4.7): kết quả ba kịch bản thử thách ràng buộc.
+4.5. Thực nghiệm 3: Chất lượng Lịch trình của Cơ chế Gợi ý Lai
+Giữ khung so sánh 20 kịch bản của đề cương gốc. Bổ sung mô tả phương pháp:
+Cách chọn 20 kịch bản: nêu rõ tiêu chí (ví dụ đa dạng theo số ngày, số điểm dừng, ràng buộc ngân sách) và có chọn ngẫu nhiên trong một không gian kịch bản lớn hơn hay không.
+Cách xây dựng baseline "LLM thuần túy": xác nhận dùng cùng mô hình Gemini, cùng được cung cấp chính danh sách POI đã truy xuất (chỉ khác việc có/không áp dụng bước kiểm tra ràng buộc Heuristics ở Giai đoạn 4) — nếu baseline để LLM tự do liệt kê địa điểm không qua đồ thị, phải nêu rõ đây là so sánh về mức độ ảo giác chứ không phải về chất lượng sắp xếp lịch trình thuần túy.
+Giữ nguyên số liệu về sai số ngân sách (dưới 8% so với 30–70%) và sai lệch định tuyến đường chim bay (32,4%) — đây là kết quả có ý nghĩa kỹ thuật rõ ràng, chỉ cần bổ sung cỡ mẫu (bao nhiêu lịch trình được đo sai số ngân sách, bao nhiêu cặp điểm được đo sai lệch định tuyến).
+4.6. Thực nghiệm 4: Hiệu quả của Kiến trúc Bộ nhớ AI
+Giữ nguyên kịch bản minh họa 8 lượt hội thoại của đề cương gốc (giảm 58% token; tỷ lệ danh mục ưa thích tăng từ 28% lên 72%), nhưng gọi rõ đây là một kịch bản minh họa. Bổ sung, nếu còn thời gian, lặp lại thí nghiệm cá nhân hóa trên ít nhất 4–5 hồ sơ người dùng khác nhau (khác tổ hợp ngân sách/danh mục ưa thích) để báo cáo khoảng biến thiên (ví dụ "tăng từ trung bình X% lên Y%, dao động giữa các hồ sơ") thay vì một con số duy nhất từ một lần chạy.
+4.7. Phép thử đối kháng cho khả năng chống ảo giác (mục mới)
+
+4.8. Bảng tổng hợp trạng thái hoàn thiện và Bàn luận
+Giữ nguyên bảng 4.7 gốc (trạng thái từng năng lực, kể cả các mục ghi trung thực "khung sườn/stub") và các mục bàn luận 4.8.1–4.8.4 (sức mạnh hiệp đồng Graph RAG + LLM; ưu thế MCP; giá trị bộ nhớ hai tầng; hạn chế kỹ thuật) — đây là phần trình bày trung thực và có giá trị, chỉ cần đối chiếu lại với kết quả phép thử đối kháng mới ở mục 4.7 khi viết phần thảo luận.
+CHƯƠNG 5. KẾT LUẬN VÀ KIẾN NGHỊ (≈ 4 trang)
+5.1. Kết luận
+Viết lại theo mức bằng chứng thực có sau khi bổ sung thực nghiệm, đối chiếu từng mục tiêu (đã rút gọn còn 6, mục B.4):
+
+Câu mở đầu mục kết luận nên tránh ngôn ngữ tuyệt đối ("đã hoàn thành xuất sắc", "giải quyết thấu đáo") trừ khi có bằng chứng người dùng thật cho câu hỏi nghiên cứu 1 (xem V3, Phần A); nếu chưa có, ghi rõ "đã giải quyết ở mức chỉ số hệ thống, chưa kiểm chứng bằng người dùng thật".
+5.2. Đóng góp của đề tài
+Giữ nguyên bốn nhóm đóng góp của đề cương gốc (khoa học: kiến trúc tham chiếu; kiến trúc AI: bộ nhớ nhận thức hai tầng; dữ liệu & thuật toán: lược đồ POI và NEAR_BY; ứng dụng thực tiễn: hệ thống mã nguồn mở đóng gói Docker) — đây là các đóng góp thực chất và trình bày tốt.
+5.3. Hạn chế
+Giữ nguyên bốn hạn chế đã nêu (phạm vi dữ liệu TP.HCM; Vector RAG chưa hoàn thiện; backend chưa mở API lưu trữ; chưa thử nghiệm người dùng cuối).
+Bổ sung: "Zero Hallucination" mới được kiểm chứng ở mức thiết kế, chưa qua phép thử đối kháng đầy đủ trước khi bổ sung mục 4.7; baseline so sánh ở thực nghiệm 3 cần nêu rõ điều kiện để người đọc đánh giá đúng mức ý nghĩa của kết quả; phiên bản mô hình ngôn ngữ dùng trong thực nghiệm có thể đã thay đổi so với thời điểm viết đề cương.
+5.4. Hướng phát triển tiếp theo
+Giữ nguyên sáu hướng phát triển của đề cương gốc (Vector RAG; backend + Firestore; TSP trong Pipeline Vi Vu; Self-Reflection Memory; tác tử giám sát rủi ro chủ động; mở rộng dữ liệu ra các đô thị khác) — đây là các hướng hợp lý và có cơ sở kỹ thuật rõ ràng từ Chương 3.
+5.5. Kiến nghị
+Trước khi trình bày hệ thống ra ngoài phạm vi bảo vệ khóa luận (demo cho đối tác, gọi vốn...), nên: (1) hoàn thành phép thử đối kháng ở mục 4.7 và công bố kết quả trung thực dù có phát hiện trường hợp thất bại; (2) làm rõ với người xem giới hạn phạm vi dữ liệu (~200 POI, 2 quận); (3) cập nhật phiên bản mô hình ngôn ngữ đang dùng trước khi demo trực tiếp, vì API cũ có thể đã ngừng hoạt động. (Nội dung điều chỉnh sau khi có kết quả.)
+B.5. Cấu trúc tổng thể khóa luận và danh mục chữ viết tắt dự kiến
+Thứ tự các thành phần theo quy định của Khoa (bổ sung nếu bản đầy đủ nộp Khoa chưa có đủ các mục này):
+
+Danh mục chữ viết tắt dự kiến
+
+B.6. Kế hoạch thực hiện dự kiến
+Đề cương gốc chưa có bảng kế hoạch theo tuần. Vì phần lớn kiến trúc kỹ thuật dường như đã được xây dựng (bảng 4.7 cho thấy đa số năng lực "chạy được hoàn chỉnh"), kế hoạch dưới đây tập trung thời lượng cho các phần còn thiếu (khảo sát tài liệu, phương pháp đánh giá, phép thử đối kháng, viết báo cáo) hơn là cho việc cài đặt mới. GVHD điều chỉnh theo tiến độ thực tế.
+
+B.7. Tài liệu tham khảo bổ sung
+Giữ nguyên toàn bộ 18 tài liệu tham khảo của đề cương gốc — đây là danh mục có chất lượng tốt, đúng định dạng, đa số là công trình nền tảng uy tín và phù hợp với nội dung lý thuyết ở Chương 2. Bổ sung nhóm tài liệu chuyên biệt về hệ thống du lịch AI mà đề cương hiện chưa có (phục vụ mục 2.9 mới), để phần "khảo sát công trình liên quan" có cơ sở đối chiếu trực tiếp thay vì chỉ dựa trên lý thuyết nền chung.
+B.7.1. Nhóm tài liệu cần bổ sung
+Hệ thống gợi ý và hoạch định lịch trình du lịch dựa trên AI/LLM (đã công bố tại các hội nghị về hệ thống gợi ý, du lịch thông minh, hoặc ứng dụng LLM).
+Ứng dụng đồ thị tri thức cho dữ liệu không gian địa lý và bài toán gợi ý địa điểm.
+Đánh giá hệ thống đối thoại/tác tử AI bằng khảo sát người dùng (phương pháp luận cho thực nghiệm 1 đã bổ sung ở mục 4.3).
+Ứng dụng thực tế của Model Context Protocol ngoài phạm vi tài liệu đặc tả gốc của Anthropic.
+B.7.2. Danh mục tài liệu nền bổ sung (bản nháp)
+Sinh viên phải đối chiếu thông tin trích dẫn (tập, số, trang, năm) với bản gốc trước khi đưa vào khóa luận. Đánh số tiếp theo từ [19] để không xáo trộn danh mục 18 tài liệu đã có.
+[19] Q. Guo et al., "Itinerary planning with LLM agents: A survey," (khảo sát về ứng dụng LLM cho hoạch định lịch trình — sinh viên tìm bản công bố chính thức và trích dẫn đúng nguồn, năm).
+[20] Y. Xie et al., "TravelPlanner: A benchmark for real-world planning with language agents," (bộ tiêu chuẩn đánh giá tác tử LLM cho bài toán lập kế hoạch du lịch — kiểm tra và trích dẫn đúng hội nghị/năm công bố).
+[21] Nghiên cứu về hệ thống gợi ý điểm đến (POI recommendation) dựa trên đồ thị tri thức — tìm công trình cụ thể qua từ khóa "knowledge graph POI recommendation".
+[22] Tài liệu về phương pháp đánh giá độ tin cậy cảm nhận (perceived trustworthiness) đối với trợ lý AI hội thoại — tìm thang đo đã công bố và được kiểm định.
+[23] Tài liệu hoặc báo cáo khảo sát về hành vi du lịch tự túc (FIT) tại Việt Nam để củng cố phần 1.1 (hiện đang dựa trên nhận định chung, nên có số liệu thống kê cụ thể đi kèm nguồn [1]).
+Lưu ý: các mục [19]–[23] ở trên là gợi ý hướng tìm kiếm, không phải trích dẫn đã xác minh — khác với 18 tài liệu gốc của sinh viên (đã kiểm tra hợp lý về mặt hình thức). Sinh viên phải tự tìm bản công bố chính thức, xác nhận năm và nơi công bố chính xác trước khi đưa vào danh mục tham khảo.
+Tên đề tài (tiếng Việt) | XÂY DỰNG GIẢI PHÁP GỢI Ý VÀ HOẠCH ĐỊNH LỊCH TRÌNH DU LỊCH THÔNG MINH TẠI THÀNH PHỐ HỒ CHÍ MINH DỰA TRÊN MÔ HÌNH NGÔN NGỮ LỚN, ĐỒ THỊ TRI THỨC VÀ CƠ CHẾ BỘ NHỚ TÁC TỬ
+Tên đề tài (tiếng Anh) | Building an Intelligent Travel Itinerary Recommendation and Planning System for Ho Chi Minh City Using Large Language Models, Knowledge Graphs, and Agent Memory Mechanisms
+Sinh viên thực hiện | SV01      MSSV: ………………      Lớp: ………………
+Chuyên ngành | Trí tuệ nhân tạo — Khoa Công nghệ thông tin, Trường Đại học Nguyễn Tất Thành
+Giảng viên hướng dẫn | ………………………………………
+Thời gian thực hiện | 12 tuần (từ ………………… đến …………………)
+Thành phần | Trong tên đề tài | Ghi chú
+Động từ (Bloom 4–6) | "Xây dựng" | Cấp 6 – Sáng tạo; giữ nguyên.
+Đối tượng | Giải pháp gợi ý và hoạch định lịch trình du lịch thông minh | Giữ nguyên.
+Bối cảnh | Tại Thành phố Hồ Chí Minh | Bổ sung — khớp phạm vi thực tế ở mục 1.3.2 (200+ POI, Quận 1, 3).
+Phương pháp, công nghệ | Mô hình ngôn ngữ lớn, Đồ thị tri thức và Cơ chế bộ nhớ tác tử | Giữ nguyên; đủ để khái quát các cơ chế AI cốt lõi ở Chương 3.
+Không viết tắt | Đạt | Giữ nguyên.
+Không trùng lặp | Cần kiểm tra | Khoa/GVHD đối chiếu danh sách đề tài.
+Chương | Khung theo quy định | Kế hoạch | Trọng tâm
+Chương 1. Giới thiệu chung về đề tài | 5–10 trang | 8 trang | Bối cảnh, bài toán, 6 mục tiêu cấp cao, đối tượng, phạm vi, 4 câu hỏi nghiên cứu, bố cục
+Chương 2. Cơ sở lý luận, nghiên cứu liên quan và đề xuất giải pháp | 10–15 trang | 15 trang | Lý thuyết nền (giữ nguyên), khảo sát công trình cụ thể (mới), bảng so sánh cân bằng hơn, vấn đề và giải pháp
+Chương 3. Mô hình lý thuyết và giải pháp đề xuất | 20–25 trang | 25 trang | Kiến trúc, lược đồ đồ thị, thuật toán (giữ nguyên), định nghĩa hình thức bổ sung, lý giải tham số, ràng buộc và rủi ro (mới)
+Chương 4. Mô hình thực nghiệm, kết quả và thảo luận | 20–25 trang | 18 trang | Môi trường (cập nhật), dữ liệu, 4 thực nghiệm có phương pháp rõ ràng, phép thử đối kháng, bảng trạng thái, thảo luận
+Chương 5. Kết luận và kiến nghị | 2–5 trang | 4 trang | Đối chiếu mục tiêu theo mức bằng chứng, đóng góp, hạn chế, hướng phát triển, kiến nghị
+Tổng | 60–70 trang | 70 trang | 
+Mục tiêu | Nội dung | Câu hỏi/Giả thuyết | Chương 3 và 4 | Chương 5
+MT1 | Nghiên cứu lý thuyết nền và khảo sát công trình liên quan | — | Ch.2 | 5.1 (mục 1)
+MT2 | Xây dựng đồ thị tri thức POI và thuật toán không gian NEAR_BY | RQ2 | 3.2–3.5; 4.4 | 5.1 (mục 2)
+MT3 | Xây dựng hệ đa tác tử qua MCP; đo trải nghiệm người dùng | RQ1, H1 | 3.6–3.8; 4.3 | 5.1 (mục 3)
+MT4 | Xây dựng cơ chế gợi ý lai và tích hợp định tuyến | RQ3, H2 | 3.9–3.10; 4.5 | 5.1 (mục 4)
+MT5 | Xây dựng kiến trúc bộ nhớ tác tử hai tầng | RQ4, H3 | 3.8; 4.6 | 5.1 (mục 5)
+MT6 | Đóng gói triển khai, kiểm thử đối kháng và đánh giá tổng thể | — | 3.12; 4.7–4.8 | 5.1 (mục 6)
+Mã | Mục tiêu (động từ Bloom) | Cấp Bloom | Tiêu chí hoàn thành | Minh chứng
+MT1 | Nghiên cứu cơ sở lý luận về LLM, ảo giác, Graph RAG, MCP, kiến trúc bộ nhớ tác tử và thuật toán định tuyến; khảo sát công trình liên quan cụ thể | 4 | Có bảng khảo sát ≥ 12 công trình với trích dẫn đầy đủ | Ch.2
+MT2 | Thiết kế và xây dựng đồ thị tri thức POI cùng thuật toán tính quan hệ không gian NEAR_BY | 6 | Đồ thị nạp thành công; thuật toán giảm số phép tính Haversine đo được cụ thể | Mục 3.2–3.5; 4.4
+MT3 | Xây dựng hệ đa tác tử qua MCP (Intent Router, ReAct Agent) và đánh giá trải nghiệm người dùng bằng cả chỉ số hệ thống lẫn khảo sát người dùng | 5–6 | Chỉ số hệ thống đo được; có kết quả khảo sát người dùng (tối thiểu quy mô nhỏ) cho câu hỏi thành phần 1.2 | Mục 3.6–3.8; 4.3
+MT4 | Xây dựng cơ chế gợi ý lai (Pipeline Vi Vu) và so sánh có đối chứng công bằng với LLM thuần và với đường chim bay | 5–6 | Baseline LLM thuần dùng cùng danh sách POI; có ≥ 20 kịch bản chọn ngẫu nhiên hoặc theo tiêu chí công bố trước | Mục 3.9–3.10; 4.5
+MT5 | Thiết kế và cài đặt kiến trúc bộ nhớ tác tử hai tầng; đánh giá hiệu quả duy trì ngữ cảnh và cá nhân hóa trên nhiều kịch bản | 6 | Kết quả trên nhiều hồ sơ người dùng/kịch bản, không chỉ một ví dụ minh họa | Mục 3.8; 4.6
+MT6 | Đóng gói hệ thống bằng Docker Compose; thực hiện phép thử đối kháng để kiểm chứng khả năng chống ảo giác ngoài các trường hợp thuận lợi | 5–6 | Có kết quả cho ba kịch bản đối kháng ở mục 4.7 (danh sách rỗng, chi tiết ngoài dữ liệu, câu hỏi ngoài phạm vi) | Mục 3.12; 4.7
+Công trình (tác giả, năm) | Bài toán, dữ liệu | Phương pháp | Cơ chế chống ảo giác (nếu có) | Kết quả chính | Hạn chế/khoảng trống
+… | … | … | … | … | …
+… | … | … | … | … | …
+Nhóm công trình cần khảo sát | Gợi ý từ khóa tìm kiếm (tiếng Anh)
+1. Hệ thống gợi ý du lịch bằng LLM/tác tử | “LLM travel itinerary planning”, “travel recommendation agent”, “tourism chatbot LLM”
+2. Graph RAG cho dữ liệu không gian/POI | “knowledge graph point of interest recommendation”, “spatial Graph RAG”, “geographic grounding LLM”
+3. Hệ đa tác tử và MCP trong ứng dụng thực tế | “multi-agent LLM application”, “Model Context Protocol case study”, “tool-augmented agent evaluation”
+4. Bộ nhớ tác tử và cá nhân hóa hội thoại | “LLM agent memory personalization”, “long-term memory conversational agent”, “user profile graph recommendation”
+5. Đánh giá hệ thống gợi ý du lịch/hoạch định lộ trình | “itinerary planning evaluation user study”, “tourism recommender system evaluation metrics”
+Tiêu chí so sánh | Hệ thống OTA truyền thống | Trợ lý LLM thuần túy | Travel AI (đề tài đề xuất)
+Độ phủ dữ liệu / phạm vi áp dụng (mới) | Toàn cầu, hàng triệu địa điểm | Không giới hạn (nhưng không kiểm chứng được) | Giới hạn ~200 POI tại 2 quận đã nạp — đánh đổi để đạt độ chính xác tuyệt đối trong phạm vi
+Tham số | Giá trị (theo đề cương gốc) | Lý giải cần bổ sung
+Bán kính lọc NEAR_BY (R) | 3,0 km | Nêu cơ sở chọn 3 km (khoảng cách đi bộ/di chuyển hợp lý trong nội thành, hay dò thực nghiệm trên vài giá trị?); nếu có thời gian, so sánh mật độ cạnh NEAR_BY ở R = 1, 3, 5 km.
+Số bước tối đa vòng lặp ReAct | 5 bước | Nêu lý do (giới hạn chi phí gọi API, hay quan sát thực tế hội thoại hiếm khi cần quá 5 bước); báo cáo tỷ lệ phiên chạm giới hạn 5 bước mà chưa hoàn tất.
+Chu kỳ nén ngữ cảnh (Working Memory) | Sau mỗi 3 lượt hoặc khi lịch trình khởi tạo | Nêu cơ sở chọn "3 lượt"; đối chiếu với độ dài cửa sổ ngữ cảnh thực tế của mô hình đang dùng.
+Số ứng viên mỗi danh mục (Giai đoạn 2) | 6 điểm mỗi loại × 3 danh mục = tối đa 18 ứng viên | Nêu ảnh hưởng của con số này đến chất lượng lịch trình (ít ứng viên → LLM ít lựa chọn; nhiều ứng viên → tốn token/độ trễ) và cách cân bằng.
+Temperature Intent Router | 0 (tất định) | Hợp lý cho bài toán phân loại; nên giữ và nêu lý do ngắn gọn (giảm phương sai, tăng khả năng tái lập).
+Ràng buộc/Rủi ro | Ảnh hưởng | Biện pháp
+Phạm vi dữ liệu hẹp (~200 POI, 2 quận) | Kết quả không khái quát ra toàn thành phố/loại hình du lịch khác | Nêu rõ giới hạn trong mọi khẳng định (mục 1.3.2); coi là proof of concept
+Phụ thuộc API bên thứ ba (Gemini, GraphHopper nếu dùng dịch vụ ngoài) | Thay đổi/ngừng hỗ trợ mô hình ảnh hưởng khả năng tái lập (xem V6, Phần A) | Ghi rõ phiên bản, ngày truy cập; có kế hoạch dự phòng mô hình thay thế
+Ràng buộc "chỉ chọn trong danh sách" chưa được kiểm thử đối kháng | "Zero Hallucination" có thể không giữ đúng trong trường hợp biên (xem V4) | Bổ sung 3 kịch bản đối kháng ở mục 4.7
+Baseline "LLM thuần" chưa rõ điều kiện so sánh | Kết quả thực nghiệm 3 có thể bị phóng đại nếu so sánh không công bằng | Chuẩn hóa baseline: cùng mô hình, cùng dữ liệu POI, chỉ khác có/không Heuristics
+Backend và Vector RAG còn là khung sườn (stub) | Một số chức năng trong mục tiêu (lưu trữ lịch trình, ngữ cảnh cảm xúc) chưa hoạt động đầy đủ | Đã nêu trung thực ở bảng 4.7 và mục 5.3 — giữ nguyên cách trình bày minh bạch này
+Chưa có lớp xác thực JWT cho máy chủ MCP; token ngrok ghi cứng | Rủi ro bảo mật nếu triển khai ngoài môi trường demo | Nêu rõ đây là giới hạn của bản demo, không dùng để triển khai thực tế khi chưa khắc phục
+Nội dung | Thiết kế đề xuất | Ghi chú
+Đối tượng khảo sát | 10–15 người dùng thử (bạn học, người quen phù hợp hồ sơ khách du lịch tự túc) | Nêu rõ cách chọn mẫu; đây là khảo sát quy mô nhỏ, không đại diện tổng thể
+Thiết kế so sánh | Trong nhóm (within-subject): mỗi người dùng thử cả hai phiên bản (có/không hiển thị tool_chain), thứ tự ngẫu nhiên hóa | Giảm ảnh hưởng khác biệt cá nhân giữa người dùng
+Công cụ đo | Thang đo Likert 5 hoặc 7 điểm cho "độ tin cậy cảm nhận" và "mức độ hài lòng"; có thể thêm câu hỏi mở ngắn | Trích dẫn thang đo tham khảo nếu có (ví dụ thang đo tin cậy hệ thống AI đã công bố)
+Phân tích | So sánh điểm trung bình hai điều kiện bằng kiểm định phù hợp (ví dụ Wilcoxon signed-rank cho mẫu nhỏ, phi tham số) | Báo cáo cả điểm trung bình và ý kiến định tính tiêu biểu
+Kịch bản | Cách thực hiện | Kết quả mong đợi / cách chấm
+Danh sách ứng viên rỗng hoặc quá ít | Yêu cầu lịch trình tại khu vực/danh mục có rất ít hoặc không có POI trong đồ thị (ví dụ hỏi về một phường không có dữ liệu) | Hệ thống phải thông báo thiếu dữ liệu, không tự bịa thêm địa điểm để lấp đầy
+Bịa chi tiết ngoài dữ liệu đã truy xuất | Kiểm tra ngẫu nhiên một mẫu câu trả lời: đối chiếu từng chi tiết (giờ mở cửa, giá, mô tả) với đúng bản ghi Memgraph tương ứng | Tỷ lệ chi tiết khớp hoàn toàn với dữ liệu gốc, không chỉ tên địa điểm
+Câu hỏi ngoài phạm vi 200 POI | Hỏi về địa điểm cụ thể ở quận không có dữ liệu (ví dụ Quận 7) hoặc địa điểm không tồn tại | Hệ thống từ chối rõ ràng hoặc nêu giới hạn phạm vi, không gán ghép nhầm sang POI gần đó trong dữ liệu
+Mục tiêu | Kết quả chính (điền sau khi bổ sung thực nghiệm) | Mức hoàn thành | Minh chứng
+MT1 | … | Hoàn thành / một phần / chưa | Ch.2
+MT2 | … | … | Mục 4.4
+MT3 | … | … | Mục 4.3
+MT4 | … | … | Mục 4.5
+MT5 | … | … | Mục 4.6
+MT6 | … | … | Mục 4.7–4.8
+Phần đầu | Phần nội dung chính (60–70 trang) | Phần cuối
+Trang bìa
+Trang bìa trong
+Tờ nhiệm vụ
+Lời cảm ơn
+Lời mở đầu
+Nhận xét, chấm điểm của GV | Mục lục
+Danh mục các bảng biểu
+Danh mục các hình
+Danh mục chữ viết tắt
+Chương 1 đến Chương 5 | Tài liệu tham khảo
+Phụ lục (đã có 3 phụ lục)
+Viết tắt | Nghĩa đầy đủ | Viết tắt | Nghĩa đầy đủ
+API | Application Programming Interface | OTA | Online Travel Agency
+CH | Contraction Hierarchies | OSM | OpenStreetMap
+DDD | Domain-Driven Design | POI | Point of Interest (điểm quan tâm)
+FIT | Free Independent Traveler (du lịch tự túc) | RAG | Retrieval-Augmented Generation
+LLM | Large Language Model | ReAct | Reasoning + Acting
+LSH | Locality-Sensitive Hashing | SSE | Server-Sent Events
+MCP | Model Context Protocol | TSP | Traveling Salesperson Problem
+NLP | Natural Language Processing | UX | User Experience
+UoW | Unit of Work | MT, RQ, H | Mục tiêu; câu hỏi nghiên cứu; giả thuyết
+Tuần | Nội dung công việc | Sản phẩm
+1 | Hoàn thiện đề cương; xác nhận với GVHD phạm vi công sức cá nhân (V1); cập nhật phiên bản mô hình Gemini đang dùng | Đề cương chi tiết đã chốt phạm vi
+2–3 | Khảo sát ≥ 12 công trình về hệ thống du lịch AI/Graph RAG/bộ nhớ tác tử (mục 2.9); viết lại Chương 2 | Bảng khảo sát công trình; bản thảo Chương 2
+4–5 | Thiết kế lại baseline "LLM thuần" cho thực nghiệm 3; chuẩn bị 20 kịch bản theo tiêu chí công bố trước; thiết kế bảng hỏi khảo sát người dùng (thực nghiệm 1) | Baseline đã chuẩn hóa; bảng hỏi khảo sát
+6 | Thực hiện khảo sát người dùng (10–15 người) cho câu hỏi thành phần 1.2 | Dữ liệu khảo sát thô
+7 | Chạy lại thực nghiệm 2, 3, 4 với cỡ mẫu và phương pháp đã chuẩn hóa; lặp thực nghiệm cá nhân hóa trên nhiều hồ sơ | Bảng kết quả đã có cỡ mẫu rõ ràng
+8 | Thực hiện ba kịch bản phép thử đối kháng (mục 4.7) | Kết quả phép thử đối kháng
+9 | Phân tích dữ liệu khảo sát người dùng; tổng hợp toàn bộ Chương 4 | Bản thảo Chương 4 hoàn chỉnh
+10 | Viết Chương 3 bổ sung (định nghĩa hình thức, lý giải tham số, ràng buộc); rà soát nhất quán số liệu (tỷ lệ loại bỏ NEAR_BY, tên hệ thống Travel AI/Travolo) | Bản thảo Chương 3 hoàn chỉnh
+11 | Viết Chương 5; bổ sung tài liệu tham khảo chuyên biệt về du lịch AI | Bản thảo Chương 5; danh mục tài liệu tham khảo đầy đủ
+12 | Hoàn thiện toàn bộ báo cáo, phụ lục; chuẩn bị slide và bảo vệ thử | Khóa luận hoàn chỉnh; slide bảo vệ

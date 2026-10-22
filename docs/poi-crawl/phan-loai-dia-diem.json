@@ -1,0 +1,172 @@
+{
+  "version": "1.0",
+  "ngay_tao": "2026-10-04",
+  "muc_dich": "Bộ phân loại địa điểm dùng chung cho bước trích xuất - phân loại - nạp POI của Travel Lung Tung. Nhãn chính dùng để tạo nút Category trong đồ thị, nhãn phụ dùng để tạo nút Tag. Bộ này là bản đề xuất, chờ chủ dự án duyệt trước khi nạp.",
+  "rang_buoc_tu_he_thong": {
+    "category_la_nut_that": "POI_service/app/core/domain/graph_entities.py:13 - Category gồm id, name, context (context la ngu canh ngu nghia cho AI agent, duoi 400 tu).",
+    "tag_la_nut_that": "graph_entities.py:40 - Tag chi gom id, name.",
+    "thu_tu_quyet_dinh_id": "graph_entities.py:181-220 - POI id sinh theo mau <nhan_chinh>_<tinh>_<quan>_<duong>_<ngay>_<uuid8>; nhan chinh lay tu poi_categories[0]. Sai nhãn chính thì sai toàn bộ id.",
+    "khong_duoc_bia_nhan": "ai_service/prompt.json - ZERO HALLUCINATION POLICY: agent không được tự nghĩ ra category id, city id, district id. Vì vậy bộ nhãn phải được tạo trong đồ thị TRƯỚC khi nạp POI.",
+    "truong_bat_buoc": "graph_entities.py:154-171 - POI bắt buộc có name, longitude, latitude; nếu có address thì district và city là bắt buộc. Nghĩa là mọi địa điểm phải được định vị trước khi nạp.",
+    "don_vi_chuan_hoa_id": "utils/helper.py:16 - normalize_for_id bỏ dấu rồi Title Case: 'Quán Ăn' -> 'QuanAn'. Tên nhãn phải giữ dấu để hiển thị, id phải là ASCII."
+  },
+  "nhan_chinh": [
+    {
+      "id": "quan_an",
+      "name": "Quán Ăn",
+      "context": "Quán phục vụ bữa chính, thường là món Việt hoặc món Á, giá bình dân đến trung bình, khách ngồi ăn tại chỗ. Ví dụ: quán hủ tiếu, quán phở, quán cơm tấm, quán bún bò, quán mì gia truyền. Đây là nhãn mặc định cho một địa điểm ăn uống có phục vụ bữa ăn và không thuộc nhóm nhà hàng theo nghĩa ở dưới.",
+      "vi_du": ["Hủ Tiếu Hồng Phát - 391 Võ Văn Tần, Quận 3", "Hủ Tiếu Nam Vang Trung Còi - 80 Cao Thắng, Quận 3"],
+      "loai_tru": "Không gán nhãn này cho nơi chỉ bán đồ uống, chỉ bán tráng miệng, hoặc chỉ bán món ăn vặt lẻ không thành bữa.",
+      "gia_tham_khao_vnd": [20000, 120000],
+      "thoi_luong_tham_viec_phut": 45,
+      "tin_hieu_nguon": ["quán", "tiệm", "hủ tiếu", "phở", "cơm", "bún", "mì", "bánh canh", "cháo"]
+    },
+    {
+      "id": "an_vat",
+      "name": "Ăn Vặt & Đường Phố",
+      "context": "Nơi bán món ăn lẻ, ăn chơi, ăn dạo: xe đẩy, gánh hàng rong, quầy vỉa hè, tiệm bánh tráng trộn, xoài lắc, bắp xào, xiên que, ốc, súp cua. Khách thường đứng hoặc ngồi ghế nhựa, thời gian ghé ngắn. Nhãn này cũng dùng cho một địa điểm ăn vặt đơn lẻ nằm trong khu ăn vặt.",
+      "vi_du": ["Hẻm 76 Hai Bà Trưng", "Chợ 200 Xóm Chiếu"],
+      "loai_tru": "Không gán cho quán phục vụ bữa chính có bàn ghế và thực đơn theo bữa.",
+      "gia_tham_khao_vnd": [10000, 60000],
+      "thoi_luong_tham_viec_phut": 30,
+      "tin_hieu_nguon": ["ăn vặt", "vỉa hè", "xe đẩy", "hàng rong", "bánh tráng", "xoài lắc", "ốc", "xiên que"]
+    },
+    {
+      "id": "cafe",
+      "name": "Cà Phê & Đồ Uống",
+      "context": "Nơi chủ yếu phục vụ đồ uống: cà phê, trà sữa, nước ép, sinh tố, trà trái cây, kể cả cà phê có view hoặc không gian để ngồi làm việc. Nếu nơi đó có bán kèm bánh ngọt nhẹ vẫn xếp vào nhãn này.",
+      "vi_du": ["quán cà phê view sông Sài Gòn", "tiệm trà sữa trong hẻm"],
+      "loai_tru": "Không gán cho quán ăn có bán đồ uống kèm, hoặc quán bar có phục vụ cocktail là chính.",
+      "gia_tham_khao_vnd": [20000, 90000],
+      "thoi_luong_tham_viec_phut": 60,
+      "tin_hieu_nguon": ["cà phê", "trà sữa", "nước ép", "sinh tố", "trà trái cây", "coffee"]
+    },
+    {
+      "id": "trang_mieng",
+      "name": "Tráng Miệng",
+      "context": "Nơi bán món ngọt dùng riêng: chè, kem, bánh ngọt, tàu hũ, rau câu, bánh flan. Tách khỏi nhóm đồ uống vì hành vi sử dụng khác: ghé ăn nhanh như một điểm dừng ngắn trong lịch trình.",
+      "vi_du": ["quán chè mâm 40 năm ở Sư Vạn Hạnh", "tàu hũ hẻm 284 Lê Văn Sỹ"],
+      "loai_tru": "Không gán cho tiệm bánh mì hoặc tiệm bánh mặn.",
+      "gia_tham_khao_vnd": [10000, 50000],
+      "thoi_luong_tham_viec_phut": 25,
+      "tin_hieu_nguon": ["chè", "kem", "bánh ngọt", "tàu hũ", "rau câu", "flant", "flan", "tráng miệng"]
+    },
+    {
+      "id": "nha_hang",
+      "name": "Nhà Hàng",
+      "context": "Cơ sở ăn uống có phục vụ bàn theo thực đơn, quy mô lớn hơn quán ăn: nhà hàng buffet, nhà hàng chuỗi, nhà hàng món ngoại, nhà hàng tiệc, nhà hàng cao cấp. Thời gian dùng bữa dài hơn quán ăn và giá cao hơn.",
+      "vi_du": ["Hệ thống nhà hàng ThaiExpress", "Tiệm nướng Cuồng Nộ"],
+      "loai_tru": "Không gán cho quán ăn bình dân không có thực đơn theo bàn; không gán cho quán chỉ bán mang đi.",
+      "gia_tham_khao_vnd": [150000, 1000000],
+      "thoi_luong_tham_viec_phut": 90,
+      "tin_hieu_nguon": ["nhà hàng", "buffet", "chuỗi", "fine dining", "tiệc", "reservation", "đặt bàn"]
+    },
+    {
+      "id": "bar",
+      "name": "Bar & Về Đêm",
+      "context": "Nơi hoạt động chủ yếu về đêm và phục vụ đồ uống có cồn: quán bar, pub, rooftop, bia hơi, club, quán nhậu mở khuya. Nhãn này quan trọng cho lịch trình vì khung giờ hoạt động khác hẳn nhóm ăn uống ban ngày.",
+      "vi_du": ["Twilight Sky Bar Sai Gon", "phố Tây Bùi Viện"],
+      "loai_tru": "Không gán cho quán ăn mở khuya nhưng không phục vụ đồ uống có cồn.",
+      "gia_tham_khao_vnd": [100000, 800000],
+      "thoi_luong_tham_viec_phut": 90,
+      "tin_hieu_nguon": ["bar", "pub", "rooftop", "bia", "club", "nhậu", "nightlife"]
+    },
+    {
+      "id": "tham_quan",
+      "name": "Điểm Tham Quan",
+      "context": "Điểm đến để xem, chụp hình, tìm hiểu: chùa, đền, nhà thờ, bảo tàng, di tích, kiến trúc cổ, công viên, điểm ngắm cảnh, phố đi bộ. Đây là nhóm điểm đến tĩnh, không tiêu thụ đồ ăn là chính.",
+      "vi_du": ["chợ Bến Thành", "Hồ Con Rùa", "các ngôi chùa Sài Gòn nổi tiếng"],
+      "loai_tru": "Không gán cho nơi mục đích chính là mua sắm hoặc vui chơi có thu phí theo trò.",
+      "gia_tham_khao_vnd": [0, 100000],
+      "thoi_luong_tham_viec_phut": 75,
+      "tin_hieu_nguon": ["chùa", "bảo tàng", "di tích", "nhà thờ", "công viên", "check-in", "ngắm cảnh"]
+    },
+    {
+      "id": "vui_choi",
+      "name": "Vui Chơi & Giải Trí",
+      "context": "Nơi khách đến để chơi: khu vui chơi, công viên nước, karaoke, rạp phim, phòng game, cà phê board game, khu giải trí tổng hợp. Khác điểm tham quan ở chỗ có hoạt động tương tác là chính.",
+      "vi_du": ["Công Viên Grand Park", "khu vui chơi trong nhà"],
+      "loai_tru": "Không gán cho điểm chỉ để xem hoặc chụp hình mà không có hoạt động chơi.",
+      "gia_tham_khao_vnd": [50000, 500000],
+      "thoi_luong_tham_viec_phut": 120,
+      "tin_hieu_nguon": ["vui chơi", "giải trí", "karaoke", "công viên nước", "trò chơi", "game"]
+    },
+    {
+      "id": "mua_sam",
+      "name": "Mua Sắm",
+      "context": "Nơi mục đích chính là mua: chợ truyền thống, chợ đêm, trung tâm thương mại, cửa hàng đặc sản, tiệm bán quà. Trong bài tổng hợp ẩm thực, nhãn này thường xuất hiện khi địa điểm là chợ hoặc nơi mua đặc sản làm quà.",
+      "vi_du": ["chợ đêm Tân Định", "19 đặc sản Sài Gòn làm quà"],
+      "loai_tru": "Không gán cho chợ ẩm thực mà hoạt động chính là ăn tại chỗ (dùng an_vat hoặc khu ăn vặt).",
+      "gia_tham_khao_vnd": [0, 300000],
+      "thoi_luong_tham_viec_phut": 60,
+      "tin_hieu_nguon": ["chợ", "trung tâm thương mại", "đặc sản làm quà", "mall", "cửa hàng"]
+    },
+    {
+      "id": "luu_tru",
+      "name": "Lưu Trú",
+      "context": "Nơi nghỉ qua đêm: khách sạn, homestay, resort, nhà nghỉ. Nhóm này không thuộc luồng cào mạng xã hội hiện tại nhưng đã có trong dữ liệu Traveloka (crawl_type hotel) nên giữ nhãn để hai nguồn không đâm nhau.",
+      "vi_du": ["khách sạn trung tâm Quận 1", "homestay Thảo Điền"],
+      "loai_tru": "Không gán cho nơi chỉ cho thuê theo giờ hoặc không lưu trú qua đêm.",
+      "gia_tham_khao_vnd": [200000, 3000000],
+      "thoi_luong_tham_viec_phut": 0,
+      "tin_hieu_nguon": ["khách sạn", "homestay", "resort", "hotel", "lưu trú"]
+    },
+    {
+      "id": "khac",
+      "name": "Chưa Rõ",
+      "context": "Nhãn dùng khi nguồn không đủ bằng chứng để xác định loại hình, ví dụ bài viết chỉ nhắc tên địa điểm mà không nói bán gì. Nhãn này tồn tại để tránh đoán bừa: chỗ nào chưa rõ thì để riêng và xếp vào danh sách cần người kiểm, không được gán đại sang nhãn ăn uống.",
+      "vi_du": ["một cái tên xuất hiện trong danh sách mà không kèm mô tả"],
+      "loai_tru": "Không dùng nhãn này khi bài viết có mô tả rõ ràng về loại hình.",
+      "gia_tham_khao_vnd": null,
+      "thoi_luong_tham_viec_phut": null,
+      "tin_hieu_nguon": []
+    }
+  ],
+  "nhan_phu": [
+    {"id": "mon_ho_tieu", "name": "Hủ tiếu", "nhom": "mon_an"},
+    {"id": "mon_pho", "name": "Phở", "nhom": "mon_an"},
+    {"id": "mon_com_tam", "name": "Cơm tấm", "nhom": "mon_an"},
+    {"id": "mon_banh_mi", "name": "Bánh mì", "nhom": "mon_an"},
+    {"id": "mon_bun", "name": "Bún", "nhom": "mon_an"},
+    {"id": "mon_oc", "name": "Ốc", "nhom": "mon_an"},
+    {"id": "mon_hai_san", "name": "Hải sản", "nhom": "mon_an"},
+    {"id": "mon_nuong", "name": "Nướng", "nhom": "mon_an"},
+    {"id": "mon_chay", "name": "Món chay", "nhom": "mon_an"},
+    {"id": "mon_lau", "name": "Lẩu", "nhom": "mon_an"},
+    {"id": "hinh_thuc_buffet", "name": "Buffet", "nhom": "hinh_thuc"},
+    {"id": "hinh_thuc_mang_di", "name": "Mang đi", "nhom": "hinh_thuc"},
+    {"id": "hinh_thuc_xe_day", "name": "Xe đẩy", "nhom": "hinh_thuc"},
+    {"id": "hinh_thuc_chuoi", "name": "Chuỗi nhiều chi nhánh", "nhom": "hinh_thuc"},
+    {"id": "thoi_diem_an_sang", "name": "Ăn sáng", "nhom": "thoi_diem"},
+    {"id": "thoi_diem_an_khuya", "name": "Ăn khuya", "nhom": "thoi_diem"},
+    {"id": "doi_tuong_gia_dinh", "name": "Gia đình", "nhom": "doi_tuong"},
+    {"id": "doi_tuong_hen_ho", "name": "Hẹn hò", "nhom": "doi_tuong"},
+    {"id": "doi_tuong_nhom_ban", "name": "Nhóm bạn", "nhom": "doi_tuong"},
+    {"id": "vibe_view_dep", "name": "View đẹp", "nhom": "khong_gian"},
+    {"id": "vibe_yen_tinh", "name": "Yên tĩnh", "nhom": "khong_gian"},
+    {"id": "vibe_nhon_nhip", "name": "Nhộn nhịp", "nhom": "khong_gian"},
+    {"id": "vibe_hem_sau", "name": "Nằm sâu trong hẻm", "nhom": "khong_gian"}
+  ],
+  "hinh_dang": {
+    "mo_ta": "Thuộc tính độc lập với nhãn chính, quyết định cách định vị và cách xếp vào lịch trình.",
+    "gia_tri": [
+      {"id": "diem", "name": "Một điểm", "dinh_vi": "Một toạ độ duy nhất, địa chỉ cụ thể.", "lich_trinh": "Một điểm dừng có thời lượng cố định."},
+      {"id": "khu", "name": "Một khu hoặc một tuyến", "dinh_vi": "Toạ độ tâm khu và bán kính ước lượng (hẻm, phố, chợ đêm, khu ăn vặt tập trung).", "lich_trinh": "Điểm dừng dạng đi bộ, thời lượng dài hơn và có thể tách thành nhiều quán con."}
+    ],
+    "vi_du_trong_du_lieu_that": ["Hẻm 76 Hai Bà Trưng", "Phố ẩm thực Vĩnh Khánh", "Chợ đêm Tân Định", "Khu ăn vặt Chi Lăng"]
+  },
+  "quy_tac_phan_loai": [
+    "Bước 1: xác định hình dạng (diem hay khu) trước, vì nơi là khu thì mọi bước sau phải xử lý như một cụm.",
+    "Bước 2: chọn nhãn chính theo bằng chứng trong nguồn, không theo suy đoán từ tên riêng.",
+    "Bước 3: nếu nguồn nói rõ có phục vụ bàn, buffet, hoặc là chuỗi lớn, chọn nha_hang thay vì quan_an.",
+    "Bước 4: nếu nguồn chỉ nói một món lẻ hoặc vỉa hè, chọn an_vat.",
+    "Bước 5: gán nhãn phụ từ danh sách đóng, tối đa 5 nhãn cho mỗi địa điểm, chỉ gán khi có bằng chứng.",
+    "Bước 6: không có bằng chứng về loại hình thì gán khac và đưa vào danh sách chờ kiểm, không được bỏ qua bản ghi."
+  ],
+  "phep_kiem_bac_bo": [
+    "Nếu một địa điểm được gán quan_an nhưng nguồn không có bằng chứng về bữa ăn (không có món chính, không có thực đơn) thì nhãn đó sai.",
+    "Nếu một địa điểm được gán khu nhưng thực tế chỉ là một quán có địa chỉ duy nhất thì hình dạng sai, lịch trình sẽ tính sai thời lượng.",
+    "Nếu hai bản ghi cùng nguồn nhưng toạ độ cách nhau dưới 30 mét và tên tương đồng thì đó là một địa điểm bị tách đôi, phải gộp trước khi nạp.",
+    "Nếu một nhãn chính không tồn tại trong đồ thị trước khi nạp thì POI sẽ rơi vào nhánh UNCATEGORIZED và id sinh sai; phép kiểm là đếm số POI có tiền tố UNCATEGORIZED sau mỗi lô, phải bằng 0."
+  ]
+}

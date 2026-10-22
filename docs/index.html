@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Travel Lung Tung — tài liệu kỹ thuật</title>
+<link rel="stylesheet" href="assets/docs.css">
+</head>
+<body>
+<header class="top">
+  <div class="bar">
+    <div class="brand">Travel Lung Tung<small>Tài liệu kỹ thuật hệ thống đa dịch vụ</small></div>
+    <div class="spacer"></div>
+    <span class="crumbs">Bản mã <code>1d18ac3</code></span>
+    <button class="btn" id="theme-toggle">Nền tối</button>
+  </div>
+</header>
+
+<div class="wrap">
+<nav class="toc">
+  <h4>Tổng quan</h4>
+  <a href="#gioi-thieu">Giới thiệu</a>
+  <a href="#doc-gi-truoc">Đọc gì trước</a>
+  <a href="#he-thong">Hệ thống gồm những gì</a>
+  <a href="#luong">Luồng dữ liệu một vòng</a>
+  <a href="#ban-do">Bản đồ tài liệu</a>
+  <a href="#quy-uoc">Quy ước viết tài liệu</a>
+  <a href="#chay-thu">Chạy thử</a>
+  <a href="#khoang-trong">Khoảng trống đã kiểm chứng</a>
+  <a href="#bang-chung">Bằng chứng và giới hạn</a>
+  <h4>Sơ đồ</h4>
+  <a href="diagrams/index.html">Thư viện sơ đồ</a>
+  <a href="travel-vo-lo.architecture.html">Kiến trúc chính</a>
+  <a href="diagrams/crawler-pipeline.workflow.html">Luồng cào dữ liệu</a>
+  <a href="diagrams/poi-ingestion.lifecycle.html">Vòng đời nạp POI</a>
+  <a href="diagrams/api-interaction.sequence.html">Tương tác giữa các API</a>
+  <a href="diagrams/class-poi-service.architecture.html">Sơ đồ lớp POI_service</a>
+  <a href="diagrams/class-crawler-service.architecture.html">Sơ đồ lớp crawler_service</a>
+  <h4>Module</h4>
+  <a href="modules/crawler-service.html">crawler_service</a>
+  <a href="modules/poi-service.html">POI_service</a>
+  <a href="modules/ai-service.html">ai_service</a>
+  <a href="modules/backend-service.html">backend_service</a>
+  <a href="modules/shared-lib.html">shared_lib</a>
+</nav>
+
+<main>
+<section id="gioi-thieu">
+  <h1>Travel Lung Tung — tài liệu kỹ thuật</h1>
+  <p class="lead">Hệ thống gồm năm gói mã nguồn: một dịch vụ cào dữ liệu du lịch, một dịch vụ quản lý điểm đến (POI) trên đồ thị Memgraph, một trung tâm AI nói chuyện với đồ thị qua giao thức MCP, một dịch vụ lưu lịch trình trên Firestore, và một gói dùng chung. Tài liệu này mô tả từng module sinh ra để làm gì, làm những gì, các lớp và hàm chính, tham số, giá trị trả về, lỗi và cách dùng.</p>
+
+  <div class="callout">
+    <p><strong>Bản mã được phân tích.</strong> Toàn bộ nội dung đối chiếu với <code>1d18ac30140dfe36335fadf49abe7c6177a19a60</code> trên nhánh <code>main</code>. Ngày 04-10-2026 đã chạy <code>git fetch origin</code>: <code>main</code> trùng khít <code>origin/main</code>, không có commit mới để kéo về, nên tài liệu mô tả đúng bản mới nhất hiện có.</p>
+  </div>
+
+  <div class="callout warn">
+    <p><strong>Tên gọi lệch nhau.</strong> <code>README.md</code> gọi hệ thống là “Travel Vo Lo”, còn mã nguồn, tiêu đề API và repo lại gọi “Travel Lung Tung” (<code>POI_service/app/main.py:57</code>, <code>ai_service/main.py:35</code>, repo <code>Travel-Lung-Tung</code>). Tài liệu này dùng tên trong mã nguồn.</p>
+  </div>
+
+  <p>Điều tài liệu <em>không</em> khẳng định: chưa có dịch vụ nào được chạy lên trong quá trình viết, chưa kết nối cơ sở dữ liệu và chưa gọi thử API. Mọi mô tả hành vi đều đọc từ mã nguồn và ghi kèm vị trí dòng.</p>
+</section>
+
+<section id="doc-gi-truoc">
+  <h2>Đọc gì trước</h2>
+  <ol>
+    <li><strong>Trang này</strong> để nắm hệ thống gồm những gì và còn hở chỗ nào.</li>
+    <li><strong><a href="travel-vo-lo.architecture.html">Sơ đồ kiến trúc chính</a></strong> để thấy ranh giới tin cậy, vùng dữ liệu và đường đi của một yêu cầu.</li>
+    <li><strong><a href="diagrams/crawler-pipeline.workflow.html">Luồng cào dữ liệu</a></strong> và <strong><a href="diagrams/poi-ingestion.lifecycle.html">vòng đời nạp POI</a></strong> — đây là hai sơ đồ sát công việc cào dữ liệu POI nhất.</li>
+    <li><strong><a href="diagrams/api-interaction.sequence.html">Tương tác giữa các API</a></strong> nếu quan tâm đường hỏi đáp của agent.</li>
+    <li><strong><a href="modules/crawler-service.html">crawler_service</a></strong> rồi <strong><a href="modules/poi-service.html">POI_service</a></strong> — hai module của đường dữ liệu vào.</li>
+    <li>Còn lại: <a href="modules/ai-service.html">ai_service</a>, <a href="modules/backend-service.html">backend_service</a>, <a href="modules/shared-lib.html">shared_lib</a>.</li>
+  </ol>
+</section>
+
+<section id="he-thong">
+  <h2>Hệ thống gồm những gì</h2>
+  <p>Bảng dưới lấy từ <code>docker-compose.yaml</code> và mã nguồn từng gói. Cột “chạy thật” cho biết gói đó có tiến trình khởi động được hay chỉ là thư viện.</p>
+  <table>
+    <thead><tr><th>Gói</th><th>Thư mục</th><th>Cổng</th><th>Điểm vào</th><th>Lưu trữ</th><th>Chạy thật</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>crawler_service</strong></td><td><code>crawler_service/</code></td><td><code>8000</code> nếu gán</td>
+        <td><code>POST /api/v1/crawl</code> (<code>app/main.py:64</code>)</td><td>tệp JSON cục bộ</td>
+        <td><span class="badge ok">có</span></td>
+      </tr>
+      <tr>
+        <td><strong>POI_service</strong> — REST</td><td><code>POI_service/</code></td><td><code>8000</code></td>
+        <td><code>/ingestion</code>, <code>/management</code>, <code>/pois</code> (<code>app/main.py:100</code>)</td><td>Memgraph, Firestore</td>
+        <td><span class="badge ok">có</span></td>
+      </tr>
+      <tr>
+        <td><strong>POI_service</strong> — MCP</td><td><code>POI_service/app/api/mcp/</code></td><td><code>8001</code></td>
+        <td>FastMCP 5 tool (<code>tools.py:26</code>)</td><td>Memgraph (chỉ đọc)</td>
+        <td><span class="badge ok">có</span></td>
+      </tr>
+      <tr>
+        <td><strong>ai_service</strong></td><td><code>ai_service/</code></td><td><code>8002</code></td>
+        <td><code>POST /chat</code>, <code>POST /generate_itinerary</code> (<code>main.py:504</code>, <code>:181</code>)</td><td>không giữ trạng thái bền</td>
+        <td><span class="badge ok">có</span></td>
+      </tr>
+      <tr>
+        <td><strong>backend_service</strong></td><td><code>backend_service/</code></td><td>—</td>
+        <td>không có <code>main.py</code></td><td>Firestore</td>
+        <td><span class="badge gap">chưa</span></td>
+      </tr>
+      <tr>
+        <td><strong>shared_lib</strong></td><td><code>shared_lib/travel_shared/</code></td><td>—</td>
+        <td>thư viện dùng chung</td><td>—</td>
+        <td><span class="badge gap">không phải dịch vụ</span></td>
+      </tr>
+      <tr>
+        <td><strong>GraphHopper</strong></td><td><code>graphhopper/</code></td><td><code>8989</code></td>
+        <td><code>GET /route</code></td><td>OSM PBF TPHCM 17,9 MB</td>
+        <td><span class="badge ok">có</span> (ảnh dựng sẵn)</td>
+      </tr>
+      <tr>
+        <td><strong>Memgraph + Lab</strong></td><td>—</td><td><code>7687</code>, <code>3000</code></td>
+        <td>Bolt</td><td>volume <code>mg_lib</code></td>
+        <td><span class="badge ok">có</span></td>
+      </tr>
+    </tbody>
+  </table>
+  <p class="evidence">Nguồn: <code>docker-compose.yaml</code>, <code>POI_service/app/main.py:56</code>, <code>crawler_service/app/main.py:27</code>, <code>ai_service/main.py:35</code>.</p>
+</section>
+
+<section id="luong">
+  <h2>Luồng dữ liệu một vòng</h2>
+  <p>Sáu chặng, mỗi chặng gắn với một sơ đồ và một module. Các chặng 1–2 là dữ liệu POI đi vào; chặng 3–6 là dữ liệu đi ra cho người dùng.</p>
+  <div class="grid two">
+    <div class="card">
+      <h3>1. Cào dữ liệu nguồn</h3>
+      <p>Seed URL đi qua cổng token, vào <code>Crawler.pipeline</code>. Chế độ khám phá chạy crawler thích ứng, chấm điểm link bằng chiến lược tách từ tiếng Việt, lọc rồi phân nhóm URL theo bốn nhóm <code>hotel</code>, <code>destinations</code>, <code>activities</code>, <code>explore</code>.</p>
+      <p><a href="diagrams/crawler-pipeline.workflow.html">Xem sơ đồ luồng cào →</a></p>
+    </div>
+    <div class="card">
+      <h3>2. Bóc nội dung và làm sạch</h3>
+      <p>Mỗi nhóm URL đi kèm một schema CSS và một đoạn JS trích xuất. Kết quả được giải nén các trường JSON lồng nhau và chuyển khối HTML sang markdown, rồi ghi ra tệp JSON cục bộ.</p>
+      <p><a href="modules/crawler-service.html#lam-sach">Chi tiết ở crawler_service →</a></p>
+    </div>
+    <div class="card">
+      <h3>3. Nạp vào đồ thị kiến thức</h3>
+      <p>Gói POI gửi vào <code>POST /ingestion/batch</code>: 10 bản ghi đầu ghi ngay trong request, phần dư chia thành khối 500 bản ghi và chạy nền, tiến độ báo qua SSE. Câu lệnh Cypher dựng luôn chuỗi <code>Nation → City → District → Street</code> và các cạnh <code>HAS_CATEGORY</code>, <code>HAS_TAG</code>, <code>OFFER</code>.</p>
+      <p><a href="diagrams/poi-ingestion.lifecycle.html">Xem vòng đời nạp →</a></p>
+    </div>
+    <div class="card">
+      <h3>4. Truy vấn cho agent</h3>
+      <p>AI Hub không giữ thông tin đăng nhập cơ sở dữ liệu. Nó mở phiên MCP qua SSE rồi gọi 5 công cụ: phân giải ID địa lý, liệt kê danh mục, tìm POI, lấy chi tiết POI, tính tuyến.</p>
+      <p><a href="diagrams/api-interaction.sequence.html">Xem tương tác API →</a></p>
+    </div>
+    <div class="card">
+      <h3>5. Sinh lịch trình</h3>
+      <p><code>POST /generate_itinerary</code> chạy một chuỗi cố định: phân giải quận, tìm POI theo ba danh mục cứng, làm giàu song song, rồi để Gemini tổng hợp thành JSON theo schema đã chốt.</p>
+      <p><a href="modules/ai-service.html#sinh-lich-trinh">Chi tiết ở ai_service →</a></p>
+    </div>
+    <div class="card">
+      <h3>6. Lưu và định tuyến</h3>
+      <p>GraphHopper tính tuyến từ toạ độ POI cho <code>car</code>, <code>foot</code>, <code>bike</code>. Phần lưu lịch trình đã có repository Firestore nhưng chưa có tiến trình nào gọi tới.</p>
+      <p><a href="modules/backend-service.html">Chi tiết ở backend_service →</a></p>
+    </div>
+  </div>
+</section>
+
+<section id="ban-do">
+  <h2>Bản đồ tài liệu</h2>
+  <p>Tài liệu chia làm hai loại: sơ đồ (tệp HTML mở được, có tìm kiếm, tô sáng và xuất ảnh) và tài liệu module (đọc theo kiểu tham chiếu).</p>
+  <div class="grid three">
+    <div class="card"><h4>Sơ đồ</h4>
+      <ul>
+        <li><a href="travel-vo-lo.architecture.html">Kiến trúc chính</a> — 11 thành phần, 5 vùng</li>
+        <li><a href="diagrams/crawler-pipeline.workflow.html">Luồng cào dữ liệu</a></li>
+        <li><a href="diagrams/poi-ingestion.lifecycle.html">Vòng đời nạp POI</a></li>
+        <li><a href="diagrams/api-interaction.sequence.html">Tương tác giữa các API</a></li>
+        <li><a href="diagrams/class-poi-service.architecture.html">Sơ đồ lớp POI_service</a></li>
+        <li><a href="diagrams/class-crawler-service.architecture.html">Sơ đồ lớp crawler_service</a></li>
+        <li><a href="diagrams/index.html">Thư viện sơ đồ</a> — kèm trạng thái kiểm chứng</li>
+      </ul>
+    </div>
+    <div class="card"><h4>Tài liệu module</h4>
+      <ul>
+        <li><a href="modules/crawler-service.html">crawler_service</a> — cào và làm sạch</li>
+        <li><a href="modules/poi-service.html">POI_service</a> — đồ thị POI, REST và MCP</li>
+        <li><a href="modules/ai-service.html">ai_service</a> — agent và sinh lịch trình</li>
+        <li><a href="modules/backend-service.html">backend_service</a> — lịch trình trên Firestore</li>
+        <li><a href="modules/shared-lib.html">shared_lib</a> — kiểu dùng chung, lỗi, ghi log</li>
+      </ul>
+    </div>
+    <div class="card"><h4>Tệp gốc đáng đọc</h4>
+      <ul>
+        <li><code>docker-compose.yaml</code> — bảy dịch vụ</li>
+        <li><code>prompt.json</code> — mười điều luật của agent</li>
+        <li><code>crawler_service/crawl_schemas/</code> — bốn schema CSS</li>
+        <li><code>crawler_service/js_codes/traveloka/</code> — năm đoạn JS trích xuất</li>
+        <li><code>POI_service/app/core/infrastructure/db/repositories/memgraph.py</code> — 997 dòng Cypher</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="quy-uoc">
+  <h2>Quy ước viết tài liệu</h2>
+  <p>Mỗi mục tham chiếu trong tài liệu module theo cùng một khuôn, lấy ý tưởng từ tài liệu tham chiếu API của pandas và TensorFlow:</p>
+  <ol>
+    <li><strong>Việc nó sinh ra để làm</strong> — vấn đề mà lớp hay hàm đó giải quyết, không mô tả lại mã nguồn.</li>
+    <li><strong>Chữ ký</strong> — nguyên văn dòng định nghĩa, kèm kiểu dữ liệu vào ra.</li>
+    <li><strong>Tham số</strong> — nằm trong khối thu gọn, bấm mới mở ra, để trang không bị dài vì bảng tham số.</li>
+    <li><strong>Giá trị trả về</strong> và <strong>lỗi có thể ném</strong> — nêu rõ trường hợp nào trả <code>None</code>, trường hợp nào ném exception.</li>
+    <li><strong>Ví dụ dùng</strong> — đoạn mã ngắn đúng như trong mã nguồn, không hư cấu.</li>
+    <li><strong>Dấu vết</strong> — mỗi mục ghi <code>tệp:dòng</code> để đối chiếu lại.</li>
+  </ol>
+  <p>Quy ước trình bày: mỗi khối tham số là một thẻ <em>thu gọn</em> — bấm tiêu đề để mở, mặc định đóng. Trên Telegram hay trình duyệt, bấm vào dòng có mũi tên <code>▸</code>.</p>
+</section>
+
+<section id="chay-thu">
+  <h2>Chạy thử</h2>
+  <p>Ba việc phải làm trước khi chạy, theo <code>docker-compose.yaml</code> và <code>POI_service/app/core/security/auth.py</code>:</p>
+  <pre><code># 1. Điền .env ở gốc repo (đang bị gitignore, không có trong bản clone)
+MEMGRAPH_USER=...
+MEMGRAPH_PASSWORD=...
+
+# 2. POI_service từ chối khởi động nếu thiếu JWT_SECRET (auth.py:18-20)
+JWT_SECRET=...
+
+# 3. Dựng cụm
+docker compose up -d memgraph lab graphhopper poi_api poi_mcp ai_service</code></pre>
+  <p class="evidence">Trạng thái môi trường Python cục bộ: <code>.venv/Scripts/python.exe</code> trỏ tới <code>C:\Users\duyan\anaconda3\envs\TVLT\python.exe</code> — đường dẫn này không còn tồn tại, nên phải tạo lại môi trường trước khi chạy trực tiếp ngoài Docker.</p>
+</section>
+
+<section id="khoang-trong">
+  <h2>Khoảng trống đã kiểm chứng</h2>
+  <p>Những điểm dưới đây đối chiếu trực tiếp với mã nguồn, không phải phỏng đoán. Cột “bằng chứng” là dòng cụ thể để mở lại kiểm tra.</p>
+  <table>
+    <thead><tr><th>Việc</th><th>Ảnh hưởng</th><th>Bằng chứng</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Không có bộ kiểm thử tự động: cả repo không có một câu <code>assert</code> nào, không có <code>.github/workflows</code>. Bộ nhớ pytest trỏ tới <code>test/crawling/main.py</code> đã bị xoá.</td>
+        <td>Không có gì phát hiện hồi quy khi sửa Cypher hay schema cào.</td>
+        <td><code>.pytest_cache/v/cache/nodeids</code>; <code>POI_service/test_pipeline.py</code> chỉ in log</td>
+      </tr>
+      <tr>
+        <td>Document RAG còn rỗng: cả REST lẫn MCP đều dùng repository rỗng cố tình ném lỗi chưa hiện thực.</td>
+        <td><code>insight</code> và <code>seo_article</code> trong payload trả về luôn là chuỗi rỗng; điểm đánh giá luôn 0.</td>
+        <td><code>POI_service/app/api/dependencies/services.py:17-23</code>; <code>api/mcp/tools.py:28-34</code>; <code>core/services/management.py:110-124</code></td>
+      </tr>
+      <tr>
+        <td>Cập nhật cạnh <code>NEAR_BY</code> không tự chạy sau khi nạp: tập quận bị ảnh hưởng được dựng nhưng không truyền cho <code>SpatialUpdater</code>.</td>
+        <td>Agent hỏi “quanh đây có gì” sẽ không thấy POI mới cho tới khi gọi tay endpoint dựng lại.</td>
+        <td><code>core/services/ingestion.py:69-97</code>; <code>api/rest/v1/endpoint_spatial_rebuild.py:11-27</code></td>
+      </tr>
+      <tr>
+        <td>Cổng bảo vệ của crawler so sánh với hằng số <code>"test"</code> nằm trong mã nguồn.</td>
+        <td>Ai gọi được cổng 8000 đều cào được; đổi khoá phải sửa mã.</td>
+        <td><code>crawler_service/app/core/security.py:8</code></td>
+      </tr>
+      <tr>
+        <td>Nhóm <code>hotel</code> chưa có bộ trích xuất: hàm nạp cố tình ném lỗi chưa hiện thực.</td>
+        <td>Cào khách sạn bị bỏ qua toàn bộ, không phải lỗi tạm thời.</td>
+        <td><code>crawler_service/app/pipelines/crawling/detail_crawler/traveloka_crawler.py:91-92</code></td>
+      </tr>
+      <tr>
+        <td><code>backend_service</code> chưa có tiến trình: không có <code>main.py</code>, tệp endpoint rỗng 0 dòng, compose không có container cho gói này.</td>
+        <td>Lịch trình sinh ra chưa được ghi xuống Firestore ở đường chạy thật; AI Hub trả JSON thẳng cho client.</td>
+        <td><code>backend_service/app/api/rest/v1/endpoint_itinerary.py</code> (0 dòng); <code>ai_service/main.py:464-467</code></td>
+      </tr>
+      <tr>
+        <td>Địa chỉ MCP lệch nhau giữa ba chỗ: <code>mcp_config.json</code> dùng <code>/mcp/sse</code>, <code>ai_service</code> mặc định <code>http://poi_mcp:8001/sse</code>, máy chủ chạy <code>transport="sse"</code>.</td>
+        <td>Cần xác minh đường dẫn thật khi chạy; nếu sai thì agent không thấy công cụ nào.</td>
+        <td><code>ai_service/mcp_config.json</code>; <code>ai_service/main.py:33</code>; <code>POI_service/app/api/mcp/tools.py:271</code></td>
+      </tr>
+      <tr>
+        <td><code>NGROK_AUTHTOKEN</code> nằm thẳng trong một tệp được git theo dõi.</td>
+        <td>Khoá công khai trong lịch sử kho mã; nên thu hồi và chuyển sang biến môi trường.</td>
+        <td><code>docker-compose.yaml:115</code></td>
+      </tr>
+      <tr>
+        <td><code>crawler_service</code> không nằm trong danh sách workspace của <code>pyproject.toml</code> gốc, nhưng Dockerfile lại chạy <code>uv export --package crawler_service</code>.</td>
+        <td>Dựng ảnh Docker của crawler có thể lệch với môi trường phát triển.</td>
+        <td><code>pyproject.toml</code> (mục <code>[tool.uv.workspace]</code>); <code>crawler_service/Dockerfile:14</code></td>
+      </tr>
+      <tr>
+        <td>Hai tệp rỗng và một lớp chưa nối: <code>cypher_query.py</code> 0 dòng, <code>Semantic_Filter</code> không được gọi ở đâu, <code>filter_duplicated</code> của MinHash nằm sẵn nhưng pipeline không dùng.</td>
+        <td>Mã chết gây hiểu nhầm là đã có lọc trùng và gom truy vấn.</td>
+        <td><code>POI_service/app/core/utils/cypher_query.py</code>; <code>crawler_service/app/utils/embedding_filter.py</code>; <code>preprocessing/base/PipelineBase.py:51</code></td>
+      </tr>
+      <tr>
+        <td>Dòng nhập lạ trong lớp điều phối cào: <code>from torch import Value</code>, trong khi gói này không khai báo <code>torch</code>.</td>
+        <td>Cần kiểm chứng khi chạy; môi trường hiện tại không dựng lại được nên tài liệu không kết luận.</td>
+        <td><code>crawler_service/app/pipelines/crawling/crawling.py:17</code> <span class="tag">chưa xác minh</span></td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="bang-chung">
+  <h2>Bằng chứng và giới hạn</h2>
+  <p>Việc đã làm để ra tài liệu này:</p>
+  <ul>
+    <li>Kéo bản mới nhất: <code>git fetch origin</code>, so <code>main</code> với <code>origin/main</code> bằng số commit hai chiều — kết quả <code>0 0</code>.</li>
+    <li>Đọc toàn bộ mã nguồn ngoài thư mục ảo: 149 tệp <code>.py</code>, trong đó phần chạy thật khoảng 5.000 dòng; cộng thêm schema JSON, JS trích xuất, Dockerfile, compose, prompt.</li>
+    <li>Dựng năm sơ đồ mới bằng Archify 2.17, mỗi sơ đồ phải qua cổng <code>validate --quality showcase</code> rồi <code>deliver</code>; bốn sơ đồ đã chạy thêm <code>visual-check</code> trên Chrome thật.</li>
+    <li>Đối chiếu bản đồ lớp và quan hệ thừa kế trực tiếp từ tệp định nghĩa, không suy diễn từ tên.</li>
+  </ul>
+  <p>Giới hạn cần nói rõ:</p>
+  <ul>
+    <li>Chưa chạy dịch vụ, chưa nối cơ sở dữ liệu, chưa gọi thử API — mọi hành vi mô tả là đọc mã.</li>
+    <li>Số liệu dữ liệu (ví dụ “hơn 6.000 POI” trong README) không kiểm chứng được vì không có ảnh chụp đồ thị.</li>
+    <li>Hai dòng mã được đánh dấu <span class="tag">chưa xác minh</span> cần kiểm khi dựng lại môi trường.</li>
+    <li>Bốn trong năm sơ đồ mới tràn màn hình ở kích thước 1440×900, xem chi tiết ở <a href="diagrams/index.html">thư viện sơ đồ</a>.</li>
+  </ul>
+  <footer class="foot">
+    Tài liệu dựng ngày 04-10-2026 cho bản mã <code>1d18ac3</code>. Nguồn: đọc mã trực tiếp trong <code>E:\Project\TVLT_2026</code>.
+  </footer>
+</section>
+</main>
+</div>
+<script src="assets/docs.js"></script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "deliver",
+  "type": "architecture",
+  "input": "E:\\Project\\TVLT_2026\\docs\\reports\\2026-10-18\\architecture.json",
+  "output": "E:\\Project\\TVLT_2026\\docs\\reports\\2026-10-18\\architecture.html",
+  "specification": {
+    "sha256": "1b37e9525888c6354280176f05d0cacb71dfb0e1ef54892740e0e418ab51f7fe",
+    "bytes": 5450
+  },
+  "artifact": {
+    "sha256": "03252a6b63d1daf4c6b5ea56a9362405de7fa56d22f3038282dccaaee94b8c50",
+    "bytes": 710836
+  },
+  "validation": {
+    "checksPassed": 9,
+    "checkCount": 9,
+    "compositionProfile": "showcase",
+    "compositionStatus": "pass",
+    "errors": 0,
+    "warnings": 0
+  }
+}

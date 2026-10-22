@@ -1,0 +1,1444 @@
+{
+  "snapshot": "2026-10-18",
+  "project": "Travel AI / Travel Lung Tung",
+  "currentPhase": 4,
+  "statusLegend": {
+    "verified": "Đã kiểm chứng trong phạm vi ghi rõ",
+    "pending": "Chờ QA độc lập hoặc còn cổng tích hợp",
+    "incomplete": "Chưa hoàn tất"
+  },
+  "phases": [
+    {
+      "id": "verify",
+      "n": 1,
+      "title": "Kiểm chứng",
+      "short": "Rà soát mã, bằng chứng và các bản giao đang chờ.",
+      "status": "reviewed",
+      "stateLabel": "Đã chốt findings; QA tiếp tục",
+      "summary": "Audit ban đầu đã xác định lỗi, giới hạn và phạm vi sửa từng mô-đun. Source scope, Jev, CLI native, nhập đủ dữ liệu và tuyến car/foot đã qua các gate có giới hạn; Compose chưa được kiểm chứng; public hosting không phải gate đã giao.",
+      "next": [
+        "Giữ nguyên bằng chứng thất bại và giới hạn đã phát hiện.",
+        "QA độc lập tiếp tục sau mỗi bản sửa; không gọi audit xong là toàn hệ đã đạt."
+      ]
+    },
+    {
+      "id": "complete",
+      "n": 2,
+      "title": "Hoàn thiện mã",
+      "short": "Sửa đúng phần đề cương cần, không mở rộng.",
+      "status": "reviewed",
+      "stateLabel": "Core đã kiểm định; bản H2/H3 đã chốt",
+      "summary": "Luồng nhận nhu cầu → gợi ý → lịch trình/tuyến thật và memory hiện có đã được kiểm định có giới hạn. Bản mã/dữ liệu/cấu hình H2/H3 đã chốt ở FREEZE088; không thêm crawler hoặc cơ chế mới trong phase2.",
+      "next": [
+        "Giữ bản mã đã chốt; H2 dùng bản bổ sung H2091 trước khi chạy.",
+        "Người dùng đã thử demo xong và cho phép chạy thí nghiệm.",
+        "Giữ các giới hạn về giá, giờ và danh tính triển khai."
+      ]
+    },
+    {
+      "id": "experiment",
+      "n": 3,
+      "title": "Thí nghiệm",
+      "short": "Chạy bộ thí nghiệm đã đăng ký và lưu bằng chứng.",
+      "status": "reviewed",
+      "stateLabel": "Đã báo cáo kết quả và giới hạn",
+      "summary": "GRAPH115 đạt 7/7 ca lifecycle, 83 kiểm tra trên 4 POI giả lập/engine thật. H2 có 119 quan sát+1 gap; H3 có 1/15 ô; TIM097 đủ30/30 nhưng5km chậm27,66%. SYS101 giữ8 hỗ trợ/1 chưa kết luận; SYS102140ca offline không thay kết quả cũ. SYS119 là phép đo B2 riêng: 1 lượt Go, 8 kiểm tra nguồn đạt, tuyến hai điểm đầy đủ; không gộp thành SYS101 đạt9/9.",
+      "next": [
+        "Giữ nguyên timeout, ô thiếu và kết quả bất lợi; không chạy lại để làm đẹp số liệu.",
+        "LIVE143 kiểm luồng thật; B146 kiểm riêng lớp hiển thị sau bản sửa CSS. Không cộng QA thành mẫu khoa học."
+      ]
+    },
+    {
+      "id": "decide",
+      "n": 4,
+      "title": "Báo cáo & quyết định",
+      "short": "Giao báo cáo, rồi chờ bạn chọn H1 hoặc viết tiếp.",
+      "status": "current",
+      "stateLabel": "Đã giao báo cáo · chờ bạn chọn",
+      "summary": "Demo đã kiểm luồng chat → tạo lịch → ghim/chọn POI bằng API thật. Báo cáo này tổng hợp kiến trúc, mô-đun, thí nghiệm và giới hạn. Mục tiêu tổng thể vẫn chưa hoàn tất; chưa tự bắt đầu H1, viết luận văn hay Finalizing.",
+      "next": [
+        "Bạn chọn tiến hành H1 hoặc viết tiếp luận văn; H1 hiện chưa có người tham gia.",
+        "Compose còn thiếu bằng chứng triển khai; native demo không thay cho Compose.",
+        "Audit bản thảo Markdown đã có danh sách cập nhật; chưa sửa chương; Word/PDF đã audit nội dung có giới hạn ở REF150.",
+        "Crawler và grow-with-user thuộc Finalizing phase, chỉ triển khai sau khi chốt kế hoạch."
+      ]
+    }
+  ],
+  "modules": [
+    {
+      "id": "acquisition",
+      "name": "Thu thập dữ liệu",
+      "kicker": "crawler_service",
+      "status": "incomplete",
+      "statusDetail": "Phase 5 — Finalizing; không chặn luồng chính",
+      "oneLine": "Crawler travel agency/mạng xã hội để phase 5; capture web hiện chỉ là thử nghiệm có giới hạn.",
+      "purpose": "Phase 5 chốt nguồn và kế hoạch crawler trước khi tích hợp. Hệ thống chính dùng POI OSM; không khôi phục Traveloka/Vietravel hoặc thu thập nguồn mới trong phase 2.",
+      "changes": [
+        "Pipeline chạy khô, kiểm tra toàn bộ nguồn trước khi ghi byte đầu tiên.",
+        "Tách tuyệt đối không gian trạng thái thật và tổng hợp; trộn hai loại bị từ chối.",
+        "Bộ chuyển đổi OSM và Wikidata dùng chung hợp đồng nguồn.",
+        "Siết lớp fetch: đọc có chặn, pin DNS, chặn giấy phép trước khi gửi request.",
+        "Định danh có namespace theo URL trang; enrichment bắt buộc tên, địa chỉ và toạ độ hợp lệ.",
+        "Lưu raw blob, hash, quyết định và hàng đợi cách ly.",
+        "Thêm nguồn Wikivoyage (CC BY-SA) kèm mã ghi công và giấy phép."
+      ],
+      "qa": [
+        "CR057: 141 kiểm thử social offline đạt; Codex kiểm chứng lại 6/6 phép thử hợp đồng, hồ sơ không được tái sử dụng tạo 0 lời gọi fetch.",
+        "Hồi quy acquisition do Codex chạy độc lập: 152 đạt. Đây là kiểm thử kỹ thuật, không phải thí nghiệm khoa học.",
+        "Kết quả 127 kiểm thử và 5/6 phép thử là mốc trước bản vá CR057; lỗi collect_profile gọi fetcher trước chính sách đã được sửa ở ranh giới điều phối.",
+        "Lần mở rộng riêng: 30 OSM + 2 Wikidata đều bị cách ly, 0 được chấp nhận; không phải bằng chứng capture cho adapter mới.",
+        "CR061: capture trang Wikivoyage thật, replay cục bộ cho 252 ứng viên; 161 có tên + địa chỉ + mô tả. Cả 252 vẫn cách ly, accepted/imported = 0; Codex kiểm độc lập hash và số lượng.",
+        "Capture 252 ứng viên/161 đủ trường tối thiểu/252 cách ly/nhập 0 chỉ là kiểm thử kỹ thuật; không phải social ingest thành công.",
+        "CR062: Codex kiểm độc lập 326 kiểm thử social/acquisition và 23 + 5 phép thử hợp đồng đều đạt; chỉ là QA kỹ thuật offline, không nhập dữ liệu thật."
+      ],
+      "gaps": [
+        "Toàn bộ crawler legacy và crawler mới đã chuyển phase 5 theo người dùng; các gap kỹ thuật dưới đây là backlog tương lai, không phải gate phase 2.",
+        "Chưa có luồng fetch/import tái sử dụng được nghiệm thu bằng capture thật; gate sửa đúng không đồng nghĩa nguồn đã đủ điều kiện dùng.",
+        "Chưa có bản ghi mở rộng nào được chấp nhận; chưa hỗ trợ gộp chéo nguồn.",
+        "Chưa chứng minh phục hồi nguyên tử khi lỗi nhiều tệp, độ phủ, độ mới và quyền tái sử dụng của từng capture.",
+        "CR062 đã sửa tên tệp Windows và chặn nội dung OSError. Còn review category/địa chỉ, lineage T050, phục hồi capture và kiểm chứng ingest thật."
+      ],
+      "evidence": [
+        [
+          "crawler_service/app/acquisition/pipeline.py",
+          448,
+          "run_pipeline"
+        ],
+        [
+          "crawler_service/app/acquisition/pipeline.py",
+          485,
+          "Kiểm tra mọi nguồn trước khi ghi"
+        ],
+        [
+          "crawler_service/app/acquisition/pipeline.py",
+          521,
+          "Tách phạm vi thật/tổng hợp"
+        ],
+        [
+          "crawler_service/app/acquisition/adapters/osm.py",
+          53,
+          "OSMAdapter"
+        ],
+        [
+          "crawler_service/app/acquisition/adapters/wikidata.py",
+          59,
+          "WikidataAdapter"
+        ],
+        [
+          "docs/project/handoffs/CR-057/parent-acceptance-proof.json",
+          1,
+          "CR057: 141 kiểm thử, gate điều phối được kiểm chứng"
+        ],
+        [
+          "docs/project/handoffs/OC-050/parent-contract-probes-20261018.json",
+          1,
+          "Phép thử hiện tại: 6/6, fetch_calls=0"
+        ],
+        [
+          "docs/project/handoffs/CR-057/parent-acquisition-regression.json",
+          1,
+          "Codex: 152 kiểm thử acquisition offline"
+        ],
+        [
+          "docs/project/handoffs/CR-061/parent-artifact-qa.json",
+          1,
+          "Codex: hash capture thật, 252 ứng viên/161 đủ trường, 0 nhập; giới hạn workflow"
+        ],
+        [
+          "docs/project/handoffs/CR-062/parent-final-review.json",
+          1,
+          "Codex nghiệm thu hai sửa crawler: 326 tests/28 probes, không live import"
+        ],
+        [
+          "docs/project/PHASE2_SCOPE_FOR_APPROVAL_VI.md",
+          1,
+          "S1–S6 đã duyệt; crawler/cơ chế mới chuyển Finalizing phase"
+        ]
+      ],
+      "files": [
+        "crawler_service/app/acquisition/",
+        "scripts/acquisition/"
+      ]
+    },
+    {
+      "id": "data-prep",
+      "name": "Chuẩn bị dữ liệu chính",
+      "kicker": "crawler_service · POI_service",
+      "status": "verified",
+      "statusDetail": "Snapshot 6.367 POI + graph đã QA; chưa xác minh từng venue",
+      "oneLine": "6.368 điểm gốc → 6.367 bản ghi; 14 category; toàn bộ đã vào graph.",
+      "purpose": "Chuẩn hóa tập POI người dùng cung cấp, giữ lineage và gói graph-ready. Codex đã đối chiếu đủ 6.367 bản ghi sau restart; thông tin chưa biết vẫn giữ rõ.",
+      "changes": [
+        "6.368 Point đầu vào; 1 bản ghi trùng chính xác; 6.367 bản ghi chuẩn bị.",
+        "14 category; 6.367 HAS_CATEGORY; 26 nhãn vùng nguồn.",
+        "1.055 giờ mở cửa thô; không có giá; 411 cờ cần review.",
+        "Registry giữ lịch sử phiên bản, không xóa bản ghi cũ, hỗ trợ no-op thật.",
+        "Adapter graph-ready kiểm tra hash, mô hình POI và từ chối ghi đè đích thật.",
+        "Vá QA-DATA-01: hồ sơ real bị khóa ở ranh giới API, trả real_binding_mismatch khi manifest lệch."
+      ],
+      "qa": [
+        "DATA068: nhập đủ 6.367 POI; Codex đối chiếu ID, tên, tọa độ, giờ mở cửa, lineage và vùng với frozen payload sau restart. Đúng cấu trúc dữ liệu, chưa xác minh venue.",
+        "Nền tảng provenance OC038R1 đã được chấp nhận ở phạm vi giới hạn; 24 kiểm thử offline adapter đều qua.",
+        "Ca hồi quy passed=false trước vá là bằng chứng lịch sử, không phải lỗi hiện tại.",
+        "Source file không có OSM object ID/URL; nhãn vùng nguồn không phải địa giới hành chính."
+      ],
+      "gaps": [
+        "Nhãn khu vực là nhãn nguồn, chưa phải địa giới hiện hành.",
+        "Không có OSM object ID/URL, giấy phép, độ mới hay xác minh từng venue; 411 review flags còn nguyên.",
+        "Không có giá; 1.055 giờ mở cửa thô chưa chuẩn hóa đầy đủ."
+      ],
+      "evidence": [
+        [
+          "crawler_service/app/primary_dataset/prepare.py",
+          159,
+          "prepare_primary_dataset"
+        ],
+        [
+          "crawler_service/app/primary_dataset/prepare.py",
+          202,
+          "Phát hiện trùng chính xác"
+        ],
+        [
+          "crawler_service/app/primary_dataset/registry.py",
+          247,
+          "plan() khóa phiên bản"
+        ],
+        [
+          "crawler_service/app/primary_dataset/registry.py",
+          385,
+          "preflight trước khi ghi"
+        ],
+        [
+          "POI_service/app/core/utils/primary_snapshot.py",
+          1968,
+          "prepare_snapshot"
+        ],
+        [
+          "docs/project/handoffs/DATA-068/parent-post-import.json",
+          1,
+          "Codex: QA độc lập graph đầy đủ sau restart"
+        ],
+        [
+          "docs/project/handoffs/DATA-068/report.md",
+          1,
+          "Snapshot 6.367/14 category/3.678.397 NEAR_BY/26 vùng"
+        ],
+        [
+          "docs/project/handoffs/OC-043/parent-real-profile-binding-probe.json",
+          9,
+          "probe: actual accepted, real=true"
+        ],
+        [
+          "docs/project/handoffs/OC-043/parent-real-profile-regression-result.json",
+          7,
+          "ca hồi quy: passed=false (lịch sử)"
+        ],
+        [
+          "docs/project/handoffs/HM-054/parent-review-summary.json",
+          1,
+          "Codex: 24 kiểm thử adapter sau vá"
+        ]
+      ],
+      "disclosure": "QA-DATA-01 là lỗ hổng đã vá: trước bản vá API từng gắn real=True cho tập 3 bản ghi; nay real_binding_mismatch từ chối hồ sơ caller tự dựng trước khi đọc tệp. DATA068 đã nhập đầy đủ 6.367 bản ghi; không suy rộng số ứng viên thành xác minh chất lượng. Nguồn không có OSM object ID/URL nên không tạo lineage OSM.",
+      "files": [
+        "data/primary_20261016/graph_ready_v2/",
+        "crawler_service/app/primary_dataset/",
+        "POI_service/app/core/utils/primary_snapshot.py"
+      ]
+    },
+    {
+      "id": "graph-mcp",
+      "name": "Đồ thị & MCP",
+      "kicker": "POI_service",
+      "status": "verified",
+      "statusDetail": "Lifecycle: 7/7 ca trên 4 POI giả lập và engine thật; chưa chứng minh CRUD toàn graph",
+      "oneLine": "6.367 POI, 14 category, 3.678.397 cạnh NEAR_BY; AI gọi POI qua MCP.",
+      "purpose": "Quản lý đồ thị tri thức POI, quan hệ không gian, nhập lô, truy vấn và công cụ MCP. AI gọi POI qua MCP; Memgraph/GraphHopper chạy native, không phải Docker.",
+      "changes": [
+        "Sửa biểu thức tiền lọc không gian để không dùng degrees()/radians() thiếu hỗ trợ.",
+        "Sửa lỗi serialize ngày của source-result (T061) ở luồng ghi/đọc thật.",
+        "1.113 ca chạy trên Memgraph thật: 0 âm tính giả, 0 lệch Python/Cypher.",
+        "Thêm lựa chọn snapshot/khu vực nguồn qua explore_pois, giữ nguyên tên công cụ cũ.",
+        "Ghi provenance dạng scalar; ghi thiếu metadata sẽ xóa tin cậy cũ thay vì giữ lại.",
+        "Native runtime Windows AI/MCP/CLI + WSL Memgraph/GraphHopper; UI /travel GET 200 đã kiểm tra lịch sử."
+      ],
+      "qa": [
+        "DATA068: 64 batch nhập đủ 6.367 POI, 14 category, 6.367 HAS_CATEGORY và 3.678.397 NEAR_BY; 0 lỗi validation/database/spatial.",
+        "Codex QA sau restart: toàn bộ ID/lineage/category đúng; 0 cạnh trùng hoặc sai khoảng cách/bán kính; đối chiếu toàn tập bằng engine đúng 3.678.397 cặp.",
+        "CORE070/071: chat thật gọi POI MCP, trả 6 POI đủ điều kiện/2 chi tiết; tuyến đi bộ thật 2,245608 km. CORE071 có lịch car 1 ngày/2 POI.",
+        "Replay đủ 6.367 payload không đổi counts/digests; restart graceful giữ dữ liệu và source queries.",
+        "GRAPH103 ngày 20/10: graph chính kết nối thật, 6.367 POI và 3.678.397 NEAR_BY; chỉ kiểm counts/kết nối, không lặp lại đối chiếu toàn tập.",
+        "UOW đã tách import kiểu khỏi cấu hình: probe import thật không thử nạp config; 7 regression đạt. Chưa chứng minh transaction thật bằng thay đổi import này.",
+        "Lịch sử GRAPH103: 38/41 ca offline, 8 ca an toàn; GRAPH104 sau đó nhận 51/51 offline với 13 tệp pin.",
+        "Lịch sử GRAPH104: chạy một container tạm rồi dừng do ServiceUnavailable trước engine preflight: cả 7 tình huống chưa được thực hiện, 0 ghi graph/0 gọi model/không truy cập graph chính. Dọn đúng container thành công; nguyên nhân lỗi kết nối chưa biết.",
+        "GRAPH115: 53 kiểm thử offline đạt, 15 tệp pin; lượt engine thật đạt 7/7 tình huống, 83 kiểm tra trên 4 POI giả lập. Review độc lập đã đạt 219/219 đối chiếu; chỉ nhận phạm vi bốn POI thử trên engine thật.",
+        "Các ca gồm tạo/move/rebuild/idempotence/stale-edge/rollback/radius/delete theo harness. Container riêng đã dọn đúng ID; không truy cập graph chính hoặc gọi model.",
+        "Lỗi GRAPH108 trước đó do harness dùng lại một UOW cho nhiều lệnh create; GRAPH115 tạo UOW mới mỗi thao tác. Mã ứng dụng không đổi trong bản sửa này; kết quả thất bại cũ giữ nguyên.",
+        "BROWSER117: catalog trả HTTP200, có snapshot đã chọn và đúng tuple vùng Quan 1, HCMC với1.483POI; phản hồi khoảng6giây. Chưa có browserjourney/modelcall mới."
+      ],
+      "gaps": [
+        "Lifecycle mới kiểm 4 POI giả lập trên engine thật; chưa chứng minh cập nhật/xóa đồng thời hoặc toàn bộ 6.367 POI, Compose/public deployment hay luồng người dùng đầy đủ.",
+        "Chưa xác minh giá/giờ mở cửa từng POI; nhãn vùng không phải địa giới hành chính.",
+        "Không có endpoint nháp tự động từ planner; draft là client POST."
+      ],
+      "evidence": [
+        [
+          "POI_service/app/core/utils/spatial.py",
+          164,
+          "conservative_prefilter_cypher"
+        ],
+        [
+          "POI_service/app/core/infrastructure/db/repositories/memgraph.py",
+          618,
+          "batch_create"
+        ],
+        [
+          "POI_service/app/core/infrastructure/db/repositories/memgraph.py",
+          1597,
+          "truy vấn nguồn"
+        ],
+        [
+          "POI_service/app/core/domain/source_scope.py",
+          73,
+          "SourceSnapshotSelection"
+        ],
+        [
+          "POI_service/app/api/mcp/tools.py",
+          359,
+          "explore_pois"
+        ],
+        [
+          "docs/project/handoffs/DATA-068/parent-post-import.json",
+          1,
+          "Codex: QA độc lập graph đầy đủ sau restart"
+        ],
+        [
+          "docs/project/handoffs/CORE-070/parent-final-acceptance.json",
+          1,
+          "Codex: chat foot thật + route, S5/S6 còn mở"
+        ],
+        [
+          "docs/project/handoffs/CORE-071/parent-final-acceptance.json",
+          1,
+          "Codex: lịch car 1 ngày/2 POI, toàn kế hoạch unverifiable"
+        ],
+        [
+          "scripts/native_runtime/README.md",
+          39,
+          "Alias và UI native loopback"
+        ],
+        [
+          "docs/project/handoffs/CORE-083/parent-final-review.json",
+          1,
+          "Codex: engine khôi phục, batch memory partial, giới hạn chẩn đoán"
+        ],
+        [
+          "docs/project/handoffs/GRAPH-103/primary-current-readonly.json",
+          1,
+          "20/10: counts và kết nối graph chính, không ghi dữ liệu"
+        ],
+        [
+          "docs/project/handoffs/GRAPH-103/parent-final-review.json",
+          1,
+          "UOW import và harness lifecycle lịch sử chưa nghiệm thu"
+        ],
+        [
+          "docs/project/handoffs/GRAPH-104/release.json",
+          1,
+          "Harness sửa đã nhận 51 ca offline, 13 tệp pin"
+        ],
+        [
+          "docs/project/handoffs/GRAPH-104/parent-execution.json",
+          1,
+          "Container thử kết thúc trước preflight; 7 ca chưa thực hiện, dọn đúng container"
+        ],
+        [
+          "docs/project/handoffs/GRAPH-115/release.json",
+          1,
+          "53 ca offline và 15 tệp pin"
+        ],
+        [
+          "docs/project/handoffs/GRAPH-115/parent-execution.json",
+          1,
+          "7 ca lifecycle/83 checks trên engine thật, cleanup đúng container"
+        ],
+        [
+          "docs/project/handoffs/GRAPH-115/brief.md",
+          1,
+          "Sửa lifetime của UOW trong harness, không đổi app"
+        ],
+        [
+          "docs/project/handoffs/BROWSER-114/readiness.json",
+          1,
+          "Native startup và HTTP readiness; chưa có browserjourney"
+        ],
+        [
+          "docs/project/handoffs/GRAPH-115/independent-review.json",
+          1,
+          "Đối chiếu độc lập lifecycle trên fixture engine thật"
+        ],
+        [
+          "docs/project/handoffs/BROWSER-117/catalog-selection-corrected.json",
+          1,
+          "Tuple snapshot/vùng hiện tại được xác nhận bằng GET"
+        ]
+      ],
+      "files": [
+        "POI_service/app/core/",
+        "POI_service/app/api/mcp/",
+        "tests/memgraph_spatial_runtime/"
+      ],
+      "disclosure": "DATA068 đếm stored relationships bằng truy vấn có hướng và đối chiếu toàn tập bằng engine; 3.678.397 cạnh lưu khác 3.668.559 cặp ước lượng cầu. Canary E085 trước đây chứng minh 1 stored relationship có thể tạo 2 undirected traversal rows. Native runtime không chứng minh Docker hay triển khai public. CORE083 đã khôi phục engine từ cache/dữ liệu cũ; graph6381node/3684764quan hệ và GraphHopper health200. Kiểm cổng Windows sau batch xác nhận engine còn chạy; chưa phải production deployment."
+    },
+    {
+      "id": "routing",
+      "name": "Tuyến đường",
+      "kicker": "GraphHopper · MCP",
+      "status": "verified",
+      "statusDetail": "Foot thật + 1 lịch car thật đã kiểm chứng; toàn kế hoạch chưa xác minh",
+      "oneLine": "Tuyến đi bộ 2,245608 km và tuyến car 2,627 km qua MCP/GraphHopper thật.",
+      "purpose": "Tính tuyến theo mạng đường thật qua GraphHopper. AI gọi get_itinerary_route qua POI MCP; không có cạnh AI→GraphHopper trực tiếp.",
+      "changes": [
+        "Dựng GraphHopper 11.1 và JRE 21 trong workspace, chỉ nghe loopback.",
+        "Sửa lỗi relay IPv6 bằng tùy chọn IPv4 theo từng tiến trình.",
+        "Bốn tuyến xe/bộ thật được ghi nhận; có stop/restart và health.",
+        "Sửa cấu hình tuyến car/foot của ứng dụng: thêm tham số tắt CH cho profile chưa dựng, rồi chạy lại kiểm thử.",
+        "Ghi rõ cấu hình native khác cấu hình ứng dụng (footway/construction).",
+        "RT064: thêm transport_mode car|foot, mặc định car có ghi nguồn; từ chối mode sai và profile không khớp, không fallback car.",
+        "CORE070: foot 2,245608 km/26,94735 phút; CORE071: car 2,627 km/3 phút làm tròn, 1 ngày/2 POI."
+      ],
+      "qa": [
+        "CORE070 actual: Jev+Go+POI+GraphHopper; 2 POI khác nhau, 6 POI đủ điều kiện/2 chi tiết; Codex replay GraphHopper khớp 2,245608 km/26,94735 phút.",
+        "CORE071 actual: 1 lịch car/1 ngày/2 POI nguồn thật; selected leg khớp 2.627,072 m/162.506 ms; pool 60/306 cặp vẫn partial.",
+        "Toàn kế hoạch có status unverifiable vì thiếu giá/giờ; không claim lịch đầy đủ hoặc arrival/departure thật.",
+        "Codex kiểm chứng sau bản vá: 4/4 tuyến ô tô/đi bộ qua get_itinerary_route; đi bộ gửi ch.disable=true.",
+        "Lỗi lịch sử: car trả 200, foot thiếu tắt CH trả 400, foot + ch.disable=true trả 200. Bản vá cấu hình theo profile đã được giữ.",
+        "RT064: 234 kiểm thử planner/integration, 162 grounding, 15 ASGI và 15 contract probe đạt.",
+        "DEMO152 theo duyệt1/2/4: gửi tin khi tạo lịch, Hủy chờUI; chọnnhiều/toàn26vùng nguồn; vẽtuyếnGraphHopper thật và hướngdẫn. Cùngphiên backend xửlýlầnlượt; chưahủyupstream. Mục3chat tựgọiplanner giữbacklog.26focusedtests/8caseUIfixture và5callMCPthật đạt; khôngmodel/Jevmới."
+      ],
+      "gaps": [
+        "Giá/giờ mở cửa unknown nên toàn kế hoạch chưa xác minh; pool tuyến còn partial 60/306.",
+        "Đã kiểm HTTP/SSE native loopback; chưa kiểm triển khai Docker hoặc public.",
+        "Chưa chứng minh mọi cặp POI hoặc tối ưu tuyến."
+      ],
+      "evidence": [
+        [
+          "POI_service/app/api/mcp/tools.py",
+          232,
+          "get_itinerary_route"
+        ],
+        [
+          "POI_service/app/api/mcp/tools.py",
+          337,
+          "gọi GraphHopper"
+        ],
+        [
+          "ai_service/domains/planning_adapter.py",
+          472,
+          "_route_distance_fields (làm tròn mét)"
+        ],
+        [
+          "docs/project/handoffs/CORE-070/parent-actual-chat-route.json",
+          1,
+          "Codex: foot thật 2,245608 km/26,94735 phút"
+        ],
+        [
+          "docs/project/handoffs/CORE-071/parent-actual-car-route.json",
+          1,
+          "Codex: car thật 2.627,072 m/162.506 ms"
+        ],
+        [
+          "docs/project/handoffs/CORE-071/parent-final-acceptance.json",
+          1,
+          "Codex: 1 lịch car/2 POI; toàn kế hoạch unverifiable"
+        ],
+        [
+          "docs/project/handoffs/RT-064/parent-final-review.json",
+          1,
+          "Codex: gate truyền mode và giới hạn"
+        ],
+        [
+          "docs/project/handoffs/DEMO-152/parent-acceptance.json",
+          1,
+          "Core1/2/4đãnhậncógiớihạn; khôngwholegoal"
+        ]
+      ],
+      "files": [
+        "scripts/native_routing/",
+        ".runtime-native/graphhopper-11.1/",
+        "docs/deployment/NATIVE_ROUTING_VERIFICATION.md"
+      ],
+      "disclosure": "CORE071 dùng lần gọi thật trước sửa metadata nhiều ngày; helper cuối và kiểm tra ngày/điểm xuất phát được replay độc lập, không gọi model thêm. Live collector làm mất timestamp visit/end do chọn nhầm khóa; S6 phải lưu arrival/departure thật trước thí nghiệm."
+    },
+    {
+      "id": "ai-provider",
+      "name": "AI & nhà cung cấp",
+      "kicker": "ai_service",
+      "status": "verified",
+      "statusDetail": "Jev + Go alias thật đã chạy trong chat; native CLI 2.0.32",
+      "oneLine": "Jev phân loại ý định; DeepSeek V4.1 Flash qua OpenCode Go sinh nội dung qua CLI native.",
+      "purpose": "Jev phân loại ý định; DeepSeek qua OpenCode Go sinh nội dung cho chat/planner. Alias ứng dụng là opencode-go/deepseek-v4.1-flash; khóa OPENCODE_API chỉ truyền qua env tham chiếu, không nằm trong prompt/log.",
+      "changes": [
+        "Thêm adapter aibox/ds/deepseek-flash, không đổi cấu hình toàn cục.",
+        "Sửa hàng đợi dung lượng để hủy/timeout không rò permit.",
+        "Sửa cờ --pure theo khả năng CLI (bản cài 2.0.32 không có) và đường dò binary native.",
+        "Kiểm tra schema công cụ đệ quy; từ chối điều khiển không hỗ trợ.",
+        "Truyền temperature/top_p qua cấu hình agent; không nhét vào prompt.",
+        "Thay generative intent router bằng Jev typed Choice; ngưỡng đóng băng 0,69; không fallback Ollama.",
+        "CLI 2.0.32 bị giới hạn 2 bước, cấm native tool; máy chủ Travel AI điều phối POI tool. Prompt lớn truyền qua file.",
+        "UI127/129: giao diện chatbot tiếng Việt, bản đồ TP.HCM 3D, ghim đỏ và thẻ POI. Giữ source scope, xe hơi/đi bộ và session memory; không có hình học đường đi nên không vẽ tuyến giả.",
+        "UI135/137: giữ lớp định vị ghim MapLibre, chừa camera theo bảng lịch trình; mobile hiển thị thẻ POI bên dưới bản đồ để đọc đủ thông tin và đóng thẻ. Desktop giữ popup."
+      ],
+      "qa": [
+        "CORE069 R3/R4: exact alias opencode-go/deepseek-v4.1-flash; export exact session/model; 226 provider tests + 76 focused + 8 ASGI groups đạt.",
+        "Jev thật: 30/30 HTTP 200; 30 câu pilot tổng hợp; holdout 15/15 nhãn đúng, 9 auto/0 sai/6 hỏi lại sau ngưỡng đóng băng.",
+        "CORE070 actual chat: Jev+Go trả 6 POI/2 chi tiết; 3 lần sinh trong một lượt chat (không phải 3 API call trong 1 CLI invocation).",
+        "Lỗi export_non_text_content đã được sửa cho call sau; receipt thất bại ban đầu vẫn giữ, không gọi là lỗi hiện tại.",
+        "AI063: Codex chạy độc lập 106 intent + 110 memory + 144 provider + 162 grounding: 522 lượt đạt.",
+        "SEC066: 149 kiểm thử provider đạt, gồm 5 ca giả lập khóa Jev không truyền sang CLI con.",
+        "CLI067 R1: 189 kiểm thử provider, 16 ca policy và 4 ca lifecycle đều đạt; giữ bằng chứng bốn lỗi trước sửa.",
+        "BROWSER130: Chrome thử riêng xác nhận 123 polygon tòa nhà được render; desktop/mobile không tràn ngang, không gọi model/Jev.",
+        "BROWSER131: hai thao tác UI gọi backend thật; chat và typed đạt, 4 Go/4 CLI attempt + 1 Jev, hai ghim khớp tọa độ API. Click/popup live bị timeout; tổng kết PARTIAL.",
+        "BROWSER133: click ghim mở thẻ và chọn thẻ đồng bộ POI đạt với response giả lập trên trình duyệt thật; 0 model/Jev.",
+        "BROWSER138: 6/6 bố trí desktop/mobile đạt ghim không bị che, chọn đúng POI và toàn thẻ đọc được. HTML/catalog/typed đều fixture; asset bản đồ thật, 0 native API/model/Jev. 8 nhóm Node và 18 race checks vẫn đạt trên mã cuối.",
+        "LIVE143: 31 kiểm tra đạt với chat → tạo lịch → hai ghim đúng tọa độ → chọn đúng POI; 4 Go V4.1/4 CLI attempt và 1 Jev, không retry. Đây là một hành trình thử kỹ thuật, không phải H1 hoặc xác nhận mọi lịch trình.",
+        "Ảnh LIVE143 còn popup bị bảng lịch trình che. UI145 chỉ sửa z-index; JavaScript giữ nguyên. B146 dùng đúng cặp POI nguồn trong fixture, xác nhận toàn thẻ và nút đóng hiển thị rõ, không bị che; chưa kiểm hành động đóng. Không hồi tố ảnh live thành bằng chứng toàn thẻ.",
+        "DEMO152 theo duyệt1/2/4: gửi tin khi tạo lịch, Hủy chờUI; chọnnhiều/toàn26vùng nguồn; vẽtuyếnGraphHopper thật và hướngdẫn. Cùngphiên backend xửlýlầnlượt; chưahủyupstream. Mục3chat tựgọiplanner giữbacklog.26focusedtests/8caseUIfixture và5callMCPthật đạt; khôngmodel/Jevmới."
+      ],
+      "gaps": [
+        "Danh tính V4.1 của alias AI-box do người dùng xác nhận; tuyến Go đã quan sát đúng provider/model ID deepseek-v4.1-flash.",
+        "Không claim Go miễn phí/không giới hạn hoặc tổng billing; usage phụ trợ chưa đầy đủ.",
+        "Coding AI-box và application alias Go là hai tuyến khác nhau; không trộn.",
+        "Native tools denied; file transport cho prompt lớn; chưa kiểm deployment public."
+      ],
+      "evidence": [
+        [
+          "ai_service/domains/providers/go_credentials.py",
+          21,
+          "GO_PROVIDER_ID/GO_MODEL_ID/GO_ENV_VAR"
+        ],
+        [
+          "ai_service/domains/providers/cli_runtime.py",
+          141,
+          "deny_permissions"
+        ],
+        [
+          "ai_service/domains/providers/cli_runtime.py",
+          452,
+          "build_run_argv"
+        ],
+        [
+          "ai_service/domains/jev_intent.py",
+          392,
+          "Jev: cấu hình process-local và loader an toàn"
+        ],
+        [
+          "ai_service/main.py",
+          561,
+          "route_intent"
+        ],
+        [
+          "ai_service/domains/chat_agent.py",
+          247,
+          "run_agent_loop"
+        ],
+        [
+          "scripts/native_runtime/README.md",
+          56,
+          "OPENCODE_API per-call env reference"
+        ],
+        [
+          "docs/project/handoffs/CORE-069/parent-r4-acceptance.json",
+          1,
+          "Codex: Go alias/provider config accepted; end-to-end chưa"
+        ],
+        [
+          "docs/project/handoffs/CORE-070/parent-final-acceptance.json",
+          1,
+          "Codex: foot chat recommendation accepted"
+        ],
+        [
+          "docs/project/handoffs/AI-063/parent-live-review.json",
+          1,
+          "Codex tính lại pilot/holdout API thật; 13 kiểm tra đạt"
+        ],
+        [
+          "docs/project/handoffs/BROWSER-130/result.json",
+          1,
+          "Render 3D thật, không model"
+        ],
+        [
+          "docs/project/handoffs/BROWSER-131/independent-live-review.json",
+          1,
+          "Chat/typed thật đạt; click live còn thiếu"
+        ],
+        [
+          "docs/project/handoffs/BROWSER-133/result.json",
+          1,
+          "Click/card với dữ liệu giả lập"
+        ],
+        [
+          "docs/project/handoffs/BROWSER-136/independent-result-review.json",
+          1,
+          "Ghim đạt; QA ảnh phát hiện mobile card bị cắt"
+        ],
+        [
+          "docs/project/handoffs/UI-137/parent-source-scope.json",
+          1,
+          "Chỉ hai khối UI137 đổi;163 backend pins nguyên"
+        ],
+        [
+          "docs/project/handoffs/BROWSER-138/result.json",
+          1,
+          "Sáu bố trí và full card readability đạt với fixture"
+        ],
+        [
+          "docs/project/handoffs/LIVE-143/independent-result-review.json",
+          1,
+          "Luồng API/JS thật; giới hạn ảnh popup"
+        ],
+        [
+          "docs/project/handoffs/BROWSER-146/independent-result-review.json",
+          1,
+          "Card đọc được sau sửa CSS, fixture riêng"
+        ],
+        [
+          "docs/project/handoffs/DEMO-152/parent-acceptance.json",
+          1,
+          "Core1/2/4đãnhậncógiớihạn; khôngwholegoal"
+        ]
+      ],
+      "disclosure": "Jev dùng khóa từ bộ nạp ứng dụng, không đưa khóa vào prompt/log/artifact; .env không bị sửa. CORE069 từng có Go chat insufficient_data trước khi có route; receipt giữ lịch sử, không phải lỗi hiện tại. AI063 từng có vi phạm workflow sửa helper ngoài phạm vi; đã báo, không có snapshot gốc đầy đủ. Runtime AI QA cũ có MCP 2.3.0 lệch lock 1.26.0; chỉ là lịch sử, không suy thành kiểm định toàn stack.",
+      "files": [
+        "ai_service/domains/providers/",
+        "ai_service/main.py",
+        "tests/ai_provider/"
+      ]
+    },
+    {
+      "id": "planner",
+      "name": "Lập lịch & kiểm tra",
+      "kicker": "ai_service · planning",
+      "status": "verified",
+      "statusDetail": "Lịch car 1 ngày/2 POI đã kiểm chứng; toàn kế hoạch chưa xác minh",
+      "oneLine": "Planner heuristic có ràng buộc, validator độc lập; lịch car 1 ngày đã chạy thật.",
+      "purpose": "Chọn điểm theo danh mục, thời gian, ngân sách, mở cửa, bữa ăn và tuyến đường; sau đó kiểm tra lại kế hoạch bằng validator độc lập. Đây là cơ chế lai thay cho việc để mô hình tự xếp lịch.",
+      "changes": [
+        "Giữ ràng buộc bắt buộc và ngân sách lũy kế theo ngày.",
+        "Scheduler là heuristic có giới hạn vòng lặp, không phải tối ưu tuyệt đối.",
+        "Validator tính lại vi phạm, thiếu dữ kiện và thứ tự ngày.",
+        "Thiếu giá vào cổng/giờ mở cửa được giữ là chưa biết, không bịa.",
+        "Giữ source scope qua lịch sau sửa; metadata xác minh và dữ liệu thiếu khớp toàn bộ điểm dừng cuối.",
+        "Car/foot không còn gán cứng: mode request đi vào route edge, scenario và constraints.",
+        "CORE071 sửa lịch bị co còn 1 điểm do thiếu tuyến ra; helper chọn cặp theo ngày/điểm xuất phát."
+      ],
+      "qa": [
+        "Mốc QA offline trước CORE071: 162 kiểm thử grounding và 126 planner đạt trong runtime MCP 1.26.0; 15 probe HTTP boundary đạt ở lượt trước.",
+        "CORE071 Codex: lịch car thật 1 ngày/2 POI nguồn; selected leg 2,627 km/3 phút; 4 nhóm kiểm tra độc lập đạt; không gọi model thêm.",
+        "Toàn kế hoạch unverifiable do thiếu giá/giờ; pool 60/306 partial.",
+        "RT064: 234 planner/integration đạt; probe ASGI car 2 phút/foot 17 phút đúng lịch sau sửa.",
+        "Lần gọi car thật dùng bản trước sửa metadata đa ngày; sau sửa, Codex replay cùng lịch một ngày và kiểm riêng ranh giới ngày/điểm xuất phát. Chưa có bằng chứng lịch đa ngày thật.",
+        "LIVE143: 31 kiểm tra đạt với chat → tạo lịch → hai ghim đúng tọa độ → chọn đúng POI; 4 Go V4.1/4 CLI attempt và 1 Jev, không retry. Đây là một hành trình thử kỹ thuật, không phải H1 hoặc xác nhận mọi lịch trình.",
+        "Ảnh LIVE143 còn popup bị bảng lịch trình che. UI145 chỉ sửa z-index; JavaScript giữ nguyên. B146 dùng đúng cặp POI nguồn trong fixture, xác nhận toàn thẻ và nút đóng hiển thị rõ, không bị che; chưa kiểm hành động đóng. Không hồi tố ảnh live thành bằng chứng toàn thẻ.",
+        "DEMO152 theo duyệt1/2/4: gửi tin khi tạo lịch, Hủy chờUI; chọnnhiều/toàn26vùng nguồn; vẽtuyếnGraphHopper thật và hướngdẫn. Cùngphiên backend xửlýlầnlượt; chưahủyupstream. Mục3chat tựgọiplanner giữbacklog.26focusedtests/8caseUIfixture và5callMCPthật đạt; khôngmodel/Jevmới."
+      ],
+      "gaps": [
+        "Chưa có giá/giờ đầy đủ; toàn kế hoạch chưa xác minh.",
+        "Chưa thí nghiệm so sánh hybrid với LLM thuần.",
+        "Đã kiểm HTTP/SSE native loopback; chưa kiểm triển khai public."
+      ],
+      "evidence": [
+        [
+          "ai_service/domains/planning/scheduler.py",
+          198,
+          "schedule"
+        ],
+        [
+          "ai_service/domains/planning/scheduler.py",
+          229,
+          "vòng lặp có giới hạn"
+        ],
+        [
+          "ai_service/domains/planning/validator.py",
+          105,
+          "validate"
+        ],
+        [
+          "ai_service/domains/planning_adapter.py",
+          762,
+          "selected_plan_day_route_coverage"
+        ],
+        [
+          "docs/project/handoffs/CORE-071/parent-final-acceptance.json",
+          1,
+          "Codex: lịch car 1 ngày/2 POI; toàn kế hoạch unverifiable"
+        ],
+        [
+          "docs/project/handoffs/CORE-071/parent-actual-car-route.json",
+          1,
+          "Codex: coverage ngày 1 complete; pool partial"
+        ],
+        [
+          "docs/project/handoffs/RT-064/parent-http-mode-results.json",
+          1,
+          "Codex: ASGI thật, model/MCP giả"
+        ],
+        [
+          "docs/project/handoffs/LIVE-143/independent-result-review.json",
+          1,
+          "Luồng API/JS thật; giới hạn ảnh popup"
+        ],
+        [
+          "docs/project/handoffs/BROWSER-146/independent-result-review.json",
+          1,
+          "Card đọc được sau sửa CSS, fixture riêng"
+        ],
+        [
+          "docs/project/handoffs/DEMO-152/parent-acceptance.json",
+          1,
+          "Core1/2/4đãnhậncógiớihạn; khôngwholegoal"
+        ]
+      ],
+      "files": [
+        "ai_service/domains/planning/",
+        "tests/planning/",
+        "tests/ai_planning_integration/"
+      ]
+    },
+    {
+      "id": "memory",
+      "name": "Bộ nhớ",
+      "kicker": "ai_service · memory",
+      "status": "verified",
+      "statusDetail": "Working memory/profile đã kiểm định native có giới hạn; chưa H3",
+      "oneLine": "Short-term và two-tier đều đã tạo lịch/tuyến thật; bộ nhớ hiện có sẵn sàng chốt phiên bản thí nghiệm.",
+      "purpose": "Giữ ngữ cảnh hội thoại có giới hạn và hồ sơ sở thích bền vững. Khóa phiên phải tách theo chủ thể; không dùng session id làm khóa hồ sơ. Profile CRUD/auth/CAS offline có bằng chứng; chưa phải H3 khoa học. Grow-with-user không phải memory S5 hiện có.",
+      "changes": [
+        "Khóa phiên canonical, giới hạn ký tự và TTL.",
+        "Lease/refcount để không xóa khóa đang giữ hoặc đang chờ.",
+        "SQLiteProfileStore dùng transaction rõ ràng, tham số hóa.",
+        "Sửa lịch sử hội thoại bị bỏ sau lượt đầu và khối hồ sơ bị cắt mất thẻ đóng.",
+        "Tách hồ sơ dài hạn khỏi ràng buộc hiện tại của người dùng.",
+        "CORE079 nối working memory theo cùng người dùng/session vào API lập lịch hiện có; không thêm schema, endpoint hay cơ chế grow-with-user."
+      ],
+      "qa": [
+        "MEM072R1: 15/15 kiểm tra đạt; 4 lượt chat quan sát đúng opencode-go/deepseek-v4.1-flash.",
+        "Xác thực, CAS, cách ly hồ sơ/lịch sử giữa hai người dùng và xóa bộ nhớ đạt.",
+        "Tắt memory loại cả hồ sơ và lịch sử khỏi đầu vào model; hồ sơ vẫn tồn tại sau khi khởi động lại stack.",
+        "Stack riêng đã dọn; không thay guard hoặc chạy lại bằng quyền cũ.",
+        "Các kiểm thử offline trước đây là bằng chứng kỹ thuật; không cộng thành cỡ mẫu khoa học.",
+        "Audit mã trước primary: kế hoạch H3 của Codex đã giả định sai hợp đồng /chat. Collector giả lập đạt không chứng minh native H3.",
+        "Codex:15/15 ca HTTP độc lập,10/10 focusedtests và357 kiểm thử hồi quy đạt. MCP/model/Jev giả lập; auth,SQLite,memory,sourcegate,scheduler vàvalidator thật trong ASGI.",
+        "47 binding mã/dữ liệu/collector được bảo vệ giữ nguyên; main.py có SHAa47411d1… được nhận offline.",
+        "CORE079 pilot thật: disabled bypass đạt; lịch hai điểm car/2.521km/3 phút, source1483 giữ đúng. Request short-term prep trả503; đã dừng và dọn stack19601/19602. Lịch được lấy từ planning.repaired_schedule, không suy từ prose.",
+        "CORE083/081:2request API/4CLI, short-term prep thành công; export đúng session có history marker. Provider GoV4.1 thành công nhưng JSON thiếu stops; API lịch HTTP200/status failed. Stack thử dọn; two-tier chưa gọi.",
+        "CORE084: sửa current synthesis bị cắt8.000ký tự ở nhánh memory bật. Codex32ca ASGI/focused và10case AST đạt; prompt>16.000ký tự giữ schema/facts/profile cuối, history vẫn giới hạn. Không gọi model thật trong gói này.",
+        "CORE085: short-term input giữ history/schema, không storedprofile/fixturecredential; lịch2điểm/car1,645km/2phút làm tròn. Batch3API/7attemptCLI, two-tier prep stage3 thất bại nên dừng, chưa gọi typed; QAstack dọn,61pins khớp.",
+        "CORE087:2request AI/3CLI đềuGoV4.1 thành công; history/fullprofile/schema/fixtureabsence được kiểm qua exactsession trongRAM. Lịch2điểm/car1,645km;15check độc lập/67pins khớp; QAstack dọn, global vẫnunverifiable do thiếu giá/giờ."
+      ],
+      "gaps": [
+        "Native readiness vẫn có giới hạn; H3 chính chỉ có1baseline/15ô rồi CLI timeout. Chưa có paired comparison hoặc effect; không biến pilot memory trước đó thành các ô missing.",
+        "Chưa có thí nghiệm H3: 5 hồ sơ × 3 điều kiện bộ nhớ.",
+        "Usage hiện có chưa đại diện tổng billing; chưa kết luận tiết kiệm token/chi phí.",
+        "Grow-with-user/harness mới thuộc phase 5; chưa có người tham gia H1."
+      ],
+      "evidence": [
+        [
+          "ai_service/domains/memory.py",
+          115,
+          "WorkingMemory"
+        ],
+        [
+          "ai_service/domains/memory.py",
+          197,
+          "lease"
+        ],
+        [
+          "ai_service/domains/memory.py",
+          471,
+          "SQLiteProfileStore"
+        ],
+        [
+          "ai_service/domains/memory_auth.py",
+          89,
+          "verify_bearer"
+        ],
+        [
+          "ai_service/main.py",
+          278,
+          "_memory_key"
+        ],
+        [
+          "docs/project/handoffs/MEM-072/parent-guard-stop.json",
+          1,
+          "Guard dừng trước lệnh; 0 application call"
+        ],
+        [
+          "docs/project/handoffs/MEM-072/parent-execution-authorization.json",
+          1,
+          "Một lần chạy Codex sau uỷ quyền; không tự chạy lại"
+        ],
+        [
+          "docs/project/handoffs/HM-054/parent-review-summary.json",
+          1,
+          "Codex: 110 kiểm thử memory sau sửa"
+        ],
+        [
+          "docs/project/handoffs/MEM-072/parent-final-acceptance.json",
+          1,
+          "Codex: nghiệm thu QA native có giới hạn"
+        ],
+        [
+          "docs/project/handoffs/MEM-072/qa-work-r1/results.json",
+          1,
+          "15 kiểm tra và 4 chat thật; không phải H3"
+        ],
+        [
+          "docs/project/handoffs/EXP-078/parent-native-api-contract-audit.json",
+          1,
+          "Codex: khoảng thiếu hợp đồng API trước H3"
+        ],
+        [
+          "docs/project/handoffs/CORE-079/prepared-plan.md",
+          1,
+          "Kế hoạch bridge đã triển khai và nhận offline"
+        ],
+        [
+          "docs/project/handoffs/CORE-079/parent-offline-acceptance.json",
+          1,
+          "Codex: bridge được nhận offline có giới hạn"
+        ],
+        [
+          "docs/project/handoffs/CORE-079/parent_http_memory_qa.py",
+          1,
+          "15 ca kiểm tra HTTP/memory độc lập, không model thật"
+        ],
+        [
+          "docs/project/handoffs/CORE-079/parent-native-result-review.json",
+          1,
+          "Codex: pilot native 1/3, HTTP503, cleanup xác minh"
+        ],
+        [
+          "docs/project/handoffs/CORE-083/parent-final-review.json",
+          1,
+          "Codex: engine khôi phục, batch memory partial, giới hạn chẩn đoán"
+        ],
+        [
+          "docs/project/handoffs/CORE-084/parent-final-acceptance.json",
+          1,
+          "Codex: nhận offline sửa prompt hiện tại; chưa native/H3"
+        ],
+        [
+          "docs/project/handoffs/CORE-085/parent-final-review.json",
+          1,
+          "Codex: short-term native đạt; two-tier thiếu, nguyên nhân chưa biết"
+        ],
+        [
+          "docs/project/handoffs/CORE-087/parent-final-acceptance.json",
+          1,
+          "Codex: two-tier native typed readiness được nhận, không H3"
+        ]
+      ],
+      "files": [
+        "ai_service/domains/memory.py",
+        "ai_service/domains/memory_auth.py",
+        "tests/ai_chat_memory/"
+      ],
+      "disclosure": "MEM072 gốc thất bại do oracle tạo hồ sơ dùng sai expected_version; bằng chứng cũ giữ nguyên. Người dùng đã cho phép bản R1 một lần và Codex chạy xong: 15/15 kiểm tra, 4 chat Go thật, 8 lượt CLI được ghi nhận, stack thử đã dọn. Danh tính thử bằng issuer HS256 tạm thời; chưa kiểm chứng tích hợp nhà cung cấp danh tính triển khai. Quyền chạy một lần đã dùng xong."
+    },
+    {
+      "id": "backend",
+      "name": "Backend & bản nháp",
+      "kicker": "backend_service",
+      "status": "verified",
+      "statusDetail": "Hợp đồng cục bộ đã kiểm chứng; chưa deployment",
+      "oneLine": "API lưu bản nháp hành trình theo chủ thể, có health/readiness không ghi dữ liệu.",
+      "purpose": "Cung cấp CRUD bản nháp hành trình có xác thực, phân trang và giới hạn payload. SQLite là backend cục bộ; Firestore là adapter thay thế.",
+      "changes": [
+        "Repository SQLite mở kết nối chỉ đọc cho probe, không đổi journal mode.",
+        "Readiness không tạo schema; thiếu bảng/sai schema thì fail closed.",
+        "Chủ sở hữu lấy từ Bearer subject, không tin owner trong payload.",
+        "Bản nháp được lưu bằng hành động client/API có xác thực; không có lịch tự động từ planner trong mã hiện tại.",
+        "Có health, readiness và xử lý lỗi kho lưu trữ."
+      ],
+      "qa": [
+        "52 kiểm thử backend chạy độc lập, 4,15 giây.",
+        "40 kiểm thử deployment và quiet Compose config đã qua.",
+        "Chưa có build/start Docker thật hay Firebase thật.",
+        "Không có lịch tự động từ planner ghi bản nháp; đây là hành vi client POST có xác thực."
+      ],
+      "gaps": [
+        "Chưa triển khai live.",
+        "Chưa đóng gói/khóa phụ thuộc thành image.",
+        "Chưa kiểm chứng luồng đầy đủ từ AI đến lưu bản nháp; chưa có UI gọi POST."
+      ],
+      "evidence": [
+        [
+          "backend_service/app/main.py",
+          33,
+          "create_app"
+        ],
+        [
+          "backend_service/app/main.py",
+          76,
+          "ready"
+        ],
+        [
+          "backend_service/app/core/repositories/sqlite_itinerary_draft.py",
+          96,
+          "SqliteItineraryDraftRepository"
+        ],
+        [
+          "backend_service/app/core/repositories/sqlite_itinerary_draft.py",
+          111,
+          "_open"
+        ],
+        [
+          "backend_service/app/api/rest/v1/endpoint_itinerary.py",
+          93,
+          "POST bản nháp có xác thực (client/API)"
+        ]
+      ],
+      "files": [
+        "backend_service/app/",
+        "tests/backend_workflows/",
+        "tests/deployment/"
+      ]
+    },
+    {
+      "id": "experiments",
+      "name": "Thu thập & đánh giá thí nghiệm",
+      "kicker": "benchmarks",
+      "status": "pending",
+      "statusDetail": "TIM097completed/389checks; chưa hoàn tất phase3. Kết quả mô tả trên desktop dùng chung.",
+      "oneLine": "E2 đủ30/30lượt đo;5km chậm hơn27,7%. H2 mô tả, H3 chưa đủ.",
+      "purpose": "Thu và đánh giá H2/H3 bằng nguồn/cấu hình đóng băng. H2 có đầu ra tổng thể cũ và timing-only riêng: thiếu giá không che kết quả thời gian, nhưng tính hợp lệ toàn kế hoạch vẫn unknown. Đã có kết quả chính với các ô thiếu và giới hạn được công bố.",
+      "changes": [
+        "H2 so sánh Hybrid và LLM-only trên20tình huống, mỗi nhánh lặp3lần; giữ đủ120ô trong mẫu số.",
+        "Mỗi ô một attempt bằng Go V4.1; không retry, resume hoặc chuyển AI-box. Receipt, prompt và kết quả được gắn hash.",
+        "Giữ riêng kết quả toàn cục và kết quả chỉ xét thời gian; lịch được tạo có thể vẫn thiếu yêu cầu.",
+        "H3 dùng hội thoại chuẩn bị rồi scoring qua /generate_itinerary; cohort đã chạy vẫn giữ1/15ô,14missing."
+      ],
+      "qa": [
+        "H2 đã kết thúc:120attempted,119/120quan sát có provenance. P12/Hybrid/lặp2 cli_timeout, giữ1gap; không gọi lại.",
+        "Codex2.521kiểm tra bằng chứng đạt; seal124tệp public/34package không đổi. Replay bằng mã đã chốt xác nhận tính tái lập.",
+        "Có lịch: Hybrid56/60, LLM-only45/60. Hybrid18lịch còn thiếu yêu cầu; no-plan3/15. Không xếp hạng bằng tỷ lệ tạo lịch đơn thuần.",
+        "Chỉ xét thời gian: Hybrid53không vi phạm/0vi phạm/3unknown; LLM-only32không vi phạm/10vi phạm/3unknown. Global feasible0/0.",
+        "13/20cặp có outcome thời gian để mô tả; suy luận bị chặn do incomplete coverage. Không kết luận H2 hoặc dùng p-value/CI của subset.",
+        "H3 giữ1/15ô,14missing sau cli_timeout. Bộ thu E2 trước đó qua99test/209binding; E2093 đo thật và qua99kiểm tra integrity riêng.",
+        "E2: đủ150batch/3radii,FNFP0. 3km có3.678.397cặp; giảm78,47%ứng viên logic, không phải số lần gọi khoảng cách vật lý đã đo.",
+        "Timing E2:11/30lượt đo,15/36cell gồm4warm-up; dừng3600s, không resume. 1kmn5/arm median84,26s→45,68s;3/5kmchưa đủ so sánh.",
+        "OPS094: đo74.322.496lần gọi hàm Python trên dữ liệu thật; đây không phải instrumentation của Memgraph.",
+        "MET095: khoảng cách engine khác Haversine6371km. E2 vẫn so hai nhánh cùng point.distance; chưa xác định thuật toán chính xác. Engine hiện báo3.13.2, không hồi tố build cũ.",
+        "TIM096 đã nhận offline:128test chính và12ca proof bổ sung đạt (137ca riêng);273kiểm tra bảo toàn đạt. Hai lỗi proof/path đã sửa. Chưa chạy cohort timing mới.",
+        "TIM097:36/36cell=6warm-up+30/30measured,0lỗi/missing,389kiểm tra độc lập đạt;26pins không đổi,terminal0/childexit0.",
+        "Medianbaseline→prefilter1/3/5km:102,08→56,06s /108,73→101,65s /117,62→150,15s.1km nhanh hơn45,08%;3km6,51%;5km chậm hơn27,66%. Mỗi nhánh5lượt, loại warm-up.",
+        "TIM097 dùng proofcorrectnessE2093pin+fresh fullPOIprojection;36counts khớp740159/3678397/7091961.0correctnessqueriesmới; không giả rawsetcomparison mới hoặc ghép hai cohort.",
+        "Lịch sửSYS098: sáu lỗi bộ kiểm định đã sửa;64test giả lập đạt. Bốn ca độc lập thêm vẫn lỗi; chưa nhận để chạy HTTP/model thật.",
+        "REF099: kiểm lại12nguồn học thuật và phần fulltext của9bài; làm rõ phạm vi số liệu. Chưa hoàn tất audit mọi citation/bản thảo.",
+        "Lịch sửSYS100: bốn gate đã sửa;83test giả lập độc lập đạt. Nhận bộ thu offline, chưa chạy9ca HTTP thật.",
+        "SYS101HTTPthật9/9ca:8kết quả được hỗ trợ,1chưa kết luận do bộ đo địa chỉ.247toolcalls/3Go/3CLIattempts;221checks/155pinskhớp,stackQAđãdọn theo helper.",
+        "Lịch sửSYS102: lượt sửa bộ đo địa chỉ chưa giao mã; source/data/kết quảSYS101 không đổi.28caQAđộc lập đã chuẩn bị, chưa nghiệm thu sửa lỗi.",
+        "SYS102correction: bộ đo địa chỉ đã sửa và đạt140test giả lập độc lập. SYS101cũvẫn8kếtquảđượchỗtrợ/1chưakếtluận;khôngchạylạithínghiệm.",
+        "SYS119: phép đo B2 mới chỉ một HTTP/Go/CLI attempt; 8 so sánh nguồn gồm địa chỉ đều đúng, 2 POI khác nhau và tuyến đầy đủ. Codex191kiểm tra và review độc lập đạt; 163pins/4SYS101files giữ nguyên, stack thử dọn theo helper.",
+        "AUD140 đối chiếu 31 mục SG/AC; REF141 kiểm nguồn nền tảng và đọc lại phương pháp L07 lưu sẵn; REF142 rà 136 nhận định trong 12 Markdown. Chưa sửa luận văn, chưa audit nội dung DOCX/PDF; các số audit không phải tỷ lệ hoàn thành.",
+        "REF150 đã mở/đọc Word và PDF hiện có:33trang,420đoạn khớp sau loại đúng dòng số trang,4hình khớp manifest;9nhóm trạng thái cũ cần cập nhật. Không sửa luận văn.12/13inputhash khớp; protocol đã đổi. Chỉ xem ảnh3trang, không nhận toàn layout hoặc mọi claim đã đạt."
+      ],
+      "gaps": [
+        "Lần live BROWSER131 giữ PARTIAL do timeout click/popup, dù chat/typed thật và hai ghim đúng tọa độ đạt. UI135/137 sửa lỗi tái hiện riêng; BROWSER138 đạt 6/6 với fixture. Chưa chạy live lại trên mã cuối; không thay kết quả cũ.",
+        "Physical engine calls và fullscale/concurrency chưa đo. GRAPH115 đã kiểm lifecycle/move/rebuild trên 4 POI; TIM097 giữ kết quả 5 km chậm hơn, không chạy lại để cải thiện.",
+        "SYS101 đã chạy ba nhóm đối kháng và giữ cả thất bại. SYS119 B2 mới được kiểm riêng; không gộp thành SYS101 đạt 9/9 hoặc suy tỷ lệ hallucination.",
+        "Giữ nguyên1gap H2 và14missing H3; không rerun để điền ô. Cohort mới cần kế hoạch trước và quyền phù hợp.",
+        "Chưa xác minh toàn cục vì thiếu giá/giờ; chưa có tổng token tính phí hoặc bằng chứng tiết kiệm chi phí.",
+        "H1/viết luận án chờ quyết định phase4; crawler và grow-with-user mới thuộc phase5.",
+        "Đếm ứng viên logic không chứng minh số lần gọi hàm khoảng cách vật lý trong engine; yêu cầu đo operations thực còn mở nếu không có instrumentation."
+      ],
+      "evidence": [
+        [
+          "benchmarks/live_model/runner.py",
+          767,
+          "run_v2_observation"
+        ],
+        [
+          "benchmarks/live_model/export.py",
+          337,
+          "build_h2_records_from_logs"
+        ],
+        [
+          "benchmarks/evaluation/h2.py",
+          613,
+          "evaluate_h2"
+        ],
+        [
+          "benchmarks/evaluation/h3.py",
+          541,
+          "evaluate_h3"
+        ],
+        [
+          "docs/experiments/EXPERIMENT_PROTOCOL.md",
+          1,
+          "giao thức"
+        ],
+        [
+          "docs/project/handoffs/EXP-074/parent-primary-hours-readiness-reproducible.json",
+          1,
+          "Codex: độ phủ parser giờ trên payload chính, không phải thí nghiệm"
+        ],
+        [
+          "benchmarks/live_model/service_projection.py",
+          577,
+          "project_service_response: giờ đến/đi thật"
+        ],
+        [
+          "docs/project/handoffs/EXP-074/parent-final-acceptance.json",
+          1,
+          "Codex: collector V2 đã nhận có giới hạn"
+        ],
+        [
+          "docs/project/handoffs/EXP-074/parent-case-route-review.json",
+          1,
+          "112 tuyến thật; chưa thí nghiệm"
+        ],
+        [
+          "docs/project/handoffs/EXP-076/parent-final-acceptance.json",
+          1,
+          "Codex: QA đầu vào và giới hạn bàn giao"
+        ],
+        [
+          "docs/project/handoffs/EXP-076/parent-data-freeze.json",
+          1,
+          "Đóng băng dữ liệu H2, chưa code/config"
+        ],
+        [
+          "docs/experiments/primary_20261018/h2_scenarios.inputs.v1.json",
+          1,
+          "20 tình huống theo nguồn; thesis_mode=false đến khi qua execution gate"
+        ],
+        [
+          "docs/project/handoffs/EXP-077/parent-final-acceptance.json",
+          1,
+          "Codex: phép đo thời gian và resume đã QA"
+        ],
+        [
+          "benchmarks/live_model/temporal_endpoint.py",
+          436,
+          "Timing-only, giữ nguyên global validity"
+        ],
+        [
+          "docs/project/handoffs/EXP-078/parent-h3-execution-design.json",
+          1,
+          "Thiết kế H3 cũ được giữ; scoring đã sửa trong v5"
+        ],
+        [
+          "docs/project/handoffs/EXP-078/parent-native-api-contract-audit.json",
+          1,
+          "Execution hold H3: hợp đồng endpoint chưa khớp"
+        ],
+        [
+          "docs/project/handoffs/CORE-079/parent-offline-acceptance.json",
+          1,
+          "Bridge code QA offline; pilot native1/3, chưa H3"
+        ],
+        [
+          "docs/project/handoffs/EXP-080/prepared-plan.md",
+          1,
+          "Kế hoạch collector đã triển khai và QA offline"
+        ],
+        [
+          "docs/project/handoffs/EXP-080/parent-h3-typed-execution-design.json",
+          1,
+          "Thiết kế typed scoring trước primary; execution hold giữ nguyên"
+        ],
+        [
+          "docs/project/handoffs/EXP-080/parent-final-acceptance.json",
+          1,
+          "Codex: nhận mã collector offline, không phải freeze/kết quả H3"
+        ],
+        [
+          "docs/project/handoffs/EXP-080/parent-source-review.json",
+          1,
+          "Hash thực tế, path bindings và phạm vi mã giữ nguyên"
+        ],
+        [
+          "docs/project/handoffs/CORE-083/parent-final-review.json",
+          1,
+          "Codex: engine khôi phục, batch memory partial, giới hạn chẩn đoán"
+        ],
+        [
+          "docs/project/handoffs/EXP-086/parent-final-acceptance.json",
+          1,
+          "Codex: closed errors/binding nhận offline; chưa fullfreeze/H3"
+        ],
+        [
+          "docs/project/handoffs/FREEZE-088/prepared-plan.md",
+          1,
+          "Codex: bước tiếp chốt fullfreeze S6, chưa chứng nhận freeze"
+        ],
+        [
+          "docs/project/handoffs/FREEZE-088/parent-final-acceptance.json",
+          1,
+          "Codex: H2/H3 pre-run freeze được nhận, chưa thực thi/kết quả"
+        ],
+        [
+          "docs/project/handoffs/EXP-089/parent-final-acceptance.json",
+          1,
+          "Codex: E2 collector được nhận offline, chưa đo Memgraph thật"
+        ],
+        [
+          "docs/project/handoffs/H3-090/parent-primary-result-review.json",
+          1,
+          "Codex: primaryH3partial1/15được kiểm,không ước lượng memoryeffect"
+        ],
+        [
+          "docs/project/handoffs/H2-091/parent-release-acceptance.json",
+          1,
+          "Codex: H2 pre-run source amendment đượcseal,chưaprimaryH2"
+        ],
+        [
+          "docs/project/handoffs/H2-091/primary-dispatch.json",
+          1,
+          "Codex: dispatch H2 đã được cho phép; chưa phải nghiệm thu kết quả"
+        ],
+        [
+          "docs/project/handoffs/H2-091/H2_PRIMARY_SUMMARY_VI.md",
+          1,
+          "Tóm tắt H2 chính bằng tiếng Việt"
+        ],
+        [
+          "docs/project/handoffs/H2-091/parent-primary-result-review.json",
+          1,
+          "Codex kiểm2.521điều kiện bằng chứng H2"
+        ],
+        [
+          "docs/project/handoffs/H2-091/parent-primary-analysis.json",
+          1,
+          "H2 mô tả; suy luận bị chặn, không xác nhận H2"
+        ],
+        [
+          "docs/project/handoffs/EXP-092/parent-final-acceptance.json",
+          1,
+          "Codex:99test/209bindings E2 durable collector, chưa đo thật"
+        ],
+        [
+          "docs/project/handoffs/E2-093/primary-dispatch.json",
+          1,
+          "Codex: E2 đã seal và launch, chưa nghiệm thu kết quả"
+        ],
+        [
+          "docs/project/handoffs/E2-093/E2_PRIMARY_SUMMARY_VI.md",
+          1,
+          "Kết quả E2 thật, phạm vi và phần thiếu"
+        ],
+        [
+          "docs/project/handoffs/E2-093/parent-primary-result-review.json",
+          1,
+          "Codex đối soát99điều kiện bằng chứng E2"
+        ],
+        [
+          "docs/project/handoffs/E2-093/parent-primary-summary.json",
+          1,
+          "Tính lại logicalpruning và median có độ phủ rõ"
+        ],
+        [
+          "docs/project/handoffs/OPS-094/parent-final-review.json",
+          1,
+          "Counter Python thực tế, không phải engine"
+        ],
+        [
+          "docs/project/handoffs/MET-095/METRIC_FINDINGS_VI.md",
+          1,
+          "Sai khác metric và giới hạn kết luận"
+        ],
+        [
+          "docs/project/handoffs/TIM-096/parent-worker-final.json",
+          1,
+          "Bàn giao dở và QA ban đầu"
+        ],
+        [
+          "docs/project/handoffs/TIM-096/parent-final-acceptance.json",
+          1,
+          "QA độc lập và giới hạn nhận offline"
+        ],
+        [
+          "docs/project/handoffs/TIM-097/parent-release-acceptance.json",
+          1,
+          "Kiểm bản chạy trước quan sát"
+        ],
+        [
+          "docs/project/handoffs/TIM-097/primary-dispatch.json",
+          1,
+          "Handle chạy duy nhất và phạm vi"
+        ],
+        [
+          "docs/project/handoffs/TIM-097/parent-primary-result-review.json",
+          1,
+          "389kiểm tra kết quả cuối"
+        ],
+        [
+          "docs/project/handoffs/TIM-097/TIM097_PRIMARY_SUMMARY_VI.md",
+          1,
+          "Timing đủ3radii và5km chậm hơn"
+        ],
+        [
+          "docs/project/handoffs/SYS-098/parent-r1-final-review.json",
+          1,
+          "Codex:64đạt/4gatecònlỗi, không nghiệm thu live"
+        ],
+        [
+          "docs/project/checkpoints/2026-10-20-sys098-r1-partial.md",
+          1,
+          "Checkpoint tiếp tục sau R1"
+        ],
+        [
+          "docs/project/handoffs/REF-099/CLAIM_CITATION_AUDIT_VI.md",
+          1,
+          "Codex: rà nguồn và giới hạn tuyên bố"
+        ],
+        [
+          "docs/project/handoffs/SYS-100/parent-final-acceptance.json",
+          1,
+          "Codex:83test/nhận bộ thu offline"
+        ],
+        [
+          "docs/project/checkpoints/2026-10-20-sys100-offline-accepted.md",
+          1,
+          "Checkpoint sau sửa bốn gate"
+        ],
+        [
+          "docs/project/handoffs/SYS-101/parent-primary-result-review.json",
+          1,
+          "Codex:221checks/8supported1inconclusive"
+        ],
+        [
+          "docs/project/handoffs/SYS-101/SYSTEM_ADVERSARIAL_SUMMARY_VI.md",
+          1,
+          "HTTPthật cócanthiệp/đối chứngnative"
+        ],
+        [
+          "docs/project/handoffs/SYS-102/parent-final-review.json",
+          1,
+          "Bộ đo chưa sửa; bằng chứngSYS101giữ nguyên"
+        ],
+        [
+          "docs/project/handoffs/SYS-102/parent-r1-acceptance.json",
+          1,
+          "Bộ đo địa chỉ sửa/140syntheticcases,khôngđổikếtquảSYS101"
+        ],
+        [
+          "docs/project/handoffs/SYS-119/parent-live-acceptance.json",
+          1,
+          "B2 mới: nghiệm thu Codex từ receipt thực tế"
+        ],
+        [
+          "docs/project/handoffs/SYS-119/independent-live-review.json",
+          1,
+          "Đối chiếu độc lập phép đo B2 riêng"
+        ],
+        [
+          "docs/project/handoffs/DOC-121/demo-runbook-vi.md",
+          1,
+          "Hướng dẫn demo một trang và giới hạn UI"
+        ],
+        [
+          "docs/project/handoffs/BROWSER-130/result.json",
+          1,
+          "Render 3D thật, không model"
+        ],
+        [
+          "docs/project/handoffs/BROWSER-131/independent-live-review.json",
+          1,
+          "Chat/typed thật đạt; click live còn thiếu"
+        ],
+        [
+          "docs/project/handoffs/BROWSER-133/result.json",
+          1,
+          "Click/card với dữ liệu giả lập"
+        ],
+        [
+          "docs/project/handoffs/REF-142/parent-review.json",
+          1,
+          "Audit vị trí/hash/phạm vi; không phải mọi claim đã đúng"
+        ],
+        [
+          "docs/project/handoffs/REF-150/parent-review.json",
+          1,
+          "Binary content audit có giới hạn; chưa viết lại"
+        ]
+      ],
+      "files": [
+        "benchmarks/live_model/",
+        "benchmarks/evaluation/",
+        "docs/experiments/"
+      ],
+      "disclosure": "Gói tạo đầu vào dừng ở ngân sách25phút. Hai hash correction trong bàn giao nháp sai đã bị Codex loại bỏ/tính lại từ tệp thật; bản gốc và kiểm tra mismatch giữ trong EXP076. Nghiệm thu dựa trên827 kiểm tra độc lập, source binding và replay byte-identical. Quy ước đa ngày và category trong oracle Codex cũng được sửa trước scoring, có lịch sử giữ lại. EXP077 ban đầu có lỗi kiểu phút0→0.0 làm evaluator từ chối; Codex giữ failure và yêu cầu sửa đúng kiểuint, không thay evaluator. T4/T7 dùng sentinel giả, không phải khóa thật. Nghiệm thu mới chỉ về mã/QA, không phải kết quả model. Codex phát hiện giả định /chat có lịch cấu trúc là sai trước khi gọi thí nghiệm. Giao thức giữ execution hold; không thay retrievedIDs thành selectedIDs hoặc tự gọi fakebackend là nativeproof."
+    }
+  ],
+  "metrics": [
+    {
+      "value": "6.367",
+      "label": "POI trong graph",
+      "note": "Từ 6.368 điểm gốc, bỏ 1 trùng chính xác. Replay/restart và QA toàn tập đạt; chưa xác minh từng địa điểm."
+    },
+    {
+      "value": "3.678.397",
+      "label": "cạnh NEAR_BY",
+      "note": "Bán kính 3 km; 14 category; 6.367 HAS_CATEGORY. Số liệu được kiểm trên graph thật."
+    },
+    {
+      "value": "26",
+      "label": "nhãn vùng nguồn",
+      "note": "Nhãn nguồn, không phải địa giới hành chính; source file không có OSM object ID/URL."
+    },
+    {
+      "value": "15/15",
+      "label": "nhãn holdout Jev",
+      "note": "30 câu pilot tổng hợp; holdout 15/15 đúng, 9 auto/0 sai/6 hỏi lại sau ngưỡng đóng băng 0,69."
+    },
+    {
+      "value": "2,245608 km",
+      "label": "tuyến đi bộ thật",
+      "note": "26,94735 phút; CORE070 actual Jev+Go+POI+GraphHopper, 6 POI đủ điều kiện/2 chi tiết."
+    },
+    {
+      "value": "2,627 km",
+      "label": "tuyến car thật",
+      "note": "3 phút làm tròn; CORE071 1 lịch/1 ngày/2 POI. Toàn kế hoạch chưa xác minh vì thiếu giá/giờ."
+    },
+    {
+      "value": "1/15",
+      "label": "ô H3 có lịch trình",
+      "note": "14ô thiếu sau CLI timeout; không có matched comparison để kết luận memory hiệu quả."
+    },
+    {
+      "value": "120/120",
+      "label": "lượt H2 đã gọi",
+      "note": "119quan sát xác minh model,1timeout. Phân tích mô tả, chưa xác nhận H2; không retry."
+    },
+    {
+      "value": "30/30",
+      "label": "lượt đo TIM097",
+      "note": "Đủ1/3/5km,n5/nhánh.5km chậm hơn27,7%; không phải độ trễ API."
+    }
+  ],
+  "limitations": [
+    "Scope đã duyệt: phase 2 tập trung user input → recommending → routing trên OSM hiện có. Phase 5 — Finalizing tích hợp mọi cơ chế mới, gồm grow-with-user và crawler; không dùng chúng chặn thí nghiệm hệ thống chính.",
+    "Không có phần trăm hoàn thành tổng thể có cơ sở; báo cáo chỉ nêu trạng thái và bằng chứng.",
+    "Phase 3 đã có kết quả H2/H3/TIM097 và SYS101 trong phạm vi ghi rõ. H2 có một timeout; H3 thiếu 14/15 ô, nên chưa xác nhận giả thuyết. H1 chưa có người tham gia; chưa viết luận văn cuối.",
+    "Cặp S01 tổng hợp chỉ là kiểm tra kỹ thuật, không phải bằng chứng khoa học.",
+    "Native Memgraph/GraphHopper/CLI không chứng minh Docker, Compose hay triển khai sản xuất. UI /travel GET 200 là kiểm tra lịch sử, không phải render trình duyệt.",
+    "Các con số kiểm thử chồng lấn, không phải cỡ mẫu khoa học và không được cộng dồn.",
+    "Nhãn hành chính trong dữ liệu nguồn chưa phải địa giới hiện hành; source file không có OSM object ID/URL; nguồn/giấy phép/độ mới còn UNKNOWN.",
+    "Jev đã qua gate offline và pilot API 30 câu tổng hợp; holdout 15/15 chỉ là fixture nhỏ, không phải H1/H2/H3.",
+    "Kiến trúc hiện tại không có nhánh tự động từ planner sang backend_service; lưu bản nháp là hành động client POST có xác thực.",
+    "architecture.html là bytes deliver nguyên bản của Archify; có liên kết Google Fonts (preconnect + stylesheet) trong template nên mở tệp có thể phát sinh request mạng; index/module pages không có CDN. Viewer UI và <html lang> dùng tiếng Anh mặc định; nhãn nội dung do báo cáo đặt là tiếng Việt. Chỉ kiểm tra deterministic validate/deliver, chưa browser/perceptual review; các file visual-check cũ là lịch sử, không phải bằng chứng cho artifact mới.",
+    "Guard default-home đã đăng ký bằng đồng ý first-use bình thường và callback thật đạt 5/5 ca tổng hợp; chưa reload gateway chạy lâu hoặc profile override. Không tuyên bố sandbox toàn hệ.",
+    "Các số không gian E081 là phép đo bàn giao chưa được Codex chạy lại toàn bộ; không dùng dòng truy vấn không hướng làm số quan hệ lưu.",
+    "Lần cập nhật DOC073 chỉ kiểm tra tĩnh mã HTML/JSON, tham chiếu và tính nhất quán. Không chạy trình duyệt, visual-check, Puppeteer/CDP, screenshot hay local server.",
+    "Coding AI-box và application alias opencode-go/deepseek-v4.1-flash là hai tuyến khác nhau; không claim Go miễn phí/không giới hạn hoặc tổng billing đã biết.",
+    "Capture 252 ứng viên/161 đủ trường tối thiểu/252 cách ly/nhập 0 là kiểm thử kỹ thuật; không phải social ingest thành công.",
+    "Lịch sử tại thời điểm receipt: S5 đã qua 15/15 kiểm tra native với danh tính thử; chưa phải H3 hoặc danh tính triển khai. Collector V2 đã QA 29 ca và 208 regression; primary freeze còn thiếu. Trạng thái sau đó: FREEZE088/H2/H3/TIM097 đã có kết quả riêng với giới hạn; không dùng dòng này làm backlog hiện tại.",
+    "Sơ đồ DOC073 được đóng băng trước khi nghiệm thu S5; chữ chờ S5 trong Viewer là trạng thái tại thời điểm tạo. Nhánh memory vẫn tùy chọn; trạng thái mới xem mô-đun Bộ nhớ.",
+    "DockerEngine29.2.1 hiện kết nối được; kiểm tra mới /healthz,/travel,catalog đều200. Điều đó không chứng nhận Compose deployment, render trình duyệt hoặc model outcomes.",
+    "Lịch sử tại thời điểm receipt: CORE079 là nghiệm thu offline:15ca độc lập/10focused/357regression, không phải15người hoặc H3outcomes; nativepilot vàfullfreeze còn thiếu. Trạng thái sau đó: FREEZE088/H2/H3/TIM097 đã có kết quả riêng với giới hạn; không dùng dòng này làm backlog hiện tại.",
+    "Lịch sử tại thời điểm receipt: CORE083/081: engine đã khôi phục,2API/4CLI; history short-term tới model nhưng output thiếu stops, API status failed. Actual API error code không được giữ; minimal reproducer plan_invalid không thay thế code thực tế. Chưa two-tier/fullfreeze/primaryH3; không tự rerun. Trạng thái sau đó: FREEZE088/H2/H3/TIM097 đã có kết quả riêng với giới hạn; không dùng dòng này làm backlog hiện tại.",
+    "CORE084/085: sửa cắt prompt đã được kiểm native short-term. Batch3API/7attempts, two-tier prep stage3providerfailed/chưa typed; mã lỗi chi tiết không được giữ, nguyên nhânunknown. Không primaryH3 hoặc toànvalidity; sourcefreeze cần binding mới.",
+    "Lịch sử tại thời điểm receipt: EXP086 sửa thu bằng chứng cho các lần chạy sau:34ca+11gate đạt, binding mới khớp46readonly. Không khôi phục mã lỗi CORE085 đã mất; chưa fullfreeze/native two-tier/primary, không cộng fixture thành mẫu khoa học. Trạng thái sau đó: FREEZE088/H2/H3/TIM097 đã có kết quả riêng với giới hạn; không dùng dòng này làm backlog hiện tại.",
+    "Lịch sử tại thời điểm receipt: CORE087 two-tier đã đạt native typed readiness:2AI/3CLI,fullprofile/history/schema đúng,car1,645km. Cùng main với short-termCORE085 nhưng các batch không phải matched H3; globalunverifiable/totalbilling/deployedIdP còn giới hạn. Fullfreeze FREEZE088 là gate tiếp theo, chưa primary. Trạng thái sau đó: FREEZE088/H2/H3/TIM097 đã có kết quả riêng với giới hạn; không dùng dòng này làm backlog hiện tại.",
+    "Lịch sử trước LIVE143: FREEZE088 đã chốt bản H2/H3 trước kết quả; không modelcall mới. Package lock dựa metadata, upstream model/default sampling không quan sát; H3 giữ synthetic-profile thesis_mode=false. Demo UI chỉ xác nhận hiển thị, chưa model end-to-end qua browser. Trạng thái mới xem LIVE143/B146; không dùng câu lịch sử làm backlog hiện tại.",
+    "H3090 primaryH3partial1/15,3AI/6knownCLI. Chỉ3individualreceipts được giữ; successfulprepđầu cócountsummary3,không tái tạoID/usage. Jevobservednull/totalusageunknown,không suyquota/auth hoặc tokensavings. Đã dọnstackthử; không retry/đổitimeout.",
+    "H2: Hybrid56lịch gồm18lịch thiếu yêu cầu, LLM-only45lịch. Không coi delivery là thành công toàn cục. Một timeout làm suy luận không đạt gate; chưa xác nhận H2 dù có chênh lệch mô tả.",
+    "Lịch sử tại thời điểm receipt: E2093: logicalpruning3km78,47% không chứng minh physical engine invocations hoặc độ phức tạp dưới bậc hai. Timing1km là count-only toàn cặp, không phải API tạo lịch trình; host92%RAM/no isolation,3/5km thiếu so sánh. Trạng thái sau đó: FREEZE088/H2/H3/TIM097 đã có kết quả riêng với giới hạn; không dùng dòng này làm backlog hiện tại.",
+    "Python Haversine6371km không tương đương metric của engine đã kiểm; không dùng counter/accepted counts Python làm bằng chứng Memgraph hoặc thay kết quảE2.",
+    "TIM097 đã đủ timing nhưng prefilter5km chậm hơn27,66%. RAM97%/desktop dùng chung/no isolation; kết quả mô tả, không suy rộng quần thể hoặc độ trễ API tạo lịch.",
+    "SYS101HTTP9ca chỉ hỗ trợ8outcome;B2địa chỉ chưa kết luận vì comparatorobject-vs-string. Không phải tỷ lệ hallucination hoặc fullsystemacceptance.",
+    "GRAPH103 kiểm graph chính chỉ chứng minh kết nối và counts. Lịch sử GRAPH104 lỗi trước preflight và GRAPH108 lỗi harness vẫn được giữ. GRAPH115 đạt7/7ca lifecycle trên4POI giả lập, không phải wholegraphCRUD/fullsystem;0primary/provider và cleanup đúng container.",
+    "Lịch sử trước LIVE143: DOC105 đã được Codex áp dụng sau QA tĩnh. Nội dung chi tiết mở trong trang tổng quan được cập nhật ngày 20/10; các trang mô-đun riêng giữ snapshot cũ theo phạm vi ghi được giao. Không có kiểm chứng trình duyệt mới. Trạng thái mới xem LIVE143/B146; không dùng câu lịch sử làm backlog hiện tại.",
+    "Lịch sử trước LIVE143: BROWSER114/117: giao diện/API và routing đã bật; catalog xác nhận đúng snapshot/vùng sau khoảng6giây (phép đo5giây cũ timeout). Chưa chạy browserjourney hoặc gọi model/Jev mới. Công cụ điều khiển trình duyệt đang lỗi khởi tạo; HTTP readiness không thay kiểm chứng giao diện. Trạng thái mới xem LIVE143/B146; không dùng câu lịch sử làm backlog hiện tại.",
+    "Lịch sử trước LIVE143: SYS119 chỉ một ca tiêm dữ liệu không có nguồn vào đề xuất model rồi kiểm kết quả. Không phải tỷ lệ hallucination tự nhiên, không chứng minh browser/chat/Jev hoặc mọi ràng buộc giá/giờ. UI120 mởURI thành công nhưng chưa tìm được cửa sổ phù hợp để quan sát; chưa có browserpass mới. Trạng thái mới xem LIVE143/B146; không dùng câu lịch sử làm backlog hiện tại.",
+    "Cập nhật UI ngày20/10: BROWSER130 đã render thật; BROWSER131 đã gọi chat/typed thật và tạo hai ghim nhưng timeout click/popup. BROWSER133 click/card đạt với fixture, không thay kết quả live. Các dòng UI120/BROWSER117 và module standalone trước đó là lịch sử; không phải tab cá nhân của người dùng đã được kiểm.",
+    "UI135/137 đã sửa lỗi mất lớp ghim, ghim bị bảng che và card mobile bị cắt. BROWSER138 là HTML/catalog/typed fixture trên browser thật, không native API/model/Jev. Sáu bố trí đạt không chứng nhận mọi kích thước, dữ liệu hoặc full live workflow. Probe health sandbox bị từ chối đã dừng, không suy service down hoặc đổi executor để thử lại.",
+    "LIVE143: 31 kiểm tra đạt với chat → tạo lịch → hai ghim đúng tọa độ → chọn đúng POI; 4 Go V4.1/4 CLI attempt và 1 Jev, không retry. Đây là một hành trình thử kỹ thuật, không phải H1 hoặc xác nhận mọi lịch trình. Ảnh LIVE143 còn popup bị bảng lịch trình che. UI145 chỉ sửa z-index; JavaScript giữ nguyên. B146 dùng đúng cặp POI nguồn trong fixture, xác nhận toàn thẻ và nút đóng hiển thị rõ, không bị che; chưa kiểm hành động đóng. Không hồi tố ảnh live thành bằng chứng toàn thẻ.",
+    "AUD140 đối chiếu 31 mục SG/AC; REF141 kiểm nguồn nền tảng và đọc lại phương pháp L07 lưu sẵn; REF142 rà 136 nhận định trong 12 Markdown. Chưa sửa luận văn, REF150 đã audit nội dung Word/PDF có giới hạn, chưa nghiệm thu layout toàn bản; các số audit không phải tỷ lệ hoàn thành. Compose, provenance/license/freshness và physical engine calls vẫn còn thiếu bằng chứng.",
+    "REF150 đã mở/đọc Word và PDF hiện có:33trang,420đoạn khớp sau loại đúng dòng số trang,4hình khớp manifest;9nhóm trạng thái cũ cần cập nhật. Không sửa luận văn.12/13inputhash khớp; protocol đã đổi. Chỉ xem ảnh3trang, không nhận toàn layout hoặc mọi claim đã đạt.",
+    "DEMO152 theo duyệt1/2/4: gửi tin khi tạo lịch, Hủy chờUI; chọnnhiều/toàn26vùng nguồn; vẽtuyếnGraphHopper thật và hướngdẫn. Cùngphiên backend xửlýlầnlượt; chưahủyupstream. Mục3chat tựgọiplanner giữbacklog.26focusedtests/8caseUIfixture và5callMCPthật đạt; khôngmodel/Jevmới."
+  ],
+  "waysOfWork": [
+    "Codex sở hữu /plan, ca kiểm thử, QA độc lập, nghiệm thu và biên tập cuối. Hermes ưu tiên thực thi không-web/báo cáo; OpenCode triển khai coding theo brief.",
+    "Executor OpenCode dùng aibox/ds/deepseek-flash (V4.1 theo xác nhận người dùng). Gom việc có phạm vi; không gọi model chỉ để chạy kiểm tra xác định.",
+    "Không chọn V4.0, không đổi global allowlist; mỗi task giữ artifact và danh sách domain cục bộ được duyệt."
+  ],
+  "inventory": [
+    [
+      "crawler_service",
+      "Thu thập OSM/Wikidata, pipeline, adapter",
+      "acquisition"
+    ],
+    [
+      "crawler_service",
+      "Chuẩn bị dữ liệu chính, registry, graph-ready",
+      "data-prep"
+    ],
+    [
+      "POI_service",
+      "Đồ thị, không gian, MCP, phạm vi nguồn",
+      "graph-mcp"
+    ],
+    [
+      "POI_service",
+      "Adapter graph-ready 6.367 bản ghi",
+      "data-prep"
+    ],
+    [
+      "ai_service",
+      "Provider CLI, router, ReAct, grounding",
+      "ai-provider"
+    ],
+    [
+      "ai_service",
+      "Planner heuristic + validator",
+      "planner"
+    ],
+    [
+      "ai_service",
+      "Bộ nhớ ngắn hạn/dài hạn",
+      "memory"
+    ],
+    [
+      "backend_service",
+      "Bản nháp hành trình, SQLite/Firestore",
+      "backend"
+    ],
+    [
+      "GraphHopper native",
+      "Tuyến foot/car thật, runtime loopback",
+      "routing"
+    ],
+    [
+      "benchmarks",
+      "Collector, evaluator H2/H3",
+      "experiments"
+    ],
+    [
+      "experiments/spatial",
+      "Benchmark không gian",
+      "graph-mcp"
+    ],
+    [
+      "Docker Compose",
+      "Cấu hình tĩnh; chưa build/start",
+      "—"
+    ]
+  ],
+  "architecture": {
+    "summary": "Luồng hiện tại: client /travel → AI Service (Jev phân loại; DeepSeek V4.1 Flash qua OpenCode CLI/Go sinh nội dung) → POI MCP → Memgraph; POI MCP gọi GraphHopper cho tuyến. Memory/profile là nhánh tùy chọn, đã qua QA native có giới hạn. Dữ liệu: 6.367 POI/14 category/3.678.397 NEAR_BY. Draft là client POST tới backend_service, không tự động từ planner.",
+    "stages": [
+      "Client /travel",
+      "AI Service (Jev + Go)",
+      "POI MCP",
+      "Memgraph + GraphHopper",
+      "Memory (S5)"
+    ],
+    "caveat": "Sơ đồ là logical/current, không phải deployment. Native Windows/WSL; không claim Docker, Spring/React hay public deployment. Mũi tên nét đứt là nhánh tùy chọn/chưa nghiệm thu (memory S5). AI→GraphHopper không có cạnh trực tiếp; tuyến đi qua POI MCP. Kiểm tra mới chỉ deterministic (validate/deliver); chưa browser/perceptual review. Sơ đồ được đóng băng trước lần nghiệm thu S5; trạng thái mới nằm trong mô-đun Bộ nhớ, không sửa lại bằng chứng diagram cũ."
+  },
+  "editorialUpdated": "2026-10-20 / DEMO152 / Codex"
+}

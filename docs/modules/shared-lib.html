@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>shared_lib — Travel Lung Tung</title>
+<link rel="stylesheet" href="../assets/docs.css">
+</head>
+<body>
+<header class="top">
+  <div class="bar">
+    <div class="brand">shared_lib<small>Kiểu dùng chung, lỗi, ghi log</small></div>
+    <div class="spacer"></div>
+    <a class="btn" href="../index.html">Trang chủ</a>
+    <button class="btn" id="theme-toggle">Nền tối</button>
+  </div>
+</header>
+
+<div class="wrap">
+<nav class="toc">
+  <h4>Tổng quan</h4>
+  <a href="../index.html">Trang chủ</a>
+  <a href="../diagrams/index.html">Thư viện sơ đồ</a>
+  <h4>Module</h4>
+  <a href="crawler-service.html">crawler_service</a>
+  <a href="poi-service.html">POI_service</a>
+  <a href="ai-service.html">ai_service</a>
+  <a href="backend-service.html">backend_service</a>
+  <h4>Trên trang này</h4>
+  <a href="#vai-tro">Vai trò</a>
+  <a href="#kieu">Kiểu dùng chung</a>
+  <a href="#loi">Lỗi chưa hiện thực</a>
+  <a href="#log">Ghi log</a>
+  <a href="#dung-o-dau">Ai đang dùng gì</a>
+  <a href="#khoang-trong">Khoảng trống</a>
+</nav>
+
+<main>
+<section id="vai-tro">
+  <h1>shared_lib</h1>
+  <p class="lead">Gói nhỏ nhất hệ thống, nhưng giữ ba thứ mà các dịch vụ phải nói cùng một ngôn ngữ: bộ giá trị liệt kê, một loại ngoại lệ có chủ đích, và cách ghi log thống nhất.</p>
+
+  <table>
+    <thead><tr><th>Tệp</th><th>Nội dung</th><th>Số dòng</th></tr></thead>
+    <tbody>
+      <tr><td><code>travel_shared/schemas.py</code></td><td>Ba bộ giá trị liệt kê</td><td>19</td></tr>
+      <tr><td><code>travel_shared/exceptions.py</code></td><td>Một lớp ngoại lệ</td><td>4</td></tr>
+      <tr><td><code>travel_shared/utils/logging_setup.py</code></td><td>Hàm dựng log cho mọi dịch vụ</td><td>38</td></tr>
+    </tbody>
+  </table>
+  <p>Gói này được khai báo là thành viên workspace và các dịch vụ phụ thuộc vào nó qua tên <code>travel-shared</code>, nên mọi thay đổi ở đây lan ra toàn hệ thống ngay khi đồng bộ lại.</p>
+  <p class="evidence">Nguồn: <code>shared_lib/pyproject.toml</code>; khai báo phụ thuộc ở <code>POI_service/pyproject.toml</code>, <code>ai_service/pyproject.toml</code>, <code>backend_service/pyproject.toml</code>.</p>
+</section>
+
+<section id="kieu">
+  <h2>Kiểu dùng chung</h2>
+
+  <h3>CACHE_MODE — chế độ đọc ghi đệm</h3>
+  <div class="sig">class CACHE_MODE(str, Enum) — READ | WRITE</div>
+  <p>Dùng ở đúng một chỗ nhưng quyết định hành vi của cả pipeline cào: chế độ đọc bỏ qua chặng khám phá và lấy danh sách URL từ tệp cũ, chế độ ghi vừa chạy vừa lưu bản mới.</p>
+  <p class="evidence">Nguồn: <code>travel_shared/schemas.py:3-5</code>; nơi dùng ở <code>crawler_service/app/pipelines/crawling/crawling.py:100</code> và <code>:126</code>.</p>
+
+  <h3>City — bốn thành phố</h3>
+  <div class="sig">class City(str, Enum) — HCM | HANOI | DALAT | DANANG</div>
+  <p>Được khai báo trong cấu hình bộ phân tích (<code>ParserSettings.CITIES</code>) để giới hạn phạm vi dữ liệu theo thành phố. Giá trị là chuỗi không dấu, không khoảng trắng.</p>
+  <p class="evidence">Nguồn: <code>travel_shared/schemas.py:7-11</code>; nơi dùng ở <code>crawler_service/app/core/config/settings.py:152</code>.</p>
+
+  <h3>Agency — bốn nguồn dữ liệu</h3>
+  <div class="sig">class Agency(str, Enum) — TRAVELOKA | VIETRAVEL | VIETNAM_CORACLE | VIETNAM_TRAVEL</div>
+  <p>Đây là trục mở rộng nguồn dữ liệu: giá trị của nó quyết định tên thư mục chứa schema và mã JS. Đổi đại lý trong <code>ExtractorSettings</code> là đổi cả cây tài nguyên được nạp.</p>
+  <p><strong>Thực tế hiện tại:</strong> chỉ <code>traveloka</code> có tài nguyên; ba giá trị còn lại chưa có thư mục nào trong <code>crawl_schemas</code> hay <code>js_codes</code>.</p>
+  <p class="evidence">Nguồn: <code>travel_shared/schemas.py:14-18</code>; cách dùng ở <code>crawler_service/app/utils/LoadExtraction.py:14-15</code>.</p>
+</section>
+
+<section id="loi">
+  <h2>Lỗi chưa hiện thực</h2>
+  <div class="sig">class IntentedNotImplementedException(Exception)</div>
+  <details class="params">
+    <summary>Vì sao cần một ngoại lệ riêng <span class="count">3 điểm</span></summary>
+    <div class="inner">
+      <ul>
+        <li>Phân biệt rõ “chưa làm” với “làm hỏng”. Chỗ nào cố tình chưa hiện thực thì ném ngoại lệ này, kèm thông điệp mặc định nói rằng hãy viết lớp con và cài đặt lại.</li>
+        <li>Nhờ vậy tầng trên bắt được chính xác loại lỗi này để thoái lui an toàn, ví dụ trả payload có phần mô tả rỗng thay vì làm hỏng cả câu trả lời.</li>
+        <li>Thông điệp có thể truyền vào để nói rõ phần nào còn thiếu.</li>
+      </ul>
+    </div>
+  </details>
+  <p><strong>Sáu chỗ đang ném ngoại lệ này</strong> — danh sách này chính là bản đồ những phần chưa làm:</p>
+  <table>
+    <thead><tr><th>Nơi</th><th>Phần chưa hiện thực</th></tr></thead>
+    <tbody>
+      <tr><td><code>POI_service/app/api/dependencies/services.py:21</code></td><td>Repository tài liệu cho Document RAG</td></tr>
+      <tr><td><code>POI_service/app/api/mcp/tools.py:34</code></td><td>Cùng phần trên, ở lối MCP</td></tr>
+      <tr><td><code>POI_service/app/core/infrastructure/db/repositories/memgraph.py:168</code></td><td>Đọc và liệt kê ý thích người dùng bằng đồ thị (phải qua Firebase)</td></tr>
+      <tr><td><code>crawler_service/app/pipelines/crawling/discover/discoverer.py:84</code></td><td>Hàm <code>crawl()</code> của lớp khám phá</td></tr>
+      <tr><td><code>crawler_service/app/pipelines/crawling/crawling.py:191</code></td><td>Đường ghi kết quả cào xuống cơ sở dữ liệu</td></tr>
+      <tr><td><code>crawler_service/.../detail_crawler/traveloka_crawler.py:92</code></td><td>Bộ trích xuất cho nhóm khách sạn</td></tr>
+    </tbody>
+  </table>
+  <p class="evidence">Nguồn: <code>travel_shared/exceptions.py:1-4</code>.</p>
+</section>
+
+<section id="log">
+  <h2>Ghi log</h2>
+  <div class="sig">def setup_logging(service_name: str, log_dir: Path) → Logger</div>
+  <p>Chuẩn hoá cách mọi dịch vụ ghi log: một tệp xoay vòng cộng một luồng ra màn hình, cùng một định dạng.</p>
+  <details class="params">
+    <summary>Tham số và thiết lập <span class="count">2 tham số, 4 thiết lập</span></summary>
+    <div class="inner">
+      <table>
+        <thead><tr><th>Mục</th><th>Giá trị</th><th>Ý nghĩa</th></tr></thead>
+        <tbody>
+          <tr><td><code>service_name</code></td><td>str</td><td>Tên tệp log: <code>&lt;tên&gt;.log</code>.</td></tr>
+          <tr><td><code>log_dir</code></td><td>Path</td><td>Thư mục log; tự tạo nếu chưa có.</td></tr>
+          <tr><td>Kích thước tệp</td><td>5 MB × 3 bản</td><td>Xoay vòng khi đầy, giữ ba bản cũ.</td></tr>
+          <tr><td>Mức log</td><td><code>INFO</code></td><td>Đặt trên logger gốc.</td></tr>
+          <tr><td>Định dạng</td><td>thời gian, mức, tên logger, thông điệp</td><td>Giống nhau ở mọi dịch vụ nên dễ gộp khi tra sự cố.</td></tr>
+          <tr><td>Chống gắn trùng</td><td>chỉ gắn khi logger gốc chưa có handler</td><td>Gọi hàm hai lần không làm log bị nhân đôi.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </details>
+  <p><strong>Trả về:</strong> logger mang tên dịch vụ để dùng ngay.</p>
+  <p class="evidence">Nguồn: <code>travel_shared/utils/logging_setup.py:5-38</code>.</p>
+</section>
+
+<section id="dung-o-dau">
+  <h2>Ai đang dùng gì</h2>
+  <table>
+    <thead><tr><th>Thứ trong gói</th><th>Nơi dùng</th></tr></thead>
+    <tbody>
+      <tr><td><code>CACHE_MODE</code></td><td>crawler_service: chế độ đệm danh sách URL (<code>crawling.py:100</code>, <code>:126</code>; <code>main.py:52</code>)</td></tr>
+      <tr><td><code>Agency</code></td><td>crawler_service: chọn cây tài nguyên schema và JS (<code>settings.py:76</code>, <code>LoadExtraction.py:14</code>)</td></tr>
+      <tr><td><code>City</code></td><td>crawler_service: phạm vi thành phố của bộ phân tích (<code>settings.py:152</code>)</td></tr>
+      <tr><td><code>IntentedNotImplementedException</code></td><td>crawler_service và POI_service, sáu chỗ liệt kê ở trên</td></tr>
+      <tr><td><code>setup_logging</code></td><td>crawler_service (<code>app/main.py:24</code>) — POI_service, ai_service và backend_service chưa dùng, mỗi bên tự ghi log theo cách riêng</td></tr>
+    </tbody>
+  </table>
+  <p>Vì gói này là workspace member, các dịch vụ nhập nó bằng tên gói <code>travel_shared</code>. Riêng repository Memgraph của POI_service lại nhập bằng đường dẫn có tiền tố thư mục (<code>shared_lib.travel_shared.exceptions</code>), khác với mọi chỗ còn lại — cần kiểm chứng khi chạy.</p>
+  <p class="evidence">Nguồn: <code>POI_service/app/core/infrastructure/db/repositories/memgraph.py:14</code> đối chiếu <code>crawler_service/app/main.py:21</code>.</p>
+</section>
+
+<section id="khoang-trong">
+  <h2>Khoảng trống</h2>
+  <table>
+    <thead><tr><th>Điểm</th><th>Hệ quả</th><th>Bằng chứng</th></tr></thead>
+    <tbody>
+      <tr><td>Gói dùng chung không có mô hình POI hay địa chỉ</td><td>Mỗi dịch vụ tự định nghĩa lại POI, ràng buộc lệch nhau; đây là gốc của vấn đề đã nêu ở trang backend_service</td><td><code>travel_shared/schemas.py</code> chỉ có ba enum; mô hình nằm rải ở từng gói</td></tr>
+      <tr><td>Không có mô hình cho lịch trình, điểm dừng hay payload trả về của agent</td><td>Hợp đồng giữa ai_service và backend_service không có nơi nào chốt chung</td><td>đối chiếu <code>ai_service/main.py:358-430</code> với <code>backend_service/app/core/domain/</code></td></tr>
+      <tr><td>Hàm dựng log chỉ được một dịch vụ dùng</td><td>Ba dịch vụ còn lại ghi log theo cách riêng, khó gộp khi tra sự cố liên dịch vụ</td><td><code>crawler_service/app/main.py:24</code></td></tr>
+      <tr><td>Ba đại lý trong enum chưa có tài nguyên tương ứng</td><td>Chọn <code>vietravel</code> hay <code>vietnamcoracle</code> sẽ không nạp được schema nào</td><td><code>travel_shared/schemas.py:14-18</code>; <code>crawl_schemas/css/</code> chỉ có <code>traveloka</code></td></tr>
+      <tr><td>Không có bộ giá trị liệt kê cho trạng thái job nạp</td><td>Trạng thái đang truyền bằng chuỗi tự do (<code>warning</code>, <code>progress</code>, <code>complete</code>) nên hai phía dễ lệch nhau</td><td><code>POI_service/app/core/services/ingestion.py:79-114</code></td></tr>
+    </tbody>
+  </table>
+  <footer class="foot">Đối chiếu bản mã <code>1d18ac3</code> ngày 04-10-2026.</footer>
+</section>
+</main>
+</div>
+<script src="../assets/docs.js"></script>
+</body>
+</html>

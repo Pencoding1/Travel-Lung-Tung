@@ -1,0 +1,1539 @@
+{
+  "task": "H3",
+  "schema_version": "oc18.h3.v1",
+  "manifest_version": "oc18.h3.smoke.v1",
+  "manifest_label": "synthetic-evaluator-smoke-h3",
+  "thesis_mode": false,
+  "allow_repeated_visits": false,
+  "label": "SYNTHETIC EVALUATOR TEST",
+  "conclusion_label": "SYNTHETIC EVALUATOR TEST",
+  "thesis_conclusion": false,
+  "data_classification": "synthetic_engineering_fixture",
+  "evidence_levels": [
+    "synthetic_engineering"
+  ],
+  "dataset_kinds": [
+    "synthetic_fixtures"
+  ],
+  "input": {
+    "manifest_sha256": "6a6202b9c425e01b6e0ba5323fc5c6b4f459873a3de74dc96ef945758e765b81",
+    "records_sha256": "c8c7fc9e620842596f64e5ecb297043f8d5dc633b6357d7fdf9e5b89de6ea2aa"
+  },
+  "conditions": [
+    "memory_disabled",
+    "short_term",
+    "two_tier"
+  ],
+  "baseline_condition": "memory_disabled",
+  "repetitions_per_case": 1,
+  "profiles": [
+    "P1",
+    "P2",
+    "P3",
+    "P4",
+    "P5"
+  ],
+  "planned_runs": 15,
+  "observed_runs": 15,
+  "missing_runs": 0,
+  "groups": {
+    "P1": {
+      "memory_disabled": {
+        "planned": 1,
+        "observed": 1,
+        "missing": 0,
+        "states": {
+          "delivered": 1,
+          "failed": 0,
+          "error": 0,
+          "refused": 0,
+          "empty": 0,
+          "missing": 0
+        },
+        "delivered": 1,
+        "selected_stop_pool": {
+          "selected_total": 1,
+          "preferred_hits": 0,
+          "non_preferred": 1,
+          "resolved_denominator": 1,
+          "unknown_category_stops": 0,
+          "unknown_preference_stops": 0,
+          "unknown_total": 0,
+          "duplicate_selected_ids": 0,
+          "empty_plan_records": 0
+        },
+        "preferred_share": 0.0,
+        "preferred_share_reason": null,
+        "preferred_share_lower": 0.0,
+        "preferred_share_upper": 0.0,
+        "resolved_subset_share": 0.0,
+        "reported_share_basis": "selected_stops_with_coverage_interval",
+        "constraint_validity": {
+          "evaluated": 1,
+          "valid": 1,
+          "rate": 1.0
+        },
+        "usage": {
+          "known_records": 1,
+          "unknown_records": 0,
+          "known_total_provider_tokens": 400,
+          "cold": {
+            "supplied_records": 0,
+            "interpretable_total": null
+          },
+          "amortized": {
+            "supplied_records": 0,
+            "interpretable_total": null
+          },
+          "no_inferred_time_savings": true
+        },
+        "latency_seconds": {
+          "unit": "seconds",
+          "n": 1,
+          "min": 1.2,
+          "median": 1.2,
+          "max": 1.2
+        },
+        "failure_retries": {
+          "n": 1,
+          "total": 0,
+          "max": 0
+        }
+      },
+      "short_term": {
+        "planned": 1,
+        "observed": 1,
+        "missing": 0,
+        "states": {
+          "delivered": 1,
+          "failed": 0,
+          "error": 0,
+          "refused": 0,
+          "empty": 0,
+          "missing": 0
+        },
+        "delivered": 1,
+        "selected_stop_pool": {
+          "selected_total": 1,
+          "preferred_hits": 1,
+          "non_preferred": 0,
+          "resolved_denominator": 1,
+          "unknown_category_stops": 0,
+          "unknown_preference_stops": 0,
+          "unknown_total": 0,
+          "duplicate_selected_ids": 0,
+          "empty_plan_records": 0
+        },
+        "preferred_share": 1.0,
+        "preferred_share_reason": null,
+        "preferred_share_lower": 1.0,
+        "preferred_share_upper": 1.0,
+        "resolved_subset_share": 1.0,
+        "reported_share_basis": "selected_stops_with_coverage_interval",
+        "constraint_validity": {
+          "evaluated": 1,
+          "valid": 1,
+          "rate": 1.0
+        },
+        "usage": {
+          "known_records": 1,
+          "unknown_records": 0,
+          "known_total_provider_tokens": 300,
+          "cold": {
+            "supplied_records": 0,
+            "interpretable_total": null
+          },
+          "amortized": {
+            "supplied_records": 0,
+            "interpretable_total": null
+          },
+          "no_inferred_time_savings": true
+        },
+        "latency_seconds": {
+          "unit": "seconds",
+          "n": 1,
+          "min": 1.1,
+          "median": 1.1,
+          "max": 1.1
+        },
+        "failure_retries": {
+          "n": 1,
+          "total": 0,
+          "max": 0
+        }
+      },
+      "two_tier": {
+        "planned": 1,
+        "observed": 1,
+        "missing": 0,
+        "states": {
+          "delivered": 1,
+          "failed": 0,
+          "error": 0,
+          "refused": 0,
+          "empty": 0,
+          "missing": 0
+        },
+        "delivered": 1,
+        "selected_stop_pool": {
+          "selected_total": 1,
+          "preferred_hits": 1,
+          "non_preferred": 0,
+          "resolved_denominator": 1,
+          "unknown_category_stops": 0,
+          "unknown_preference_stops": 0,
+          "unknown_total": 0,
+          "duplicate_selected_ids": 0,
+          "empty_plan_records": 0
+        },
+        "preferred_share": 1.0,
+        "preferred_share_reason": null,
+        "preferred_share_lower": 1.0,
+        "preferred_share_upper": 1.0,
+        "resolved_subset_share": 1.0,
+        "reported_share_basis": "selected_stops_with_coverage_interval",
+        "constraint_validity": {
+          "evaluated": 1,
+          "valid": 1,
+          "rate": 1.0
+        },
+        "usage": {
+          "known_records": 1,
+          "unknown_records": 0,
+          "known_total_provider_tokens": 200,
+          "cold": {
+            "supplied_records": 0,
+            "interpretable_total": null
+          },
+          "amortized": {
+            "supplied_records": 0,
+            "interpretable_total": null
+          },
+          "no_inferred_time_savings": true
+        },
+        "latency_seconds": {
+          "unit": "seconds",
+          "n": 1,
+          "min": 1.0,
+          "median": 1.0,
+          "max": 1.0
+        },
+        "failure_retries": {
+          "n": 1,
+          "total": 0,
+          "max": 0
+        }
+      }
+    },
+    "P2": {
+      "memory_disabled": {
+        "planned": 1,
+        "observed": 1,
+        "missing": 0,
+        "states": {
+          "delivered": 1,
+          "failed": 0,
+          "error": 0,
+          "refused": 0,
+          "empty": 0,
+          "missing": 0
+        },
+        "delivered": 1,
+        "selected_stop_pool": {
+          "selected_total": 1,
+          "preferred_hits": 0,
+          "non_preferred": 1,
+          "resolved_denominator": 1,
+          "unknown_category_stops": 0,
+          "unknown_preference_stops": 0,
+          "unknown_total": 0,
+          "duplicate_selected_ids": 0,
+          "empty_plan_records": 0
+        },
+        "preferred_share": 0.0,
+        "preferred_share_reason": null,
+        "preferred_share_lower": 0.0,
+        "preferred_share_upper": 0.0,
+        "resolved_subset_share": 0.0,
+        "reported_share_basis": "selected_stops_with_coverage_interval",
+        "constraint_validity": {
+          "evaluated": 1,
+          "valid": 1,
+          "rate": 1.0
+        },
+        "usage": {
+          "known_records": 1,
+          "unknown_records": 0,
+          "known_total_provider_tokens": 400,
+          "cold": {
+            "supplied_records": 0,
+            "interpretable_total": null
+          },
+          "amortized": {
+            "supplied_records": 0,
+            "interpretable_total": null
+          },
+          "no_inferred_time_savings": true
+        },
+        "latency_seconds": {
+          "unit": "seconds",
+          "n": 1,
+          "min": 1.2,
+          "median": 1.2,
+          "max": 1.2
+        },
+        "failure_retries": {
+          "n": 1,
+          "total": 0,
+          "max": 0
+        }
+      },
+      "short_term": {
+        "planned": 1,
+        "observed": 1,
+        "missing": 0,
+        "states": {
+          "delivered": 1,
+          "failed": 0,
+          "error": 0,
+          "refused": 0,
+          "empty": 0,
+          "missing": 0
+        },
+        "delivered": 1,
+        "selected_stop_pool": {
+          "selected_total": 1,
+          "preferred_hits": 1,
+          "non_preferred": 0,
+          "resolved_denominator": 1,
+          "unknown_category_stops": 0,
+          "unknown_preference_stops": 0,
+          "unknown_total": 0,
+          "duplicate_selected_ids": 0,
+          "empty_plan_records": 0
+        },
+        "preferred_share": 1.0,
+        "preferred_share_reason": null,
+        "preferred_share_lower": 1.0,
+        "preferred_share_upper": 1.0,
+        "resolved_subset_share": 1.0,
+        "reported_share_basis": "selected_stops_with_coverage_interval",
+        "constraint_validity": {
+          "evaluated": 1,
+          "valid": 1,
+          "rate": 1.0
+        },
+        "usage": {
+          "known_records": 1,
+          "unknown_records": 0,
+          "known_total_provider_tokens": 300,
+          "cold": {
+            "supplied_records": 0,
+            "interpretable_total": null
+          },
+          "amortized": {
+            "supplied_records": 0,
+            "interpretable_total": null
+          },
+          "no_inferred_time_savings": true
+        },
+        "latency_seconds": {
+          "unit": "seconds",
+          "n": 1,
+          "min": 1.1,
+          "median": 1.1,
+          "max": 1.1
+        },
+        "failure_retries": {
+          "n": 1,
+          "total": 0,
+          "max": 0
+        }
+      },
+      "two_tier": {
+        "planned": 1,
+        "observed": 1,
+        "missing": 0,
+        "states": {
+          "delivered": 1,
+          "failed": 0,
+          "error": 0,
+          "refused": 0,
+          "empty": 0,
+          "missing": 0
+        },
+        "delivered": 1,
+        "selected_stop_pool": {
+          "selected_total": 1,
+          "preferred_hits": 1,
+          "non_preferred": 0,
+          "resolved_denominator": 1,
+          "unknown_category_stops": 0,
+          "unknown_preference_stops": 0,
+          "unknown_total": 0,
+          "duplicate_selected_ids": 0,
+          "empty_plan_records": 0
+        },
+        "preferred_share": 1.0,
+        "preferred_share_reason": null,
+        "preferred_share_lower": 1.0,
+        "preferred_share_upper": 1.0,
+        "resolved_subset_share": 1.0,
+        "reported_share_basis": "selected_stops_with_coverage_interval",
+        "constraint_validity": {
+          "evaluated": 1,
+          "valid": 1,
+          "rate": 1.0
+        },
+        "usage": {
+          "known_records": 1,
+          "unknown_records": 0,
+          "known_total_provider_tokens": 200,
+          "cold": {
+            "supplied_records": 0,
+            "interpretable_total": null
+          },
+          "amortized": {
+            "supplied_records": 0,
+            "interpretable_total": null
+          },
+          "no_inferred_time_savings": true
+        },
+        "latency_seconds": {
+          "unit": "seconds",
+          "n": 1,
+          "min": 1.0,
+          "median": 1.0,
+          "max": 1.0
+        },
+        "failure_retries": {
+          "n": 1,
+          "total": 0,
+          "max": 0
+        }
+      }
+    },
+    "P3": {
+      "memory_disabled": {
+        "planned": 1,
+        "observed": 1,
+        "missing": 0,
+        "states": {
+          "delivered": 1,
+          "failed": 0,
+          "error": 0,
+          "refused": 0,
+          "empty": 0,
+          "missing": 0
+        },
+        "delivered": 1,
+        "selected_stop_pool": {
+          "selected_total": 1,
+          "preferred_hits": 0,
+          "non_preferred": 1,
+          "resolved_denominator": 1,
+          "unknown_category_stops": 0,
+          "unknown_preference_stops": 0,
+          "unknown_total": 0,
+          "duplicate_selected_ids": 0,
+          "empty_plan_records": 0
+        },
+        "preferred_share": 0.0,
+        "preferred_share_reason": null,
+        "preferred_share_lower": 0.0,
+        "preferred_share_upper": 0.0,
+        "resolved_subset_share": 0.0,
+        "reported_share_basis": "selected_stops_with_coverage_interval",
+        "constraint_validity": {
+          "evaluated": 1,
+          "valid": 1,
+          "rate": 1.0
+        },
+        "usage": {
+          "known_records": 1,
+          "unknown_records": 0,
+          "known_total_provider_tokens": 400,
+          "cold": {
+            "supplied_records": 0,
+            "interpretable_total": null
+          },
+          "amortized": {
+            "supplied_records": 0,
+            "interpretable_total": null
+          },
+          "no_inferred_time_savings": true
+        },
+        "latency_seconds": {
+          "unit": "seconds",
+          "n": 1,
+          "min": 1.2,
+          "median": 1.2,
+          "max": 1.2
+        },
+        "failure_retries": {
+          "n": 1,
+          "total": 0,
+          "max": 0
+        }
+      },
+      "short_term": {
+        "planned": 1,
+        "observed": 1,
+        "missing": 0,
+        "states": {
+          "delivered": 1,
+          "failed": 0,
+          "error": 0,
+          "refused": 0,
+          "empty": 0,
+          "missing": 0
+        },
+        "delivered": 1,
+        "selected_stop_pool": {
+          "selected_total": 1,
+          "preferred_hits": 1,
+          "non_preferred": 0,
+          "resolved_denominator": 1,
+          "unknown_category_stops": 0,
+          "unknown_preference_stops": 0,
+          "unknown_total": 0,
+          "duplicate_selected_ids": 0,
+          "empty_plan_records": 0
+        },
+        "preferred_share": 1.0,
+        "preferred_share_reason": null,
+        "preferred_share_lower": 1.0,
+        "preferred_share_upper": 1.0,
+        "resolved_subset_share": 1.0,
+        "reported_share_basis": "selected_stops_with_coverage_interval",
+        "constraint_validity": {
+          "evaluated": 1,
+          "valid": 1,
+          "rate": 1.0
+        },
+        "usage": {
+          "known_records": 1,
+          "unknown_records": 0,
+          "known_total_provider_tokens": 300,
+          "cold": {
+            "supplied_records": 0,
+            "interpretable_total": null
+          },
+          "amortized": {
+            "supplied_records": 0,
+            "interpretable_total": null
+          },
+          "no_inferred_time_savings": true
+        },
+        "latency_seconds": {
+          "unit": "seconds",
+          "n": 1,
+          "min": 1.1,
+          "median": 1.1,
+          "max": 1.1
+        },
+        "failure_retries": {
+          "n": 1,
+          "total": 0,
+          "max": 0
+        }
+      },
+      "two_tier": {
+        "planned": 1,
+        "observed": 1,
+        "missing": 0,
+        "states": {
+          "delivered": 1,
+          "failed": 0,
+          "error": 0,
+          "refused": 0,
+          "empty": 0,
+          "missing": 0
+        },
+        "delivered": 1,
+        "selected_stop_pool": {
+          "selected_total": 1,
+          "preferred_hits": 1,
+          "non_preferred": 0,
+          "resolved_denominator": 1,
+          "unknown_category_stops": 0,
+          "unknown_preference_stops": 0,
+          "unknown_total": 0,
+          "duplicate_selected_ids": 0,
+          "empty_plan_records": 0
+        },
+        "preferred_share": 1.0,
+        "preferred_share_reason": null,
+        "preferred_share_lower": 1.0,
+        "preferred_share_upper": 1.0,
+        "resolved_subset_share": 1.0,
+        "reported_share_basis": "selected_stops_with_coverage_interval",
+        "constraint_validity": {
+          "evaluated": 1,
+          "valid": 1,
+          "rate": 1.0
+        },
+        "usage": {
+          "known_records": 1,
+          "unknown_records": 0,
+          "known_total_provider_tokens": 200,
+          "cold": {
+            "supplied_records": 0,
+            "interpretable_total": null
+          },
+          "amortized": {
+            "supplied_records": 0,
+            "interpretable_total": null
+          },
+          "no_inferred_time_savings": true
+        },
+        "latency_seconds": {
+          "unit": "seconds",
+          "n": 1,
+          "min": 1.0,
+          "median": 1.0,
+          "max": 1.0
+        },
+        "failure_retries": {
+          "n": 1,
+          "total": 0,
+          "max": 0
+        }
+      }
+    },
+    "P4": {
+      "memory_disabled": {
+        "planned": 1,
+        "observed": 1,
+        "missing": 0,
+        "states": {
+          "delivered": 1,
+          "failed": 0,
+          "error": 0,
+          "refused": 0,
+          "empty": 0,
+          "missing": 0
+        },
+        "delivered": 1,
+        "selected_stop_pool": {
+          "selected_total": 1,
+          "preferred_hits": 0,
+          "non_preferred": 1,
+          "resolved_denominator": 1,
+          "unknown_category_stops": 0,
+          "unknown_preference_stops": 0,
+          "unknown_total": 0,
+          "duplicate_selected_ids": 0,
+          "empty_plan_records": 0
+        },
+        "preferred_share": 0.0,
+        "preferred_share_reason": null,
+        "preferred_share_lower": 0.0,
+        "preferred_share_upper": 0.0,
+        "resolved_subset_share": 0.0,
+        "reported_share_basis": "selected_stops_with_coverage_interval",
+        "constraint_validity": {
+          "evaluated": 1,
+          "valid": 1,
+          "rate": 1.0
+        },
+        "usage": {
+          "known_records": 1,
+          "unknown_records": 0,
+          "known_total_provider_tokens": 400,
+          "cold": {
+            "supplied_records": 0,
+            "interpretable_total": null
+          },
+          "amortized": {
+            "supplied_records": 0,
+            "interpretable_total": null
+          },
+          "no_inferred_time_savings": true
+        },
+        "latency_seconds": {
+          "unit": "seconds",
+          "n": 1,
+          "min": 1.2,
+          "median": 1.2,
+          "max": 1.2
+        },
+        "failure_retries": {
+          "n": 1,
+          "total": 0,
+          "max": 0
+        }
+      },
+      "short_term": {
+        "planned": 1,
+        "observed": 1,
+        "missing": 0,
+        "states": {
+          "delivered": 1,
+          "failed": 0,
+          "error": 0,
+          "refused": 0,
+          "empty": 0,
+          "missing": 0
+        },
+        "delivered": 1,
+        "selected_stop_pool": {
+          "selected_total": 1,
+          "preferred_hits": 1,
+          "non_preferred": 0,
+          "resolved_denominator": 1,
+          "unknown_category_stops": 0,
+          "unknown_preference_stops": 0,
+          "unknown_total": 0,
+          "duplicate_selected_ids": 0,
+          "empty_plan_records": 0
+        },
+        "preferred_share": 1.0,
+        "preferred_share_reason": null,
+        "preferred_share_lower": 1.0,
+        "preferred_share_upper": 1.0,
+        "resolved_subset_share": 1.0,
+        "reported_share_basis": "selected_stops_with_coverage_interval",
+        "constraint_validity": {
+          "evaluated": 1,
+          "valid": 1,
+          "rate": 1.0
+        },
+        "usage": {
+          "known_records": 1,
+          "unknown_records": 0,
+          "known_total_provider_tokens": 300,
+          "cold": {
+            "supplied_records": 0,
+            "interpretable_total": null
+          },
+          "amortized": {
+            "supplied_records": 0,
+            "interpretable_total": null
+          },
+          "no_inferred_time_savings": true
+        },
+        "latency_seconds": {
+          "unit": "seconds",
+          "n": 1,
+          "min": 1.1,
+          "median": 1.1,
+          "max": 1.1
+        },
+        "failure_retries": {
+          "n": 1,
+          "total": 0,
+          "max": 0
+        }
+      },
+      "two_tier": {
+        "planned": 1,
+        "observed": 1,
+        "missing": 0,
+        "states": {
+          "delivered": 1,
+          "failed": 0,
+          "error": 0,
+          "refused": 0,
+          "empty": 0,
+          "missing": 0
+        },
+        "delivered": 1,
+        "selected_stop_pool": {
+          "selected_total": 1,
+          "preferred_hits": 1,
+          "non_preferred": 0,
+          "resolved_denominator": 1,
+          "unknown_category_stops": 0,
+          "unknown_preference_stops": 0,
+          "unknown_total": 0,
+          "duplicate_selected_ids": 0,
+          "empty_plan_records": 0
+        },
+        "preferred_share": 1.0,
+        "preferred_share_reason": null,
+        "preferred_share_lower": 1.0,
+        "preferred_share_upper": 1.0,
+        "resolved_subset_share": 1.0,
+        "reported_share_basis": "selected_stops_with_coverage_interval",
+        "constraint_validity": {
+          "evaluated": 1,
+          "valid": 1,
+          "rate": 1.0
+        },
+        "usage": {
+          "known_records": 1,
+          "unknown_records": 0,
+          "known_total_provider_tokens": 200,
+          "cold": {
+            "supplied_records": 0,
+            "interpretable_total": null
+          },
+          "amortized": {
+            "supplied_records": 0,
+            "interpretable_total": null
+          },
+          "no_inferred_time_savings": true
+        },
+        "latency_seconds": {
+          "unit": "seconds",
+          "n": 1,
+          "min": 1.0,
+          "median": 1.0,
+          "max": 1.0
+        },
+        "failure_retries": {
+          "n": 1,
+          "total": 0,
+          "max": 0
+        }
+      }
+    },
+    "P5": {
+      "memory_disabled": {
+        "planned": 1,
+        "observed": 1,
+        "missing": 0,
+        "states": {
+          "delivered": 1,
+          "failed": 0,
+          "error": 0,
+          "refused": 0,
+          "empty": 0,
+          "missing": 0
+        },
+        "delivered": 1,
+        "selected_stop_pool": {
+          "selected_total": 1,
+          "preferred_hits": 0,
+          "non_preferred": 1,
+          "resolved_denominator": 1,
+          "unknown_category_stops": 0,
+          "unknown_preference_stops": 0,
+          "unknown_total": 0,
+          "duplicate_selected_ids": 0,
+          "empty_plan_records": 0
+        },
+        "preferred_share": 0.0,
+        "preferred_share_reason": null,
+        "preferred_share_lower": 0.0,
+        "preferred_share_upper": 0.0,
+        "resolved_subset_share": 0.0,
+        "reported_share_basis": "selected_stops_with_coverage_interval",
+        "constraint_validity": {
+          "evaluated": 1,
+          "valid": 1,
+          "rate": 1.0
+        },
+        "usage": {
+          "known_records": 1,
+          "unknown_records": 0,
+          "known_total_provider_tokens": 400,
+          "cold": {
+            "supplied_records": 0,
+            "interpretable_total": null
+          },
+          "amortized": {
+            "supplied_records": 0,
+            "interpretable_total": null
+          },
+          "no_inferred_time_savings": true
+        },
+        "latency_seconds": {
+          "unit": "seconds",
+          "n": 1,
+          "min": 1.2,
+          "median": 1.2,
+          "max": 1.2
+        },
+        "failure_retries": {
+          "n": 1,
+          "total": 0,
+          "max": 0
+        }
+      },
+      "short_term": {
+        "planned": 1,
+        "observed": 1,
+        "missing": 0,
+        "states": {
+          "delivered": 1,
+          "failed": 0,
+          "error": 0,
+          "refused": 0,
+          "empty": 0,
+          "missing": 0
+        },
+        "delivered": 1,
+        "selected_stop_pool": {
+          "selected_total": 1,
+          "preferred_hits": 1,
+          "non_preferred": 0,
+          "resolved_denominator": 1,
+          "unknown_category_stops": 0,
+          "unknown_preference_stops": 0,
+          "unknown_total": 0,
+          "duplicate_selected_ids": 0,
+          "empty_plan_records": 0
+        },
+        "preferred_share": 1.0,
+        "preferred_share_reason": null,
+        "preferred_share_lower": 1.0,
+        "preferred_share_upper": 1.0,
+        "resolved_subset_share": 1.0,
+        "reported_share_basis": "selected_stops_with_coverage_interval",
+        "constraint_validity": {
+          "evaluated": 1,
+          "valid": 1,
+          "rate": 1.0
+        },
+        "usage": {
+          "known_records": 1,
+          "unknown_records": 0,
+          "known_total_provider_tokens": 300,
+          "cold": {
+            "supplied_records": 0,
+            "interpretable_total": null
+          },
+          "amortized": {
+            "supplied_records": 0,
+            "interpretable_total": null
+          },
+          "no_inferred_time_savings": true
+        },
+        "latency_seconds": {
+          "unit": "seconds",
+          "n": 1,
+          "min": 1.1,
+          "median": 1.1,
+          "max": 1.1
+        },
+        "failure_retries": {
+          "n": 1,
+          "total": 0,
+          "max": 0
+        }
+      },
+      "two_tier": {
+        "planned": 1,
+        "observed": 1,
+        "missing": 0,
+        "states": {
+          "delivered": 1,
+          "failed": 0,
+          "error": 0,
+          "refused": 0,
+          "empty": 0,
+          "missing": 0
+        },
+        "delivered": 1,
+        "selected_stop_pool": {
+          "selected_total": 2,
+          "preferred_hits": 2,
+          "non_preferred": 0,
+          "resolved_denominator": 2,
+          "unknown_category_stops": 0,
+          "unknown_preference_stops": 0,
+          "unknown_total": 0,
+          "duplicate_selected_ids": 0,
+          "empty_plan_records": 0
+        },
+        "preferred_share": 1.0,
+        "preferred_share_reason": null,
+        "preferred_share_lower": 1.0,
+        "preferred_share_upper": 1.0,
+        "resolved_subset_share": 1.0,
+        "reported_share_basis": "selected_stops_with_coverage_interval",
+        "constraint_validity": {
+          "evaluated": 1,
+          "valid": 1,
+          "rate": 1.0
+        },
+        "usage": {
+          "known_records": 1,
+          "unknown_records": 0,
+          "known_total_provider_tokens": 200,
+          "cold": {
+            "supplied_records": 0,
+            "interpretable_total": null
+          },
+          "amortized": {
+            "supplied_records": 0,
+            "interpretable_total": null
+          },
+          "no_inferred_time_savings": true
+        },
+        "latency_seconds": {
+          "unit": "seconds",
+          "n": 1,
+          "min": 1.0,
+          "median": 1.0,
+          "max": 1.0
+        },
+        "failure_retries": {
+          "n": 1,
+          "total": 0,
+          "max": 0
+        }
+      }
+    }
+  },
+  "profile_effects": [
+    {
+      "profile_id": "P1",
+      "baseline_condition": "memory_disabled",
+      "preferred_share_by_condition": {
+        "memory_disabled": 0.0,
+        "short_term": 1.0,
+        "two_tier": 1.0
+      },
+      "resolved_subset_share_by_condition": {
+        "memory_disabled": 0.0,
+        "short_term": 1.0,
+        "two_tier": 1.0
+      },
+      "preferred_share_detail_by_condition": {
+        "memory_disabled": {
+          "value": 0.0,
+          "reason": null,
+          "lower": 0.0,
+          "upper": 0.0,
+          "resolved_subset_share": 0.0,
+          "selected_total": 1,
+          "preferred": 0,
+          "non_preferred": 1,
+          "resolved_total": 1,
+          "unknown_total": 0,
+          "coverage": 1.0
+        },
+        "short_term": {
+          "value": 1.0,
+          "reason": null,
+          "lower": 1.0,
+          "upper": 1.0,
+          "resolved_subset_share": 1.0,
+          "selected_total": 1,
+          "preferred": 1,
+          "non_preferred": 0,
+          "resolved_total": 1,
+          "unknown_total": 0,
+          "coverage": 1.0
+        },
+        "two_tier": {
+          "value": 1.0,
+          "reason": null,
+          "lower": 1.0,
+          "upper": 1.0,
+          "resolved_subset_share": 1.0,
+          "selected_total": 1,
+          "preferred": 1,
+          "non_preferred": 0,
+          "resolved_total": 1,
+          "unknown_total": 0,
+          "coverage": 1.0
+        }
+      },
+      "constraint_validity_by_condition": {
+        "memory_disabled": 1.0,
+        "short_term": 1.0,
+        "two_tier": 1.0
+      },
+      "token_reduction_by_condition": {
+        "short_term": {
+          "value": 0.25,
+          "reason": null,
+          "baseline_total": 400,
+          "condition_total": 300
+        },
+        "two_tier": {
+          "value": 0.5,
+          "reason": null,
+          "baseline_total": 400,
+          "condition_total": 200
+        }
+      },
+      "paired_effect_details": {
+        "short_term": {
+          "condition": "short_term",
+          "baseline_condition": "memory_disabled",
+          "effect": 1.0,
+          "reason": null,
+          "paired_units": 1,
+          "excluded_units": [],
+          "unit_effect_definition": "share(condition) - share(baseline) within the same unit",
+          "token_reduction": {
+            "value": 0.25,
+            "reason": null,
+            "baseline_total": 400,
+            "condition_total": 300
+          },
+          "provenance_status": "compatible"
+        },
+        "two_tier": {
+          "condition": "two_tier",
+          "baseline_condition": "memory_disabled",
+          "effect": 1.0,
+          "reason": null,
+          "paired_units": 1,
+          "excluded_units": [],
+          "unit_effect_definition": "share(condition) - share(baseline) within the same unit",
+          "token_reduction": {
+            "value": 0.5,
+            "reason": null,
+            "baseline_total": 400,
+            "condition_total": 200
+          },
+          "provenance_status": "compatible"
+        }
+      },
+      "preferred_share_effect_short_term_minus_baseline": 1.0,
+      "preferred_share_effect_two_tier_minus_baseline": 1.0,
+      "provenance_status": "compatible"
+    },
+    {
+      "profile_id": "P2",
+      "baseline_condition": "memory_disabled",
+      "preferred_share_by_condition": {
+        "memory_disabled": 0.0,
+        "short_term": 1.0,
+        "two_tier": 1.0
+      },
+      "resolved_subset_share_by_condition": {
+        "memory_disabled": 0.0,
+        "short_term": 1.0,
+        "two_tier": 1.0
+      },
+      "preferred_share_detail_by_condition": {
+        "memory_disabled": {
+          "value": 0.0,
+          "reason": null,
+          "lower": 0.0,
+          "upper": 0.0,
+          "resolved_subset_share": 0.0,
+          "selected_total": 1,
+          "preferred": 0,
+          "non_preferred": 1,
+          "resolved_total": 1,
+          "unknown_total": 0,
+          "coverage": 1.0
+        },
+        "short_term": {
+          "value": 1.0,
+          "reason": null,
+          "lower": 1.0,
+          "upper": 1.0,
+          "resolved_subset_share": 1.0,
+          "selected_total": 1,
+          "preferred": 1,
+          "non_preferred": 0,
+          "resolved_total": 1,
+          "unknown_total": 0,
+          "coverage": 1.0
+        },
+        "two_tier": {
+          "value": 1.0,
+          "reason": null,
+          "lower": 1.0,
+          "upper": 1.0,
+          "resolved_subset_share": 1.0,
+          "selected_total": 1,
+          "preferred": 1,
+          "non_preferred": 0,
+          "resolved_total": 1,
+          "unknown_total": 0,
+          "coverage": 1.0
+        }
+      },
+      "constraint_validity_by_condition": {
+        "memory_disabled": 1.0,
+        "short_term": 1.0,
+        "two_tier": 1.0
+      },
+      "token_reduction_by_condition": {
+        "short_term": {
+          "value": 0.25,
+          "reason": null,
+          "baseline_total": 400,
+          "condition_total": 300
+        },
+        "two_tier": {
+          "value": 0.5,
+          "reason": null,
+          "baseline_total": 400,
+          "condition_total": 200
+        }
+      },
+      "paired_effect_details": {
+        "short_term": {
+          "condition": "short_term",
+          "baseline_condition": "memory_disabled",
+          "effect": 1.0,
+          "reason": null,
+          "paired_units": 1,
+          "excluded_units": [],
+          "unit_effect_definition": "share(condition) - share(baseline) within the same unit",
+          "token_reduction": {
+            "value": 0.25,
+            "reason": null,
+            "baseline_total": 400,
+            "condition_total": 300
+          },
+          "provenance_status": "compatible"
+        },
+        "two_tier": {
+          "condition": "two_tier",
+          "baseline_condition": "memory_disabled",
+          "effect": 1.0,
+          "reason": null,
+          "paired_units": 1,
+          "excluded_units": [],
+          "unit_effect_definition": "share(condition) - share(baseline) within the same unit",
+          "token_reduction": {
+            "value": 0.5,
+            "reason": null,
+            "baseline_total": 400,
+            "condition_total": 200
+          },
+          "provenance_status": "compatible"
+        }
+      },
+      "preferred_share_effect_short_term_minus_baseline": 1.0,
+      "preferred_share_effect_two_tier_minus_baseline": 1.0,
+      "provenance_status": "compatible"
+    },
+    {
+      "profile_id": "P3",
+      "baseline_condition": "memory_disabled",
+      "preferred_share_by_condition": {
+        "memory_disabled": 0.0,
+        "short_term": 1.0,
+        "two_tier": 1.0
+      },
+      "resolved_subset_share_by_condition": {
+        "memory_disabled": 0.0,
+        "short_term": 1.0,
+        "two_tier": 1.0
+      },
+      "preferred_share_detail_by_condition": {
+        "memory_disabled": {
+          "value": 0.0,
+          "reason": null,
+          "lower": 0.0,
+          "upper": 0.0,
+          "resolved_subset_share": 0.0,
+          "selected_total": 1,
+          "preferred": 0,
+          "non_preferred": 1,
+          "resolved_total": 1,
+          "unknown_total": 0,
+          "coverage": 1.0
+        },
+        "short_term": {
+          "value": 1.0,
+          "reason": null,
+          "lower": 1.0,
+          "upper": 1.0,
+          "resolved_subset_share": 1.0,
+          "selected_total": 1,
+          "preferred": 1,
+          "non_preferred": 0,
+          "resolved_total": 1,
+          "unknown_total": 0,
+          "coverage": 1.0
+        },
+        "two_tier": {
+          "value": 1.0,
+          "reason": null,
+          "lower": 1.0,
+          "upper": 1.0,
+          "resolved_subset_share": 1.0,
+          "selected_total": 1,
+          "preferred": 1,
+          "non_preferred": 0,
+          "resolved_total": 1,
+          "unknown_total": 0,
+          "coverage": 1.0
+        }
+      },
+      "constraint_validity_by_condition": {
+        "memory_disabled": 1.0,
+        "short_term": 1.0,
+        "two_tier": 1.0
+      },
+      "token_reduction_by_condition": {
+        "short_term": {
+          "value": 0.25,
+          "reason": null,
+          "baseline_total": 400,
+          "condition_total": 300
+        },
+        "two_tier": {
+          "value": 0.5,
+          "reason": null,
+          "baseline_total": 400,
+          "condition_total": 200
+        }
+      },
+      "paired_effect_details": {
+        "short_term": {
+          "condition": "short_term",
+          "baseline_condition": "memory_disabled",
+          "effect": 1.0,
+          "reason": null,
+          "paired_units": 1,
+          "excluded_units": [],
+          "unit_effect_definition": "share(condition) - share(baseline) within the same unit",
+          "token_reduction": {
+            "value": 0.25,
+            "reason": null,
+            "baseline_total": 400,
+            "condition_total": 300
+          },
+          "provenance_status": "compatible"
+        },
+        "two_tier": {
+          "condition": "two_tier",
+          "baseline_condition": "memory_disabled",
+          "effect": 1.0,
+          "reason": null,
+          "paired_units": 1,
+          "excluded_units": [],
+          "unit_effect_definition": "share(condition) - share(baseline) within the same unit",
+          "token_reduction": {
+            "value": 0.5,
+            "reason": null,
+            "baseline_total": 400,
+            "condition_total": 200
+          },
+          "provenance_status": "compatible"
+        }
+      },
+      "preferred_share_effect_short_term_minus_baseline": 1.0,
+      "preferred_share_effect_two_tier_minus_baseline": 1.0,
+      "provenance_status": "compatible"
+    },
+    {
+      "profile_id": "P4",
+      "baseline_condition": "memory_disabled",
+      "preferred_share_by_condition": {
+        "memory_disabled": 0.0,
+        "short_term": 1.0,
+        "two_tier": 1.0
+      },
+      "resolved_subset_share_by_condition": {
+        "memory_disabled": 0.0,
+        "short_term": 1.0,
+        "two_tier": 1.0
+      },
+      "preferred_share_detail_by_condition": {
+        "memory_disabled": {
+          "value": 0.0,
+          "reason": null,
+          "lower": 0.0,
+          "upper": 0.0,
+          "resolved_subset_share": 0.0,
+          "selected_total": 1,
+          "preferred": 0,
+          "non_preferred": 1,
+          "resolved_total": 1,
+          "unknown_total": 0,
+          "coverage": 1.0
+        },
+        "short_term": {
+          "value": 1.0,
+          "reason": null,
+          "lower": 1.0,
+          "upper": 1.0,
+          "resolved_subset_share": 1.0,
+          "selected_total": 1,
+          "preferred": 1,
+          "non_preferred": 0,
+          "resolved_total": 1,
+          "unknown_total": 0,
+          "coverage": 1.0
+        },
+        "two_tier": {
+          "value": 1.0,
+          "reason": null,
+          "lower": 1.0,
+          "upper": 1.0,
+          "resolved_subset_share": 1.0,
+          "selected_total": 1,
+          "preferred": 1,
+          "non_preferred": 0,
+          "resolved_total": 1,
+          "unknown_total": 0,
+          "coverage": 1.0
+        }
+      },
+      "constraint_validity_by_condition": {
+        "memory_disabled": 1.0,
+        "short_term": 1.0,
+        "two_tier": 1.0
+      },
+      "token_reduction_by_condition": {
+        "short_term": {
+          "value": 0.25,
+          "reason": null,
+          "baseline_total": 400,
+          "condition_total": 300
+        },
+        "two_tier": {
+          "value": 0.5,
+          "reason": null,
+          "baseline_total": 400,
+          "condition_total": 200
+        }
+      },
+      "paired_effect_details": {
+        "short_term": {
+          "condition": "short_term",
+          "baseline_condition": "memory_disabled",
+          "effect": 1.0,
+          "reason": null,
+          "paired_units": 1,
+          "excluded_units": [],
+          "unit_effect_definition": "share(condition) - share(baseline) within the same unit",
+          "token_reduction": {
+            "value": 0.25,
+            "reason": null,
+            "baseline_total": 400,
+            "condition_total": 300
+          },
+          "provenance_status": "compatible"
+        },
+        "two_tier": {
+          "condition": "two_tier",
+          "baseline_condition": "memory_disabled",
+          "effect": 1.0,
+          "reason": null,
+          "paired_units": 1,
+          "excluded_units": [],
+          "unit_effect_definition": "share(condition) - share(baseline) within the same unit",
+          "token_reduction": {
+            "value": 0.5,
+            "reason": null,
+            "baseline_total": 400,
+            "condition_total": 200
+          },
+          "provenance_status": "compatible"
+        }
+      },
+      "preferred_share_effect_short_term_minus_baseline": 1.0,
+      "preferred_share_effect_two_tier_minus_baseline": 1.0,
+      "provenance_status": "compatible"
+    },
+    {
+      "profile_id": "P5",
+      "baseline_condition": "memory_disabled",
+      "preferred_share_by_condition": {
+        "memory_disabled": 0.0,
+        "short_term": 1.0,
+        "two_tier": 1.0
+      },
+      "resolved_subset_share_by_condition": {
+        "memory_disabled": 0.0,
+        "short_term": 1.0,
+        "two_tier": 1.0
+      },
+      "preferred_share_detail_by_condition": {
+        "memory_disabled": {
+          "value": 0.0,
+          "reason": null,
+          "lower": 0.0,
+          "upper": 0.0,
+          "resolved_subset_share": 0.0,
+          "selected_total": 1,
+          "preferred": 0,
+          "non_preferred": 1,
+          "resolved_total": 1,
+          "unknown_total": 0,
+          "coverage": 1.0
+        },
+        "short_term": {
+          "value": 1.0,
+          "reason": null,
+          "lower": 1.0,
+          "upper": 1.0,
+          "resolved_subset_share": 1.0,
+          "selected_total": 1,
+          "preferred": 1,
+          "non_preferred": 0,
+          "resolved_total": 1,
+          "unknown_total": 0,
+          "coverage": 1.0
+        },
+        "two_tier": {
+          "value": 1.0,
+          "reason": null,
+          "lower": 1.0,
+          "upper": 1.0,
+          "resolved_subset_share": 1.0,
+          "selected_total": 2,
+          "preferred": 2,
+          "non_preferred": 0,
+          "resolved_total": 2,
+          "unknown_total": 0,
+          "coverage": 1.0
+        }
+      },
+      "constraint_validity_by_condition": {
+        "memory_disabled": 1.0,
+        "short_term": 1.0,
+        "two_tier": 1.0
+      },
+      "token_reduction_by_condition": {
+        "short_term": {
+          "value": 0.25,
+          "reason": null,
+          "baseline_total": 400,
+          "condition_total": 300
+        },
+        "two_tier": {
+          "value": 0.5,
+          "reason": null,
+          "baseline_total": 400,
+          "condition_total": 200
+        }
+      },
+      "paired_effect_details": {
+        "short_term": {
+          "condition": "short_term",
+          "baseline_condition": "memory_disabled",
+          "effect": 1.0,
+          "reason": null,
+          "paired_units": 1,
+          "excluded_units": [],
+          "unit_effect_definition": "share(condition) - share(baseline) within the same unit",
+          "token_reduction": {
+            "value": 0.25,
+            "reason": null,
+            "baseline_total": 400,
+            "condition_total": 300
+          },
+          "provenance_status": "compatible"
+        },
+        "two_tier": {
+          "condition": "two_tier",
+          "baseline_condition": "memory_disabled",
+          "effect": 1.0,
+          "reason": null,
+          "paired_units": 1,
+          "excluded_units": [],
+          "unit_effect_definition": "share(condition) - share(baseline) within the same unit",
+          "token_reduction": {
+            "value": 0.5,
+            "reason": null,
+            "baseline_total": 400,
+            "condition_total": 200
+          },
+          "provenance_status": "compatible"
+        }
+      },
+      "preferred_share_effect_short_term_minus_baseline": 1.0,
+      "preferred_share_effect_two_tier_minus_baseline": 1.0,
+      "provenance_status": "compatible"
+    }
+  ],
+  "diagnostics": []
+}

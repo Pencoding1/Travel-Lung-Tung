@@ -1,0 +1,157 @@
+/* Travel Lung Tung — tài liệu kỹ thuật. Bố cục: thanh mục lục trái + nội dung đọc. */
+:root {
+  --bg: #f7f8fa;
+  --panel: #ffffff;
+  --panel-2: #f0f2f6;
+  --text: #1c2024;
+  --muted: #5b6470;
+  --line: #dfe3e8;
+  --accent: #2f6fd0;
+  --accent-soft: #e8f0fd;
+  --ok: #1f7a4d;
+  --ok-soft: #e6f5ed;
+  --warn: #9a6400;
+  --warn-soft: #fdf3e2;
+  --gap: #b03434;
+  --gap-soft: #fdecec;
+  --code-bg: #f2f4f7;
+  --shadow: 0 1px 2px rgba(16, 24, 40, .06), 0 8px 24px rgba(16, 24, 40, .05);
+  --radius: 12px;
+  --font: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, "JetBrains Mono", "Cascadia Mono", Consolas, monospace;
+}
+html[data-theme="dark"] {
+  --bg: #0f1216;
+  --panel: #171b21;
+  --panel-2: #1e242c;
+  --text: #e6e9ee;
+  --muted: #9aa4b2;
+  --line: #2a313a;
+  --accent: #78a9f0;
+  --accent-soft: #1d2937;
+  --ok: #63c893;
+  --ok-soft: #16281f;
+  --warn: #e0b463;
+  --warn-soft: #2a2417;
+  --gap: #f08a8a;
+  --gap-soft: #2c1a1a;
+  --code-bg: #10151b;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .5), 0 8px 24px rgba(0, 0, 0, .35);
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0; background: var(--bg); color: var(--text);
+  font-family: var(--font); font-size: 15.5px; line-height: 1.62;
+  -webkit-text-size-adjust: 100%;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+code, kbd, pre { font-family: var(--mono); font-size: .88em; }
+code { background: var(--code-bg); border: 1px solid var(--line); border-radius: 5px; padding: .08em .35em; }
+pre { background: var(--code-bg); border: 1px solid var(--line); border-radius: var(--radius); padding: 14px 16px; overflow-x: auto; }
+pre code { background: none; border: 0; padding: 0; }
+
+/* ---------- khung trang ---------- */
+.wrap { display: grid; grid-template-columns: 268px minmax(0, 1fr); gap: 28px; max-width: 1400px; margin: 0 auto; padding: 0 22px 64px; }
+header.top {
+  position: sticky; top: 0; z-index: 20; backdrop-filter: blur(8px);
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  border-bottom: 1px solid var(--line); margin-bottom: 22px;
+}
+header.top .bar { display: flex; align-items: center; gap: 14px; max-width: 1400px; margin: 0 auto; padding: 12px 22px; }
+header.top .brand { font-weight: 650; letter-spacing: -.01em; }
+header.top .brand small { display: block; font-weight: 400; color: var(--muted); font-size: 12.5px; }
+header.top .spacer { flex: 1; }
+header.top .crumbs { color: var(--muted); font-size: 13px; }
+.btn {
+  font: inherit; font-size: 13.5px; cursor: pointer; color: var(--text);
+  background: var(--panel); border: 1px solid var(--line); border-radius: 9px; padding: 6px 11px;
+}
+.btn:hover { background: var(--panel-2); }
+
+nav.toc { position: sticky; top: 78px; align-self: start; max-height: calc(100vh - 100px); overflow: auto; font-size: 14px; }
+nav.toc h4 { margin: 18px 0 8px; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+nav.toc h4:first-child { margin-top: 4px; }
+nav.toc a { display: block; padding: 5px 10px; border-radius: 8px; color: var(--text); text-decoration: none; border-left: 2px solid transparent; }
+nav.toc a:hover { background: var(--panel); }
+nav.toc a.active { background: var(--accent-soft); border-left-color: var(--accent); color: var(--accent); font-weight: 600; }
+nav.toc .sub a { padding-left: 22px; color: var(--muted); font-size: 13.5px; }
+
+main { min-width: 0; }
+main > section { margin-bottom: 34px; scroll-margin-top: 84px; }
+h1 { font-size: 28px; line-height: 1.25; letter-spacing: -.02em; margin: 6px 0 6px; }
+h2 { font-size: 21px; letter-spacing: -.01em; margin: 34px 0 10px; padding-bottom: 8px; border-bottom: 1px solid var(--line); }
+h3 { font-size: 17px; margin: 24px 0 8px; }
+h4 { font-size: 15px; margin: 18px 0 6px; }
+p, li { color: var(--text); }
+.lead { font-size: 17px; color: var(--muted); max-width: 70ch; }
+ul, ol { padding-left: 22px; }
+li + li { margin-top: 3px; }
+
+/* ---------- thẻ, bảng ---------- */
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 20px; box-shadow: var(--shadow); }
+.grid { display: grid; gap: 16px; }
+.grid.two { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+.grid.three { grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); }
+table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 14.5px; }
+th, td { text-align: left; padding: 9px 11px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-size: 12.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 600; }
+tbody tr:hover { background: var(--panel-2); }
+.tag { display: inline-block; font-size: 12px; padding: 1px 8px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel-2); color: var(--muted); }
+.badge { display: inline-block; font-size: 12px; font-weight: 600; padding: 2px 9px; border-radius: 999px; }
+.badge.ok { background: var(--ok-soft); color: var(--ok); }
+.badge.warn { background: var(--warn-soft); color: var(--warn); }
+.badge.gap { background: var(--gap-soft); color: var(--gap); }
+
+/* ---------- khối tham số thu gọn ---------- */
+details.params { border: 1px solid var(--line); border-radius: 10px; background: var(--panel-2); margin: 10px 0 16px; }
+details.params > summary {
+  cursor: pointer; list-style: none; padding: 10px 14px; font-weight: 600; font-size: 14px;
+  display: flex; align-items: center; gap: 9px;
+}
+details.params > summary::-webkit-details-marker { display: none; }
+details.params > summary::before { content: "▸"; color: var(--muted); font-size: 12px; }
+details.params[open] > summary::before { content: "▾"; }
+details.params > summary .count { font-weight: 400; color: var(--muted); font-size: 13px; }
+details.params .inner { padding: 2px 14px 14px; border-top: 1px solid var(--line); }
+details.params table { margin-top: 8px; }
+
+/* ---------- khối chữ ký hàm ---------- */
+.sig { background: var(--code-bg); border: 1px solid var(--line); border-left: 3px solid var(--accent); border-radius: 8px; padding: 10px 14px; font-family: var(--mono); font-size: 13.5px; overflow-x: auto; margin: 10px 0 6px; }
+.sig .kw { color: var(--accent); }
+.evidence { font-size: 13px; color: var(--muted); margin: 6px 0 14px; }
+.evidence code { font-size: 12.5px; }
+.callout { border-left: 3px solid var(--accent); background: var(--accent-soft); border-radius: 0 10px 10px 0; padding: 12px 16px; margin: 14px 0; }
+.callout.warn { border-left-color: var(--warn); background: var(--warn-soft); }
+.callout.gap { border-left-color: var(--gap); background: var(--gap-soft); }
+.callout.ok { border-left-color: var(--ok); background: var(--ok-soft); }
+.callout p:first-child { margin-top: 0; }
+.callout p:last-child { margin-bottom: 0; }
+
+/* ---------- khung nhúng sơ đồ ---------- */
+.diagram { border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; background: var(--panel); box-shadow: var(--shadow); }
+.diagram .head { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--line); font-size: 14px; }
+.diagram .head .spacer { flex: 1; }
+.diagram iframe { display: block; width: 100%; height: 620px; border: 0; background: var(--panel); }
+.diagram.tall iframe { height: 760px; }
+.diagram .note { padding: 9px 14px; border-top: 1px solid var(--line); color: var(--muted); font-size: 13px; }
+.legend-inline { display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: 13.5px; color: var(--muted); margin: 8px 0 0; }
+
+/* ---------- thẻ use case ---------- */
+.uc { border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; background: var(--panel); }
+.uc h4 { margin: 0 0 6px; }
+.uc p { margin: 0 0 8px; color: var(--muted); font-size: 14px; }
+.uc pre { margin: 0; font-size: 12.5px; }
+
+footer.foot { border-top: 1px solid var(--line); margin-top: 40px; padding-top: 16px; color: var(--muted); font-size: 13.5px; }
+
+@media (max-width: 980px) {
+  .wrap { grid-template-columns: 1fr; }
+  nav.toc { position: static; max-height: none; }
+  .diagram iframe { height: 460px; }
+}
+@media print {
+  nav.toc, header.top { display: none; }
+  .wrap { grid-template-columns: 1fr; }
+}

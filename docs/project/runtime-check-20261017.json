@@ -1,0 +1,13 @@
+{
+  "date": "2026-10-17",
+  "purpose": "Bounded read-only assessment of existing local verification runtimes",
+  "docker_last_probe": {"exit_code": 1, "result": "dockerDesktopLinuxEngine named pipe missing"},
+  "windows_path_inventory": {"wsl": true, "java": false, "podman": false},
+  "graphhopper_repository_jar_found": false,
+  "wsl_inventory": {"restricted_attempt": "E_ACCESSDENIED", "normal_host_exit_code": 0, "distributions": ["Ubuntu", "docker-desktop"]},
+  "ubuntu_path_inventory": {"command": "command -v memgraph docker java podman", "exit_code": 1, "stdout": "", "stderr": "", "interpretation": "Initial multi-name shell probe was insufficient; per-name loop below supersedes it"},
+  "ubuntu_confirmed_per_name_inventory": {"memgraph": false, "java": false, "podman": false, "docker": "Windows Desktop WSL stub only", "dpkg-deb": true, "tar": true, "curl": true, "ldd": true, "python3": true},
+  "ubuntu_platform": {"version": "24.04.3 LTS", "architecture": "x86_64", "glibc": "2.39"},
+  "ubuntu_docker_shell_probe": {"exit_code": 1, "result": "Docker command unavailable in this WSL distro; Desktop integration must be activated"},
+  "limits": "No installation, service deployment or configuration change. PATH inventory does not establish that no binaries exist anywhere on disk. No live Memgraph or route verification achieved."
+}

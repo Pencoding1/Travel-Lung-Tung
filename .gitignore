@@ -19,6 +19,8 @@ serviceAccountKey.json
 __pycache__/
 *.pyc
 .venv/
+# Isolated validation/test virtualenvs (keep the canonical .venv above).
+.venv-*/
 .uv_cache/
 venv/
 env/
@@ -42,3 +44,26 @@ mg_log/
 **/__pycache__/
 .venv/
 .git/
+
+# --- Research source downloads ---
+# Bulky downloaded research papers/text under docs/research/sources/ are not
+# shipped. They are cited publicly elsewhere and the curated summaries remain
+# versioned in docs/research/*.md.
+docs/research/sources/*.pdf
+docs/research/sources/*.txt
+
+# --- Raw executor logs ---
+# Machine-generated executor event streams can be very large; they should not
+# be committed. Curated handoff reports and evidence logs stay versionable.
+events*.log
+*-events.log
+
+# --- Generated QA scratch trees ---
+# Throwaway QA workspaces are regenerated per run and never versioned; curated
+# handoff reports/evidence under docs/project/handoffs/ remain tracked.
+.qa-tmp*/
+
+# --- Isolated workspace-native runtime binaries/state (OC-041) ---
+# Downloaded packages, extracted Memgraph runtime, fresh data dir and logs stay
+# machine-local; reproducible helpers and the written report remain tracked.
+.runtime-native/

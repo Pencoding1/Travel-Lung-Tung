@@ -1,0 +1,491 @@
+{
+  "generatedAt": "2026-10-17T18:41:30.602Z",
+  "checked": 48,
+  "failed": 0,
+  "limitations": [
+    "Line checks prove file existence and in-bounds line numbers; they do not re-audit semantic correctness.",
+    "Paths are relative to the repository root."
+  ],
+  "checks": [
+    {
+      "module": "acquisition",
+      "path": "crawler_service/app/acquisition/pipeline.py",
+      "line": 448,
+      "label": "run_pipeline",
+      "exists": true,
+      "lines": 867,
+      "ok": true,
+      "preview": "def run_pipeline("
+    },
+    {
+      "module": "acquisition",
+      "path": "crawler_service/app/acquisition/pipeline.py",
+      "line": 485,
+      "label": "Kiểm tra mọi nguồn trước khi ghi",
+      "exists": true,
+      "lines": 867,
+      "ok": true,
+      "preview": "# Phase 1: validate and parse every source into memory before any write."
+    },
+    {
+      "module": "acquisition",
+      "path": "crawler_service/app/acquisition/pipeline.py",
+      "line": 521,
+      "label": "Tách phạm vi thật/tổng hợp",
+      "exists": true,
+      "lines": 867,
+      "ok": true,
+      "preview": "# Phase 1b: derive the immutable dataset/synthetic scope from the effective"
+    },
+    {
+      "module": "acquisition",
+      "path": "crawler_service/app/acquisition/adapters/osm.py",
+      "line": 53,
+      "label": "OSMAdapter",
+      "exists": true,
+      "lines": 206,
+      "ok": true,
+      "preview": "class OSMAdapter(SourceAdapter):"
+    },
+    {
+      "module": "acquisition",
+      "path": "crawler_service/app/acquisition/adapters/wikidata.py",
+      "line": 59,
+      "label": "WikidataAdapter",
+      "exists": true,
+      "lines": 294,
+      "ok": true,
+      "preview": "class WikidataAdapter(SourceAdapter):"
+    },
+    {
+      "module": "data-prep",
+      "path": "crawler_service/app/primary_dataset/prepare.py",
+      "line": 159,
+      "label": "prepare_primary_dataset",
+      "exists": true,
+      "lines": 561,
+      "ok": true,
+      "preview": "def prepare_primary_dataset("
+    },
+    {
+      "module": "data-prep",
+      "path": "crawler_service/app/primary_dataset/prepare.py",
+      "line": 202,
+      "label": "Phát hiện trùng chính xác",
+      "exists": true,
+      "lines": 561,
+      "ok": true,
+      "preview": "feature_hash = exact_feature_hash(feature)"
+    },
+    {
+      "module": "data-prep",
+      "path": "crawler_service/app/primary_dataset/registry.py",
+      "line": 247,
+      "label": "plan() khóa phiên bản",
+      "exists": true,
+      "lines": 453,
+      "ok": true,
+      "preview": "def plan("
+    },
+    {
+      "module": "data-prep",
+      "path": "crawler_service/app/primary_dataset/registry.py",
+      "line": 385,
+      "label": "preflight trước khi ghi",
+      "exists": true,
+      "lines": 453,
+      "ok": true,
+      "preview": "def preflight("
+    },
+    {
+      "module": "data-prep",
+      "path": "POI_service/app/core/utils/primary_snapshot.py",
+      "line": 1968,
+      "label": "prepare_snapshot",
+      "exists": true,
+      "lines": 2232,
+      "ok": true,
+      "preview": "def prepare_snapshot("
+    },
+    {
+      "module": "data-prep",
+      "path": "docs/project/QA_PHASE1.md",
+      "line": 28,
+      "label": "QA-DATA-01: hợp đồng hash chế độ real",
+      "exists": true,
+      "lines": 31,
+      "ok": true,
+      "preview": "**QA-DATA-01 — ràng buộc hash chế độ real có thể bị thay bằng tham số thư viện.** Gọi `prepare_snapshot` với bản sao `RE"
+    },
+    {
+      "module": "data-prep",
+      "path": "docs/project/handoffs/OC-043/parent-real-profile-binding-probe.json",
+      "line": 9,
+      "label": "probe: actual accepted, real=true",
+      "exists": true,
+      "lines": 14,
+      "ok": true,
+      "preview": "\"actual\": \"accepted\","
+    },
+    {
+      "module": "data-prep",
+      "path": "docs/project/handoffs/OC-043/parent-real-profile-regression-result.json",
+      "line": 7,
+      "label": "ca hồi quy: passed=false",
+      "exists": true,
+      "lines": 9,
+      "ok": true,
+      "preview": "\"passed\": false,"
+    },
+    {
+      "module": "graph-mcp",
+      "path": "POI_service/app/core/utils/spatial.py",
+      "line": 164,
+      "label": "conservative_prefilter_cypher",
+      "exists": true,
+      "lines": 257,
+      "ok": true,
+      "preview": "def conservative_prefilter_cypher("
+    },
+    {
+      "module": "graph-mcp",
+      "path": "POI_service/app/core/infrastructure/db/repositories/memgraph.py",
+      "line": 618,
+      "label": "batch_create",
+      "exists": true,
+      "lines": 1937,
+      "ok": true,
+      "preview": "def batch_create(self, poi_batch: list[dict]) -> int:"
+    },
+    {
+      "module": "graph-mcp",
+      "path": "POI_service/app/core/infrastructure/db/repositories/memgraph.py",
+      "line": 1597,
+      "label": "truy vấn nguồn",
+      "exists": true,
+      "lines": 1937,
+      "ok": true,
+      "preview": "def get_compound_explore_source("
+    },
+    {
+      "module": "graph-mcp",
+      "path": "POI_service/app/core/domain/source_scope.py",
+      "line": 73,
+      "label": "SourceSnapshotSelection",
+      "exists": true,
+      "lines": 343,
+      "ok": true,
+      "preview": "class SourceSnapshotSelection(BaseModel):"
+    },
+    {
+      "module": "graph-mcp",
+      "path": "POI_service/app/api/mcp/tools.py",
+      "line": 359,
+      "label": "explore_pois",
+      "exists": true,
+      "lines": 537,
+      "ok": true,
+      "preview": "def explore_pois("
+    },
+    {
+      "module": "routing",
+      "path": "POI_service/app/api/mcp/tools.py",
+      "line": 191,
+      "label": "get_itinerary_route",
+      "exists": true,
+      "lines": 537,
+      "ok": true,
+      "preview": "def get_itinerary_route(ordered_poi_ids: List[str], vehicle: str = \"car\") -> str:"
+    },
+    {
+      "module": "routing",
+      "path": "POI_service/app/api/mcp/tools.py",
+      "line": 285,
+      "label": "gọi GraphHopper",
+      "exists": true,
+      "lines": 537,
+      "ok": true,
+      "preview": "response = client.get(_graphhopper_url(), params=params, timeout=10.0)"
+    },
+    {
+      "module": "routing",
+      "path": "scripts/native_routing/inspect_profiles.py",
+      "line": 1,
+      "label": "kiểm tra profile native",
+      "exists": true,
+      "lines": 21,
+      "ok": true,
+      "preview": "import json"
+    },
+    {
+      "module": "routing",
+      "path": "docs/deployment/NATIVE_ROUTING_VERIFICATION.md",
+      "line": 1,
+      "label": "biên bản runtime",
+      "exists": true,
+      "lines": 279,
+      "ok": true,
+      "preview": "# Native GraphHopper 11.1 routing verification"
+    },
+    {
+      "module": "ai-provider",
+      "path": "ai_service/domains/providers/config.py",
+      "line": 59,
+      "label": "ProviderConfig",
+      "exists": true,
+      "lines": 217,
+      "ok": true,
+      "preview": "class ProviderConfig:"
+    },
+    {
+      "module": "ai-provider",
+      "path": "ai_service/domains/providers/opencode_cli.py",
+      "line": 384,
+      "label": "_ArgumentValidator",
+      "exists": true,
+      "lines": 1245,
+      "ok": true,
+      "preview": "class _ArgumentValidator:"
+    },
+    {
+      "module": "ai-provider",
+      "path": "ai_service/domains/providers/opencode_cli.py",
+      "line": 902,
+      "label": "_AsyncCapacity",
+      "exists": true,
+      "lines": 1245,
+      "ok": true,
+      "preview": "class _AsyncCapacity:"
+    },
+    {
+      "module": "ai-provider",
+      "path": "ai_service/main.py",
+      "line": 402,
+      "label": "_router_prompt hiện vẫn hỏi model provider",
+      "exists": true,
+      "lines": 1519,
+      "ok": true,
+      "preview": "def _router_prompt(user_message: str) -> str:"
+    },
+    {
+      "module": "ai-provider",
+      "path": "ai_service/main.py",
+      "line": 419,
+      "label": "route_intent",
+      "exists": true,
+      "lines": 1519,
+      "ok": true,
+      "preview": "async def route_intent(user_message: str,"
+    },
+    {
+      "module": "ai-provider",
+      "path": "ai_service/main.py",
+      "line": 496,
+      "label": "_run_travel_turn",
+      "exists": true,
+      "lines": 1519,
+      "ok": true,
+      "preview": "async def _run_travel_turn(messages: List[Dict[str, Any]],"
+    },
+    {
+      "module": "ai-provider",
+      "path": "docs/project/JEV_INTENT_PLAN.md",
+      "line": 1,
+      "label": "kế hoạch Jev: chưa triển khai",
+      "exists": true,
+      "lines": 31,
+      "ok": true,
+      "preview": "# Kế hoạch Codex — chuyển phân loại ý định sang Jev"
+    },
+    {
+      "module": "planner",
+      "path": "ai_service/domains/planning/scheduler.py",
+      "line": 198,
+      "label": "schedule",
+      "exists": true,
+      "lines": 397,
+      "ok": true,
+      "preview": "def schedule(scenario: Scenario) -> Plan:"
+    },
+    {
+      "module": "planner",
+      "path": "ai_service/domains/planning/scheduler.py",
+      "line": 229,
+      "label": "vòng lặp có giới hạn",
+      "exists": true,
+      "lines": 397,
+      "ok": true,
+      "preview": "while len(day_stops) < day_max and not iteration_limit_hit:"
+    },
+    {
+      "module": "planner",
+      "path": "ai_service/domains/planning/validator.py",
+      "line": 105,
+      "label": "validate",
+      "exists": true,
+      "lines": 323,
+      "ok": true,
+      "preview": "def validate(scenario: Scenario, plan: Plan) -> ValidationReport:"
+    },
+    {
+      "module": "planner",
+      "path": "ai_service/domains/planning_adapter.py",
+      "line": 1,
+      "label": "adapter sản xuất",
+      "exists": true,
+      "lines": 925,
+      "ok": true,
+      "preview": "\"\"\"Integration adapter between verified grounding evidence and the OC-010 planner."
+    },
+    {
+      "module": "memory",
+      "path": "ai_service/domains/memory.py",
+      "line": 115,
+      "label": "WorkingMemory",
+      "exists": true,
+      "lines": 654,
+      "ok": true,
+      "preview": "class WorkingMemory:"
+    },
+    {
+      "module": "memory",
+      "path": "ai_service/domains/memory.py",
+      "line": 197,
+      "label": "lease",
+      "exists": true,
+      "lines": 654,
+      "ok": true,
+      "preview": "async def lease(self, key: str):"
+    },
+    {
+      "module": "memory",
+      "path": "ai_service/domains/memory.py",
+      "line": 471,
+      "label": "SQLiteProfileStore",
+      "exists": true,
+      "lines": 654,
+      "ok": true,
+      "preview": "class SQLiteProfileStore:"
+    },
+    {
+      "module": "memory",
+      "path": "ai_service/domains/memory_auth.py",
+      "line": 89,
+      "label": "verify_bearer",
+      "exists": true,
+      "lines": 126,
+      "ok": true,
+      "preview": "def verify_bearer(authorization: Optional[str]) -> str:"
+    },
+    {
+      "module": "memory",
+      "path": "ai_service/main.py",
+      "line": 269,
+      "label": "_memory_key",
+      "exists": true,
+      "lines": 1519,
+      "ok": true,
+      "preview": "def _memory_key(subject: Optional[str], session_id: str) -> str:"
+    },
+    {
+      "module": "backend",
+      "path": "backend_service/app/main.py",
+      "line": 33,
+      "label": "create_app",
+      "exists": true,
+      "lines": 88,
+      "ok": true,
+      "preview": "def create_app(*, repository: Optional[ItineraryDraftRepository] = None,"
+    },
+    {
+      "module": "backend",
+      "path": "backend_service/app/main.py",
+      "line": 76,
+      "label": "ready",
+      "exists": true,
+      "lines": 88,
+      "ok": true,
+      "preview": "def ready() -> Any:"
+    },
+    {
+      "module": "backend",
+      "path": "backend_service/app/core/repositories/sqlite_itinerary_draft.py",
+      "line": 96,
+      "label": "SqliteItineraryDraftRepository",
+      "exists": true,
+      "lines": 302,
+      "ok": true,
+      "preview": "class SqliteItineraryDraftRepository(ItineraryDraftRepository):"
+    },
+    {
+      "module": "backend",
+      "path": "backend_service/app/core/repositories/sqlite_itinerary_draft.py",
+      "line": 111,
+      "label": "_open",
+      "exists": true,
+      "lines": 302,
+      "ok": true,
+      "preview": "def _open(self, *, mode: str) -> sqlite3.Connection:"
+    },
+    {
+      "module": "backend",
+      "path": "backend_service/app/api/rest/v1/endpoint_itinerary.py",
+      "line": 93,
+      "label": "POST bản nháp có xác thực (client/API)",
+      "exists": true,
+      "lines": 190,
+      "ok": true,
+      "preview": "@router.post(\"\", response_model=DraftDetail, status_code=status.HTTP_201_CREATED)"
+    },
+    {
+      "module": "experiments",
+      "path": "benchmarks/live_model/runner.py",
+      "line": 387,
+      "label": "run_observation",
+      "exists": true,
+      "lines": 797,
+      "ok": true,
+      "preview": "def run_observation(scenario_input: dict, condition: str, repetition: int, *,"
+    },
+    {
+      "module": "experiments",
+      "path": "benchmarks/live_model/export.py",
+      "line": 300,
+      "label": "build_h2_records_from_logs",
+      "exists": true,
+      "lines": 356,
+      "ok": true,
+      "preview": "def build_h2_records_from_logs(logs: Sequence[Dict[str, Any]]) -> List[Dict[str, Any]]:"
+    },
+    {
+      "module": "experiments",
+      "path": "benchmarks/evaluation/h2.py",
+      "line": 613,
+      "label": "evaluate_h2",
+      "exists": true,
+      "lines": 797,
+      "ok": true,
+      "preview": "def evaluate_h2(manifest: Mapping[str, Any],"
+    },
+    {
+      "module": "experiments",
+      "path": "benchmarks/evaluation/h3.py",
+      "line": 541,
+      "label": "evaluate_h3",
+      "exists": true,
+      "lines": 744,
+      "ok": true,
+      "preview": "def evaluate_h3(manifest: Mapping[str, Any],"
+    },
+    {
+      "module": "experiments",
+      "path": "docs/experiments/EXPERIMENT_PROTOCOL.md",
+      "line": 1,
+      "label": "giao thức",
+      "exists": true,
+      "lines": 59,
+      "ok": true,
+      "preview": "# Experimental protocol — Travel AI"
+    }
+  ]
+}

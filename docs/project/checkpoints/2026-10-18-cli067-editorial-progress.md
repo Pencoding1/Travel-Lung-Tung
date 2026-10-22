@@ -1,0 +1,15 @@
+# Checkpoint Codex — CLI067 đang tích hợp, báo cáo đã đồng bộ
+
+Ngày 18/10/2026, phase 2; goal ACTIVE/INCOMPLETE. Chủ trì và tác giả kết luận: Codex trong chat hiện tại.
+
+- User đã cho phép xác thực chính thức cho server QA riêng. CLI065 dùng password mới chỉ trong bộ nhớ/môi trường tiến trình con, không đọc khóa global hoặc tắt guard; native proof và cleanup có trong `CLI-065/parent-authenticated-results.json`. Không gọi model ứng dụng.
+- SEC066 đã nhận có giới hạn: 149 provider tests đạt; loại TYPESAFE_API_TOKEN/KEY khỏi CLI child environment, giữ guard carriers và credential provider. E104/E105 đã thêm vào EVIDENCE_REGISTER.md.
+- Báo cáo `docs/reports/2026-10-18/index.html` và canonical JSON được Codex biên tập thêm hai kết quả trên. Root QA: 238 mục tĩnh/72 tham chiếu, 75 kiểm tra đồng bộ, semantic phase/mode và node syntax đạt. Không có browser/render proof mới. Receipts ở `CLI-067/parent-report-qa/` (copy từ lần QA mới nhất của harness RT064).
+- CLI067 **vẫn đang chạy**: OpenCode `aibox/ds/deepseek-flash`, session `ses_eb264bdc8ffeBEy4NnUOEb7hs0`, exec handle **20173**. Không restart hoặc chạy writer khác trên provider. Brief/dispatch trong `docs/project/handoffs/CLI-067/`. Log `E:/Agent_Artifact/TVLT_2026/2026-10-18/cli-owned-engine/events.log`.
+- Tiến độ executor mới quan sát: lượt regression đầu165pass/4fail, đã sửa và169pass; thêm lifecycle tests có179pass/1fail rồi sửa thành180pass. Đây là log phía executor, **chưa root rerun/acceptance**, native OpenCode + fake-provider proof/report chưa bàn giao tại note này. Không gọi toàn bộ180 là mock: có Python child HTTP lifecycle tổng hợp, không native OpenCode model proof.
+- Root đã viết `parent_policy_probe.py` và `parent_boundary_probe.py`; **chưa chạy** trên candidate đang sửa. Đây là fault injections tổng hợp, không native engine/model proof. Chờ terminal rồi đọc report/diff, chạy regression và probes; native fake-provider proof phải xác minh độc lập trước acceptance.
+- Quan sát workflow: executor đã fetch tài liệu công khai `dev.opencode.ai` ngoài phạm vi network của brief, có `Invoke-WebRequest -OutFile`. Ghi riêng vi phạm, không hợp thức hóa bằng thêm allowlist sau sự kiện. Quan sát này không chứng minh đọc/lộ credential hoặc gọi model ứng dụng thật.
+
+Không nghiệm thu T051 bằng file cấu hình, test mock hoặc status process0. Cần gate agent/policy thực trước model, cùng owned server cho run/export, sampling/identity/usage, error/cancellation cleanup. Default AI_CLI_PURE phải giữ failclosed khi không hỗ trợ. Sau gate còn T050/full6367/client/service integration rồi primary H2/H3. H1 chưa có participants; chờ user chọn sau phase4 trước H1 hoặc viết luận án tiếp. Agent Memory implementation là P2 sau4phase.
+
+User hỏi lại hai hướng mở rộng: Codex đã báo rõ crawl P0/P1 chưa hoàn tất và vẫn thuộc phase2. Capture252/161đủtrường chỉ là web, quarantine252/import0, không được ghi thành social-platform pipeline đã chạy thật. Phải hoàn thiện T057/T058 và T050 trước chuyển phase3. Harness research đã so4hệ, đề xuất thin typed preference và5ticket RS061; không đồng nghĩa grow-with-user runtime đã xây.

@@ -1,0 +1,12 @@
+{
+  "task": "H3",
+  "evaluator_version": "oc18.eval.v1",
+  "generated_at_utc": "2026-10-16T09:03:31.621663+00:00",
+  "input_sha256": {
+    "manifest": "6a6202b9c425e01b6e0ba5323fc5c6b4f459873a3de74dc96ef945758e765b81",
+    "records": "c8c7fc9e620842596f64e5ecb297043f8d5dc633b6357d7fdf9e5b89de6ea2aa"
+  },
+  "output_sha256": "5838699149e8a861e6a91ceb918ceff36d392c00c8484c6a11635b46b1371657",
+  "no_live_execution": true,
+  "label": "SYNTHETIC EVALUATOR TEST"
+}
