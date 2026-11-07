@@ -87,6 +87,15 @@
    - `valid_record_count`: `6367`
    - `source_area_count`: `26`
    - `excluded_corrupt_count`: `0`
-3. **Kiểm tra Toàn bộ Test Suite:**
+3. **Kiểm tra Liên kết End-to-End Giữa Các Module (8 Điểm Nối Live HTTP):**
+   - **Health & Routing Profiles:** `GET /healthz` (`ai_service` `:8002` → `ok`), `GET /openapi.json` (`poi_api` `:8000` → `200 OK`), `GET /info` (`graphhopper` `:8989` → `['car', 'foot', 'bike']`).
+   - **Catalog & Spatial Graph (`ai_service` → `poi_mcp` → `memgraph-db`):** `6.367` POI, `26` vùng nguồn, `58.369` cạnh không gian `:NEAR_BY` (bán kính `3.0 km`) và 3 chỉ mục đồ thị (`:POI(id)`, `:POI(source_area_id)`, `:Category(id)`).
+   - **Chat Tra cứu Địa điểm (`POST /chat`):** Phân loại ý định qua TypeSafe Jev (`TRAVEL`), gọi MCP `explore_pois` + `get_poi_details`, tổng hợp qua Gemini (`gemini-2.5-flash`) kèm kiểm chứng Grounding (`source_evidence_ids` > 0).
+   - **Chat Điền Form & Phương án Gợi ý (`POST /chat`):** Tự động trích xuất `planning.form` (`days`, `party`, `budget`, `date`) và `3` phương án (`planning.options`) lên giao diện `travel.html`.
+   - **Chat Mô phỏng Đặt chỗ (`POST /chat`):** Trả về khối `booking` (`destination_status: "RESOLVED"`, `cta_label: "Book Ngay"`, `simulation: true`) khi khớp địa điểm trong dữ liệu.
+   - **Tạo Lịch trình & Vẽ Tuyến đường Thực tế (`POST /generate_itinerary`):** Trả về danh sách điểm dừng đã lập lịch (`reply.stops`) và hình học tuyến đường thực tế (`planning.route_geometry.features`) từ GraphHopper.
+   - **Lưu / Mở / Xóa Lịch trình Bền vững (`POST/GET/DELETE /saved/itineraries`):** Lưu trữ bền vững trên volume `ai_memory` (`/var/lib/ai_memory/saved_itineraries.json`), bảo toàn trọn vẹn `reply.stops` và `planning.route_geometry` khi mở lại trên UI.
+   - **Quản lý Hồ sơ & Bộ nhớ (`PUT/GET/DELETE /memory/profile` & `POST /memory/short/clear`):** Xác thực JWT HS256 và lưu trữ SQLite bền vững trên `/var/lib/ai_memory/profiles.db` (`200 OK`).
+4. **Kiểm tra Toàn bộ Test Suite:**
    - **2.142 / 2.142 bài test tự động PASSED** (`0 failed`).
    - Toàn bộ hợp đồng đóng băng (`docs/contracts/frozen/TVLT-CHAT-v1.1-20261028/manifest.json`) và dữ liệu nguồn (`data/primary_20261016/`) được bảo toàn nguyên vẹn 100% mã băm SHA-256.
