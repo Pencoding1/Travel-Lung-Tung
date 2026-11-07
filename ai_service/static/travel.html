@@ -957,6 +957,7 @@
       state.chatBusy = false;
       state.planBusy = false;
       state.itinerary = null;
+      state.lastItineraryBody = null;
       state.projection = null;
       state.selectedPoiId = null;
       state.routeGeometry = null;
@@ -977,6 +978,7 @@
       invalidateResults();
       state.sessionId = newSessionId();
       resetConversation(reason);
+      loadSavedDrafts();
       return options;
     }
 
@@ -1389,6 +1391,7 @@
       var reply = body.reply && typeof body.reply === "object" ? body.reply : null;
       var planning = body.planning && typeof body.planning === "object" ? body.planning : null;
       state.itinerary = planning;
+      state.lastItineraryBody = body && typeof body === "object" ? body : null;
       state.projection = projectStops(reply);
       state.routeGeometry = safeRouteGeometry(planning);
 
@@ -1930,17 +1933,18 @@
     }
 
     async function saveCurrentItinerary() {
-      if (!state.itinerary) {
+      if (!state.itinerary && !state.lastItineraryBody) {
         setStatus("Chưa có lịch trình để lưu.", "warn");
         return;
       }
+      var payloadToSave = state.lastItineraryBody || { reply: null, planning: state.itinerary };
       try {
         await requestJson("/saved/itineraries", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             session_id: state.sessionId,
-            payload: state.itinerary
+            payload: payloadToSave
           })
         });
         setStatus("Đã lưu lịch trình.", "");
@@ -1978,7 +1982,7 @@
           var btn = el("button", "Phương án " + String(idx + 1) + " (" + pace + " · " + bgt + ")", "chip");
           btn.type = "button";
           btn.addEventListener("click", function () {
-            messageEl.value = "Xác nhận phương án " + String(idx + 1);
+            messageEl.value = "Xác nhận phương án " + String(idx + 1) + " cho lịch trình du lịch";
             ask();
           });
           chipRow.appendChild(btn);

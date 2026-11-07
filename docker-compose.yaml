@@ -74,7 +74,8 @@ services:
       - JWT_SECRET=${JWT_SECRET:?JWT_SECRET is required}
       - JWT_ALGORITHM=${JWT_ALGORITHM:-HS256}
       - FIRESTORE_ENABLED=${FIRESTORE_ENABLED:-false}
-      - GRAPHHOPPER_PROFILES=${GRAPHHOPPER_PROFILES:-car,foot}
+      - GRAPHHOPPER_PROFILES=${GRAPHHOPPER_PROFILES:-car,foot,bike}
+      - SAVED_ITINERARY_STORAGE_PATH=${SAVED_ITINERARY_STORAGE_PATH:-/tmp/saved_itineraries.json}
     env_file:
       - path: ./POI_service/.env
         required: false
@@ -97,7 +98,8 @@ services:
       - JWT_SECRET=${JWT_SECRET:?JWT_SECRET is required}
       - JWT_ALGORITHM=${JWT_ALGORITHM:-HS256}
       - FIRESTORE_ENABLED=${FIRESTORE_ENABLED:-false}
-      - GRAPHHOPPER_PROFILES=${GRAPHHOPPER_PROFILES:-car,foot}
+      - GRAPHHOPPER_PROFILES=${GRAPHHOPPER_PROFILES:-car,foot,bike}
+      - SAVED_ITINERARY_STORAGE_PATH=${SAVED_ITINERARY_STORAGE_PATH:-/tmp/saved_itineraries.json}
     env_file:
       - path: ./POI_service/.env
         required: false
@@ -120,13 +122,18 @@ services:
       - MCP_SERVER_URL=${MCP_SERVER_URL:-http://poi_mcp:8001/sse}
       - GEMINI_MODEL=${GEMINI_MODEL:-gemini-2.5-pro}
       - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - AI_PROVIDER=${AI_PROVIDER:-gemini}
       - TYPESAFE_API_TOKEN=${TYPESAFE_API_TOKEN:-}
       - TYPESAFE_API_KEY=${TYPESAFE_API_KEY:-}
       - JEV_MIN_CONFIDENCE=${JEV_MIN_CONFIDENCE:-0.65}
       - JEV_MODEL=${JEV_MODEL:-jev-latest}
+      - JEV_POLICY_VERSION=${JEV_POLICY_VERSION:-jev_intent_policy_v1}
+      - JEV_TIMEOUT_SECONDS=${JEV_TIMEOUT_SECONDS:-8.0}
+      - JEV_MAX_ATTEMPTS=${JEV_MAX_ATTEMPTS:-1}
       - JWT_SECRET=${JWT_SECRET:?JWT_SECRET is required}
       - JWT_ALGORITHM=${JWT_ALGORITHM:-HS256}
       - MEMORY_DB_PATH=${MEMORY_DB_PATH:-}
+      - SAVED_ITINERARY_STORAGE_PATH=${SAVED_ITINERARY_STORAGE_PATH:-/var/lib/ai_memory/saved_itineraries.json}
     depends_on:
       - poi_mcp
 

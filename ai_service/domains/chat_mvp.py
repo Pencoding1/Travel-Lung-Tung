@@ -24,6 +24,8 @@ from __future__ import annotations
 
 from collections import OrderedDict
 import json
+import os
+from pathlib import Path
 import re
 import unicodedata
 import uuid
@@ -57,8 +59,61 @@ class SavedDraftStore:
         self._max_per_owner = max_per_owner
         self._by_owner: "OrderedDict[str, OrderedDict[str, Dict[str, Any]]]" = OrderedDict()
         self._last_itinerary: "OrderedDict[str, Dict[str, Any]]" = OrderedDict()
+        self._loaded_path: Optional[str] = None
+        self._load_if_configured()
+
+    def _storage_path(self) -> Optional[Path]:
+        raw = os.environ.get("SAVED_ITINERARY_STORAGE_PATH", "").strip()
+        if not raw:
+            return None
+        return Path(raw)
+
+    def _load_if_configured(self) -> None:
+        path = self._storage_path()
+        if path is None:
+            return
+        resolved = str(path)
+        if self._loaded_path == resolved:
+            return
+        self._loaded_path = resolved
+        if not path.is_file():
+            return
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+            if isinstance(data, dict):
+                by_owner = data.get("by_owner")
+                if isinstance(by_owner, dict):
+                    for owner, records in by_owner.items():
+                        if isinstance(owner, str) and isinstance(records, dict):
+                            bucket: "OrderedDict[str, Dict[str, Any]]" = OrderedDict()
+                            for did, rec in records.items():
+                                if isinstance(did, str) and isinstance(rec, dict):
+                                    bucket[did] = rec
+                            self._by_owner[owner] = bucket
+                last_itin = data.get("last_itinerary")
+                if isinstance(last_itin, dict):
+                    for owner, payload in last_itin.items():
+                        if isinstance(owner, str) and isinstance(payload, dict):
+                            self._last_itinerary[owner] = payload
+        except Exception:  # noqa: BLE001
+            pass
+
+    def _persist_if_configured(self) -> None:
+        path = self._storage_path()
+        if path is None:
+            return
+        try:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            serialized = {
+                "by_owner": {k: dict(v) for k, v in self._by_owner.items()},
+                "last_itinerary": dict(self._last_itinerary),
+            }
+            path.write_text(json.dumps(serialized, ensure_ascii=False), encoding="utf-8")
+        except Exception:  # noqa: BLE001
+            pass
 
     def _bucket(self, owner_key: str) -> "OrderedDict[str, Dict[str, Any]]":
+        self._load_if_configured()
         bucket = self._by_owner.get(owner_key)
         if bucket is None:
             bucket = OrderedDict()
@@ -71,12 +126,15 @@ class SavedDraftStore:
     def remember_generated(self, owner_key: str, payload: Dict[str, Any]) -> None:
         if not owner_key or not isinstance(payload, dict):
             return
+        self._load_if_configured()
         self._last_itinerary[owner_key] = dict(payload)
         self._last_itinerary.move_to_end(owner_key)
         while len(self._last_itinerary) > self._max_owners:
             self._last_itinerary.popitem(last=False)
+        self._persist_if_configured()
 
     def get_last_generated(self, owner_key: str) -> Optional[Dict[str, Any]]:
+        self._load_if_configured()
         item = self._last_itinerary.get(owner_key)
         return dict(item) if isinstance(item, dict) else None
 
@@ -91,6 +149,11 @@ class SavedDraftStore:
         draft_id = f"draft_{uuid.uuid4().hex}"
         reply = payload.get("reply") if isinstance(payload.get("reply"), dict) else payload
         stops = reply.get("stops") if isinstance(reply, dict) and isinstance(reply.get("stops"), list) else []
+        if not stops:
+            planning_obj = payload.get("planning") if isinstance(payload.get("planning"), dict) else payload
+            totals = planning_obj.get("totals") if isinstance(planning_obj, dict) else None
+            if isinstance(totals, dict) and isinstance(totals.get("legs"), list):
+                stops = totals["legs"]
         start_poi_id = reply.get("start_poi_id") if isinstance(reply, dict) else None
         end_poi_id = reply.get("end_poi_id") if isinstance(reply, dict) else None
         now_iso = datetime.now(timezone.utc).isoformat()
@@ -108,9 +171,11 @@ class SavedDraftStore:
         bucket.move_to_end(draft_id)
         while len(bucket) > self._max_per_owner:
             bucket.popitem(last=False)
+        self._persist_if_configured()
         return dict(record)
 
     def list(self, owner_key: str, *, limit: int = 20, offset: int = 0) -> Tuple[List[Dict[str, Any]], int]:
+        self._load_if_configured()
         bucket = self._by_owner.get(owner_key)
         if not bucket:
             return [], 0
@@ -132,6 +197,7 @@ class SavedDraftStore:
         return summaries, total
 
     def get(self, owner_key: str, draft_id: str) -> Optional[Dict[str, Any]]:
+        self._load_if_configured()
         bucket = self._by_owner.get(owner_key)
         if not bucket:
             return None
@@ -139,10 +205,12 @@ class SavedDraftStore:
         return dict(rec) if isinstance(rec, dict) else None
 
     def delete(self, owner_key: str, draft_id: str) -> bool:
+        self._load_if_configured()
         bucket = self._by_owner.get(owner_key)
         if not bucket or draft_id not in bucket:
             return False
         del bucket[draft_id]
+        self._persist_if_configured()
         return True
 
 
@@ -676,7 +744,20 @@ def apply_mvp_contract(
         return result
 
     # MANAGE_SAVED (KT-07): SAVE / LIST / OPEN / DELETE
-    if intent == "MANAGE_SAVED":
+    low_msg = (user_message or "").lower()
+    is_explicit_saved_cmd = any(
+        marker in low_msg
+        for marker in (
+            "lưu lịch trình",
+            "lưu lại lịch trình",
+            "lịch trình đã lưu",
+            "danh sách đã lưu",
+            "mở lịch trình draft_",
+            "xóa lịch trình draft_",
+            "xoá lịch trình draft_",
+        )
+    )
+    if intent == "MANAGE_SAVED" or (intent in ("TRAVEL", "CHITCHAT") and is_explicit_saved_cmd):
         effective_owner = owner_key or "anonymous:default"
         sub_action = _detect_saved_sub_action(user_message)
         m_draft = DRAFT_ID_RE.search(user_message or "")
@@ -872,6 +953,77 @@ def apply_mvp_contract(
         result["handoff"] = None
         result["actions"] = []
         return result
+
+    if intent == "TRAVEL":
+        low = (user_message or "").lower()
+        has_booking_kw = any(
+            w in low for w in ("đặt bàn", "đặt phòng", "đặt vé", "giữ bàn", "thuê xe")
+        )
+        if has_booking_kw:
+            b_type = _extract_booking_type(user_message)
+            evidence_list = result.get("source_evidence_ids")
+            if isinstance(evidence_list, list) and evidence_list:
+                dest_id = str(evidence_list[0])
+                result["booking"] = {
+                    "type": b_type,
+                    "destination": dest_id,
+                    "destination_status": "RESOLVED",
+                    "simulation": True,
+                    "demo_notice": BOOKING_DEMO_NOTICE,
+                    "cta_label": "Book Ngay",
+                }
+            else:
+                named_target = _extract_named_booking_target(user_message)
+                result["booking"] = {
+                    "type": b_type,
+                    "destination": None,
+                    "destination_status": "NOT_FOUND" if named_target else "UNSPECIFIED",
+                    "simulation": True,
+                    "demo_notice": BOOKING_DEMO_NOTICE,
+                }
+
+        m_days = DAYS_RE.search(user_message or "")
+        days_val = int(m_days.group(1)) if m_days else None
+        m_party = PARTY_RE.search(user_message or "")
+        party_val = (
+            int(m_party.group(1))
+            if m_party
+            else (2 if "người yêu" in low else None)
+        )
+        budget_val = _extract_budget_vnd(user_message or "")
+        area_val = _extract_area(user_message or "")
+        prefs_val = _extract_preferences(user_message or "")
+        date_val, date_text_val, date_source_val = _extract_date_fields(user_message or "")
+        is_confirm = "xác nhận phương án" in low or "chốt phương án" in low
+        is_plan_req = any(
+            w in low for w in ("lập lịch trình", "lên lịch trình", "lên kế hoạch")
+        )
+        if is_confirm or is_plan_req or any(
+            v is not None for v in (days_val, party_val, budget_val, date_val)
+        ):
+            form_travel: Dict[str, Any] = {
+                "days": days_val,
+                "area": area_val,
+                "party": party_val,
+                "budget": budget_val,
+                "preferences": prefs_val,
+                "date": date_val,
+                "date_text": date_text_val,
+                "date_source": date_source_val,
+            }
+            if isinstance(days_val, int) and days_val <= 0:
+                result["planning"] = {"form": form_travel, "options": []}
+            elif is_confirm:
+                prior_opts = _find_prior_options(prior_messages)
+                result["planning"] = {"form": form_travel, "options": prior_opts}
+                result["handoff"] = {
+                    "target": "itinerary_planning",
+                    "payload": {"poi_ids": [DEFAULT_POI_A, DEFAULT_POI_B], "days": days_val or 2},
+                }
+                result["actions"] = [{"name": "planning.start", "target": "itinerary_planning"}]
+            else:
+                options_travel = _default_meaningful_options(user_message) if is_plan_req else []
+                result["planning"] = {"form": form_travel, "options": options_travel}
 
     result["reply"] = scrub_availability_claims(str(result.get("reply") or ""))
     return result

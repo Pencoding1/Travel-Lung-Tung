@@ -8,10 +8,12 @@ schema, and ingests them in bounded transactions via ``MemgraphUnitOfWork``.
 
 from __future__ import annotations
 
+from collections import defaultdict
 import argparse
 import asyncio
 import hashlib
 import json
+import math
 import os
 import sys
 import time
@@ -109,6 +111,55 @@ def load_and_verify_snapshot(snapshot_dir: Path) -> tuple[Dict[str, Any], List[D
     return manifest, validated_records
 
 
+def _compute_spatial_edges(
+    records: List[Dict[str, Any]],
+    *,
+    radius_km: float = NEARBY_RADIUS_KM_DEFAULT,
+    max_neighbors: int = 15,
+) -> List[Dict[str, Any]]:
+    """Compute canonical NEAR_BY edges using a uniform spatial grid."""
+    pts: List[tuple[str, float, float]] = []
+    for rec in records:
+        pid = rec.get("id")
+        lat = rec.get("latitude")
+        lon = rec.get("longitude")
+        if isinstance(pid, str) and isinstance(lat, (int, float)) and isinstance(lon, (int, float)):
+            pts.append((pid, float(lat), float(lon)))
+
+    cell_size = 0.03
+    grid: Dict[tuple[int, int], List[tuple[str, float, float]]] = defaultdict(list)
+    for pid, lat, lon in pts:
+        grid[(int(lat / cell_size), int(lon / cell_size))].append((pid, lat, lon))
+
+    edge_map: Dict[tuple[str, str], float] = {}
+    for pid, lat, lon in pts:
+        gx, gy = int(lat / cell_size), int(lon / cell_size)
+        cos_lat = math.cos(math.radians(lat))
+        candidates: List[tuple[float, str]] = []
+        for dx in (-1, 0, 1):
+            for dy in (-1, 0, 1):
+                for pid2, lat2, lon2 in grid.get((gx + dx, gy + dy), ()):
+                    if pid == pid2:
+                        continue
+                    dlat = (lat2 - lat) * 111.32
+                    dlon = (lon2 - lon) * 111.32 * cos_lat
+                    dist = math.hypot(dlat, dlon)
+                    if dist <= radius_km:
+                        candidates.append((dist, pid2))
+        candidates.sort(key=lambda item: item[0])
+        for dist, pid2 in candidates[:max_neighbors]:
+            pair = (pid, pid2) if pid < pid2 else (pid2, pid)
+            rounded = round(dist, 4)
+            prev = edge_map.get(pair)
+            if prev is None or rounded < prev:
+                edge_map[pair] = rounded
+
+    return [
+        {"id1": id1, "id2": id2, "dist": dist}
+        for (id1, id2), dist in edge_map.items()
+    ]
+
+
 async def ingest_snapshot(
     snapshot_dir: Path,
     *,
@@ -116,7 +167,7 @@ async def ingest_snapshot(
     port: int = 7687,
     chunk_size: int = 500,
     build_spatial: bool = True,
-    spatial_batch_size: int = 200,
+    spatial_batch_size: int = 2500,
 ) -> Dict[str, Any]:
     """Load validated records into Memgraph and optionally rebuild NEAR_BY edges."""
     start_time = time.monotonic()
@@ -130,6 +181,16 @@ async def ingest_snapshot(
     accepted = 0
 
     try:
+        for index_cypher in (
+            "CREATE INDEX ON :POI(id)",
+            "CREATE INDEX ON :POI(source_area_id)",
+            "CREATE INDEX ON :Category(id)",
+        ):
+            try:
+                connector.db.execute(index_cypher)
+            except Exception:  # noqa: BLE001
+                pass
+
         for offset in range(0, len(records), chunk_size):
             chunk = records[offset : offset + chunk_size]
             with uow_factory() as uow:
@@ -137,24 +198,22 @@ async def ingest_snapshot(
 
         spatial_summary: Dict[str, Any] = {"status": "skipped", "rebuilt_pois": 0}
         if build_spatial:
-            all_ids = [r["id"] for r in records if isinstance(r.get("id"), str)]
-            rebuilt = 0
-            total_edges = 0
-            for offset in range(0, len(all_ids), spatial_batch_size):
-                batch_ids = all_ids[offset : offset + spatial_batch_size]
+            edges = _compute_spatial_edges(records, radius_km=NEARBY_RADIUS_KM_DEFAULT)
+            edge_query = """
+            UNWIND $batch AS e
+            MATCH (p1:POI {id: e.id1}), (p2:POI {id: e.id2})
+            MERGE (p1)-[r:NEAR_BY]->(p2)
+            SET r.distance = e.dist
+            """
+            for offset in range(0, len(edges), spatial_batch_size):
+                batch = edges[offset : offset + spatial_batch_size]
                 with uow_factory() as uow:
-                    edges = uow.pois._rebuild_nearby_edges(
-                        "UNWIND $batch_ids AS pid MATCH (p1:POI {id: pid})",
-                        {"batch_ids": batch_ids},
-                        NEARBY_RADIUS_KM_DEFAULT,
-                    )
-                rebuilt += len(batch_ids)
-                total_edges += int(edges or 0)
+                    uow.pois._execute_write(edge_query, {"batch": batch})
             spatial_summary = {
                 "status": "success",
-                "rebuilt_pois": rebuilt,
+                "rebuilt_pois": len(records),
                 "failed_pois": 0,
-                "touched_edges": total_edges,
+                "touched_edges": len(edges),
                 "radius_km": NEARBY_RADIUS_KM_DEFAULT,
             }
 
