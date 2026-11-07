@@ -1,0 +1,30 @@
+{
+  "mapping_version": 1,
+  "_comment": "OC-012 provisional category catalog ONLY. There are deliberately NO reviewed entities and NO category mappings in this manifest: every actual candidate stays quarantined until catalog/admin/source review. This file is not an operational approval.",
+  "categories": [
+    {"id": "museum", "name": "Museum", "context": "Museums and cultural exhibition venues (provisional catalog entry)"},
+    {"id": "attraction", "name": "Attraction", "context": "Tourist attractions and landmarks (provisional catalog entry)"},
+    {"id": "cafe", "name": "Cafe", "context": "Coffee shops and cafes (provisional catalog entry)"},
+    {"id": "restaurant", "name": "Restaurant", "context": "Restaurants and dining venues (provisional catalog entry)"}
+  ],
+  "sources": {
+    "osm-local-pbf-sample": {
+      "synthetic": false,
+      "districts": {},
+      "category_map": {},
+      "entities": {}
+    },
+    "wikidata-expansion-q703871": {
+      "synthetic": false,
+      "districts": {},
+      "category_map": {},
+      "entities": {}
+    },
+    "wikidata-expansion-q933384": {
+      "synthetic": false,
+      "districts": {},
+      "category_map": {},
+      "entities": {}
+    }
+  }
+}

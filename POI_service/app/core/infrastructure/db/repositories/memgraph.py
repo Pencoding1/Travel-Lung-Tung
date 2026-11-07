@@ -1528,7 +1528,7 @@ class MemgraphPOIRepository(BaseMemgraphRepository[POI], IPOIRepository):
           AND ($category_id IS NULL OR
                  EXISTS { MATCH (p)-[:HAS_CATEGORY]->(:Category {id: $category_id}) })
           AND ($product_keyword IS NULL OR
-                 EXISTS { MATCH (p)-[ro:OFFER]->(prod:Product)
+                 toLower(COALESCE(p.name, '')) CONTAINS toLower($product_keyword) OR EXISTS { MATCH (p)-[ro:OFFER]->(prod:Product)
                           WHERE toLower(COALESCE(prod.canonical_name, '')) CONTAINS toLower($product_keyword)
                              OR toLower(COALESCE(ro.shop_specific_name, '')) CONTAINS toLower($product_keyword) })
           // Default/current exploration excludes every provenance-bearing record:
@@ -1640,7 +1640,7 @@ class MemgraphPOIRepository(BaseMemgraphRepository[POI], IPOIRepository):
           AND ($category_id IS NULL OR
                  EXISTS {{ MATCH (p)-[:HAS_CATEGORY]->(:Category {{id: $category_id}}) }})
           AND ($product_keyword IS NULL OR
-                 EXISTS {{ MATCH (p)-[ro:OFFER]->(prod:Product)
+                 toLower(COALESCE(p.name, '')) CONTAINS toLower($product_keyword) OR EXISTS {{ MATCH (p)-[ro:OFFER]->(prod:Product)
                           WHERE toLower(COALESCE(prod.canonical_name, '')) CONTAINS toLower($product_keyword)
                              OR toLower(COALESCE(ro.shop_specific_name, '')) CONTAINS toLower($product_keyword) }})
           // Fully-cached matching selectors are a fast path; records written

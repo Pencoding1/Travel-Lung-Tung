@@ -1,0 +1,125 @@
+{
+  "captures": [
+    {
+      "attempts": 1,
+      "bytes": 51051,
+      "content_type": "text/html; charset=UTF-8",
+      "elapsed_ms": 188,
+      "fetched_at": "2026-10-17T19:06:37.979429Z",
+      "final_url": "https://vietnam.travel/node/137",
+      "redirect_chain": [],
+      "sha256": "c17af074fcbbb501939e95fa8fbc1e972ce4b1920e1d9a2840023b4bb11c733b",
+      "status": 200,
+      "url": "https://vietnam.travel/node/137"
+    }
+  ],
+  "counts": {
+    "content_pages": 1,
+    "exported_records": 7,
+    "extracted_records": 7,
+    "fetch_failures": 0,
+    "imported": 0,
+    "minimum_valid": 7,
+    "missing_address": 0,
+    "missing_description": 0,
+    "missing_name": 0,
+    "policy_fetches": 1,
+    "unstable_identity": 0
+  },
+  "extraction_errors": [],
+  "failures": [],
+  "generated_at": "2026-10-17T19:06:37.979429Z",
+  "limitations": [
+    "P0/P1 output only: no graph write, no ingestion POST, imported=0.",
+    "Coordinates are absent unless explicitly present in a reviewed record.",
+    "License/admin/category review is never inferred by this pipeline."
+  ],
+  "mode": "offline_replay",
+  "policy": {
+    "evidence": [
+      {
+        "bytes": 1639,
+        "exists": true,
+        "reference": "data/social_expansion_20261018/real/policy/vietnam_travel_robots.txt",
+        "sha256": "83dcb91e8e7b8ad9ed7d65239350c586a24688a4c0d755f9e534adf4689919da"
+      },
+      {
+        "bytes": 49935,
+        "exists": true,
+        "reference": "data/social_expansion_20261018/real/policy/vietnam_travel_terms.html",
+        "sha256": "41c6dbe843aea240aef73d4b8758bf3660b262d9e3707672b4a1d82f6c8392d3"
+      }
+    ],
+    "license": "UNKNOWN",
+    "notes": "Robots fetched 2026-10-18 (HTTP 200) does not disallow /node/137. Terms page (redirect /terms-conditions -> /term-conditions, HTTP 200) states that except with prior written permission the material may not be stored or reproduced. Reuse is therefore NOT permitted; all records are quarantined for policy review. No license was inferred.",
+    "reuse_permitted": false,
+    "reuse_status": "not_permitted",
+    "robots": {
+      "vietnam.travel": {
+        "allowed": true,
+        "matched_rule": null,
+        "reason": "no_matching_disallow_rule_in_minimal_parser",
+        "sha256": "83dcb91e8e7b8ad9ed7d65239350c586a24688a4c0d755f9e534adf4689919da",
+        "status": 200,
+        "url": "https://vietnam.travel/robots.txt"
+      }
+    }
+  },
+  "policy_captures": [
+    {
+      "attempts": 1,
+      "bytes": 1639,
+      "content_type": "text/plain",
+      "elapsed_ms": 141,
+      "fetched_at": "2026-10-17T19:06:36.431102Z",
+      "file": "policy/robots-vietnam.travel__83dcb91e8e7b.txt",
+      "final_url": "https://vietnam.travel/robots.txt",
+      "kind": "policy",
+      "redirect_chain": [],
+      "sha256": "83dcb91e8e7b8ad9ed7d65239350c586a24688a4c0d755f9e534adf4689919da",
+      "status": 200,
+      "url": "https://vietnam.travel/robots.txt"
+    }
+  ],
+  "profile": "vietnam_travel_hcmc7",
+  "records_preview": [
+    {
+      "issues": [],
+      "locator": "section.ac-chapter[0]#chapter-1",
+      "minimum_valid": true,
+      "name": "War Remnants Museum",
+      "record_id": "node/137#chapter-1"
+    },
+    {
+      "issues": [],
+      "locator": "section.ac-chapter[1]#chapter-2",
+      "minimum_valid": true,
+      "name": "Notre Dame Cathedral",
+      "record_id": "node/137#chapter-2"
+    },
+    {
+      "issues": [],
+      "locator": "section.ac-chapter[2]#chapter-3",
+      "minimum_valid": true,
+      "name": "Saigon Central Post Office",
+      "record_id": "node/137#chapter-3"
+    },
+    {
+      "issues": [],
+      "locator": "section.ac-chapter[3]#chapter-4",
+      "minimum_valid": true,
+      "name": "The Reunification Palace",
+      "record_id": "node/137#chapter-4"
+    },
+    {
+      "issues": [],
+      "locator": "section.ac-chapter[4]#chapter-5",
+      "minimum_valid": true,
+      "name": "Nguyen Hue Street and City Hall",
+      "record_id": "node/137#chapter-5"
+    }
+  ],
+  "schema_version": 1,
+  "source_id": "vietnam-travel-node137",
+  "synthetic": false
+}

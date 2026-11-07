@@ -81,3 +81,14 @@ def test_config_does_not_mutate_the_supplied_mapping():
     before = dict(env)
     load_provider_config(env)
     assert env == before
+
+
+def test_aibox_http_provider_selection_is_supported():
+    config = load_provider_config({"AI_LLM_PROVIDER": "aibox"})
+    assert config.provider == "aibox"
+    assert config.model == "ds/deepseek-flash"
+    assert config.is_aibox is True
+    assert config.is_cli is False
+    alias = load_provider_config({"AI_LLM_PROVIDER": "aibox_http"})
+    assert alias.provider == "aibox"
+    assert alias.is_aibox is True

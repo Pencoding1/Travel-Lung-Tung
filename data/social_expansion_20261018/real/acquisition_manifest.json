@@ -1,0 +1,16 @@
+{
+  "dataset": "social_web_oc050",
+  "manifest_version": 1,
+  "sources": [
+    {
+      "export_path": "export.json",
+      "license": "UNKNOWN",
+      "retrieved_at": "2026-10-17T19:06:37.979429Z",
+      "source_id": "vietnam-travel-node137",
+      "source_type": "web_poi",
+      "source_url": "https://vietnam.travel/node/137",
+      "synthetic": false
+    }
+  ],
+  "synthetic": false
+}

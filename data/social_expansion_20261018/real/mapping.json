@@ -1,0 +1,40 @@
+{
+  "categories": [
+    {
+      "context": "Visitor attraction candidate; category review pending",
+      "id": "attraction",
+      "name": "Attraction"
+    },
+    {
+      "context": "Museum candidate; category review pending",
+      "id": "museum",
+      "name": "Museum"
+    },
+    {
+      "context": "Cafe candidate; category review pending",
+      "id": "cafe",
+      "name": "Cafe"
+    },
+    {
+      "context": "Restaurant candidate; category review pending",
+      "id": "restaurant",
+      "name": "Restaurant"
+    }
+  ],
+  "mapping_version": 1,
+  "sources": {
+    "vietnam-travel-node137": {
+      "category_map": {
+        "schema:cafeorcoffeeshop": "cafe",
+        "schema:localbusiness": "restaurant",
+        "schema:museum": "museum",
+        "schema:restaurant": "restaurant",
+        "schema:touristattraction": "attraction",
+        "tourism=attraction": "attraction"
+      },
+      "districts": {},
+      "entities": {},
+      "synthetic": false
+    }
+  }
+}

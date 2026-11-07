@@ -1,0 +1,100 @@
+{
+  "dataset": "social_web_oc050_synthetic_fixture",
+  "dry_run": true,
+  "generated_at": "2026-10-18T00:03:00Z",
+  "limitations": {
+    "cross_source_equivalence": "unsupported",
+    "network_acquisition": "not_implemented"
+  },
+  "live_ingestion": false,
+  "manifest_path": "data\\social_expansion_20261018\\synthetic\\manifest.json",
+  "manifest_sha256": "2f4ed3b04bc333f669714bc4d2575aaf4d553c35b8357351b689ca221d2cfca8",
+  "mapping_path": "data\\social_expansion_20261018\\synthetic\\mapping.json",
+  "outputs": {
+    "accepted": "data\\social_expansion_20261018\\synthetic\\acquisition_out\\accepted.jsonl",
+    "candidates": "data\\social_expansion_20261018\\synthetic\\acquisition_out\\candidates.jsonl",
+    "decisions": "data\\social_expansion_20261018\\synthetic\\acquisition_out\\decisions.jsonl",
+    "quarantine": "data\\social_expansion_20261018\\synthetic\\acquisition_out\\quarantine.jsonl",
+    "raw": "data\\social_expansion_20261018\\synthetic\\acquisition_out\\raw.jsonl",
+    "summary": "data\\social_expansion_20261018\\synthetic\\acquisition_out\\summary.json"
+  },
+  "pipeline_version": 3,
+  "policy_hash": "b5926a982d44353d7bdcf2a0f2d9113e27791388e02ebc818a24ae5e3352592f",
+  "provenance": {
+    "web_poi:5e382ed18b4cf665a448a4d9021a3960": {
+      "field_paths": {
+        "address": "/records/0/address_raw",
+        "category": "/records/0/category_tags",
+        "coordinates": "/records/0/coordinates",
+        "description": "/records/0/description",
+        "field_evidence": "/records/0/field_evidence",
+        "identity": "/records/0/record_id",
+        "name": "/records/0/name",
+        "opening_hours": "/records/0/opening_hours_raw",
+        "review": "/records/0/review_text"
+      },
+      "info_codes": [],
+      "license": "SYNTHETIC-TEST-ONLY",
+      "mapping": {
+        "admin": {
+          "city": "Ho Chi Minh City",
+          "district": "District 1",
+          "evidence_reference": "tests/social_poi_ingest/synthetic-fixture.json",
+          "nation": "Vietnam",
+          "pointer": "/sources/synthetic-test-source/entities/web_poi~1synthetic~11#a",
+          "reviewer": "synthetic-test-reviewer"
+        },
+        "categories": [
+          {
+            "catalog_pointer": "/categories/0",
+            "category_id": "attraction",
+            "map_pointer": "/sources/synthetic-test-source/category_map/tourism=attraction",
+            "tag": "tourism=attraction"
+          }
+        ],
+        "manifest_sha256": "b5926a982d44353d7bdcf2a0f2d9113e27791388e02ebc818a24ae5e3352592f"
+      },
+      "raw_content_reference": "raw/f09896e4dc8a6d11__981f61a2dcac.json",
+      "raw_sha256": "981f61a2dcac029df11f1c238d3973125575125dc7195e23992a5bac685199d5",
+      "retrieved_at": "2026-10-18T00:00:00Z",
+      "source_entity_id": "synthetic/1#a",
+      "source_revision": "f46c9c4a03a167b42087b6e7575bc3a6070f9adb92f694b4a74aa86494a952ab",
+      "source_type": "web_poi",
+      "source_url": "https://example.test/pois"
+    }
+  },
+  "real_expansion_totals": {
+    "accepted": 0,
+    "candidates": 0
+  },
+  "run_id": "9eabb2b0a3eb1250",
+  "scope": "social_web_oc050_synthetic_fixture::synthetic",
+  "sources": [
+    {
+      "counts": {
+        "accepted": 0,
+        "candidates": 3,
+        "duplicate": 3,
+        "rejected": 0,
+        "requires_review": 0
+      },
+      "license": "SYNTHETIC-TEST-ONLY",
+      "retrieved_at": "2026-10-18T00:00:00Z",
+      "reviewed_entities": 2,
+      "source_id": "synthetic-test-source",
+      "source_type": "web_poi",
+      "source_url": "https://example.test/pois",
+      "synthetic": true
+    }
+  ],
+  "synthetic": true,
+  "totals": {
+    "accepted": 0,
+    "accepted_durable": 1,
+    "candidates": 3,
+    "duplicate": 3,
+    "quarantine_durable": 2,
+    "rejected": 0,
+    "requires_review": 0
+  }
+}

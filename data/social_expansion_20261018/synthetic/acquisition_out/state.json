@@ -1,0 +1,172 @@
+{
+  "entries": {
+    "web_poi:34efc1bc601a4df33b558f5bcb7508ad": {
+      "category_ids": [],
+      "conflicted": false,
+      "fact_fingerprint": "0ea3b2f0e2a84d7fab2a607fb3399ba53a9e74f12cc1e1779c8718b29ba17920",
+      "first_seen": "2026-10-18T00:02:00Z",
+      "history": [
+        {
+          "at": "2026-10-18T00:02:00Z",
+          "category_ids": [],
+          "outcome": "requires_review",
+          "policy_hash": "b5926a982d44353d7bdcf2a0f2d9113e27791388e02ebc818a24ae5e3352592f",
+          "reasons": [
+            "entity_unreviewed",
+            "unknown_admin",
+            "missing_name"
+          ],
+          "resolution_status": "ambiguous",
+          "run_id": "61254c656701e154"
+        }
+      ],
+      "info_codes": [],
+      "last_seen": "2026-10-18T00:03:00Z",
+      "policy_hash": "b5926a982d44353d7bdcf2a0f2d9113e27791388e02ebc818a24ae5e3352592f",
+      "provenance": null,
+      "raw_sha256": "981f61a2dcac029df11f1c238d3973125575125dc7195e23992a5bac685199d5",
+      "reasons": [
+        "entity_unreviewed",
+        "unknown_admin",
+        "missing_name"
+      ],
+      "resolution_status": "ambiguous",
+      "resolved": null,
+      "source_entity_id": "synthetic/1#c",
+      "source_id": "synthetic-test-source",
+      "source_type": "web_poi",
+      "stable_id": "web_poi:34efc1bc601a4df33b558f5bcb7508ad",
+      "status": "requires_review",
+      "synthetic": true
+    },
+    "web_poi:5e382ed18b4cf665a448a4d9021a3960": {
+      "category_ids": [
+        "attraction"
+      ],
+      "conflicted": false,
+      "fact_fingerprint": "7b5ab8cc788cbb40562ad6ddd3009995aa5989782d1b630550228ae19a4dc007",
+      "first_seen": "2026-10-18T00:02:00Z",
+      "history": [
+        {
+          "at": "2026-10-18T00:02:00Z",
+          "category_ids": [
+            "attraction"
+          ],
+          "outcome": "accepted",
+          "policy_hash": "b5926a982d44353d7bdcf2a0f2d9113e27791388e02ebc818a24ae5e3352592f",
+          "reasons": [],
+          "resolution_status": "exact",
+          "run_id": "61254c656701e154"
+        }
+      ],
+      "info_codes": [],
+      "last_seen": "2026-10-18T00:03:00Z",
+      "policy_hash": "b5926a982d44353d7bdcf2a0f2d9113e27791388e02ebc818a24ae5e3352592f",
+      "provenance": {
+        "field_paths": {
+          "address": "/records/0/address_raw",
+          "category": "/records/0/category_tags",
+          "coordinates": "/records/0/coordinates",
+          "description": "/records/0/description",
+          "field_evidence": "/records/0/field_evidence",
+          "identity": "/records/0/record_id",
+          "name": "/records/0/name",
+          "opening_hours": "/records/0/opening_hours_raw",
+          "review": "/records/0/review_text"
+        },
+        "info_codes": [],
+        "license": "SYNTHETIC-TEST-ONLY",
+        "mapping": {
+          "admin": {
+            "city": "Ho Chi Minh City",
+            "district": "District 1",
+            "evidence_reference": "tests/social_poi_ingest/synthetic-fixture.json",
+            "nation": "Vietnam",
+            "pointer": "/sources/synthetic-test-source/entities/web_poi~1synthetic~11#a",
+            "reviewer": "synthetic-test-reviewer"
+          },
+          "categories": [
+            {
+              "catalog_pointer": "/categories/0",
+              "category_id": "attraction",
+              "map_pointer": "/sources/synthetic-test-source/category_map/tourism=attraction",
+              "tag": "tourism=attraction"
+            }
+          ],
+          "manifest_sha256": "b5926a982d44353d7bdcf2a0f2d9113e27791388e02ebc818a24ae5e3352592f"
+        },
+        "raw_content_reference": "raw/f09896e4dc8a6d11__981f61a2dcac.json",
+        "raw_sha256": "981f61a2dcac029df11f1c238d3973125575125dc7195e23992a5bac685199d5",
+        "retrieved_at": "2026-10-18T00:00:00Z",
+        "source_entity_id": "synthetic/1#a",
+        "source_revision": "f46c9c4a03a167b42087b6e7575bc3a6070f9adb92f694b4a74aa86494a952ab",
+        "source_type": "web_poi",
+        "source_url": "https://example.test/pois"
+      },
+      "raw_sha256": "981f61a2dcac029df11f1c238d3973125575125dc7195e23992a5bac685199d5",
+      "reasons": [],
+      "resolution_status": "exact",
+      "resolved": {
+        "address": {
+          "city": "Ho Chi Minh City",
+          "district": "District 1",
+          "nation": "Vietnam"
+        },
+        "id": "web_poi:5e382ed18b4cf665a448a4d9021a3960",
+        "latitude": 10.7801,
+        "longitude": 106.7001,
+        "name": "Synthetic Museum A",
+        "poi_categories": [
+          {
+            "context": "Test",
+            "id": "attraction",
+            "name": "Attraction"
+          }
+        ]
+      },
+      "source_entity_id": "synthetic/1#a",
+      "source_id": "synthetic-test-source",
+      "source_type": "web_poi",
+      "stable_id": "web_poi:5e382ed18b4cf665a448a4d9021a3960",
+      "status": "accepted",
+      "synthetic": true
+    },
+    "web_poi:cea5380a04f7b4a46b448187fe64f3c3": {
+      "category_ids": [],
+      "conflicted": false,
+      "fact_fingerprint": "b18e94a821d3061e4b7dc05105eb054fad4b0b7377c4f56c0f7d724d9dcbb990",
+      "first_seen": "2026-10-18T00:02:00Z",
+      "history": [
+        {
+          "at": "2026-10-18T00:02:00Z",
+          "category_ids": [],
+          "outcome": "requires_review",
+          "policy_hash": "b5926a982d44353d7bdcf2a0f2d9113e27791388e02ebc818a24ae5e3352592f",
+          "reasons": [
+            "missing_coordinates"
+          ],
+          "resolution_status": "ambiguous",
+          "run_id": "61254c656701e154"
+        }
+      ],
+      "info_codes": [],
+      "last_seen": "2026-10-18T00:03:00Z",
+      "policy_hash": "b5926a982d44353d7bdcf2a0f2d9113e27791388e02ebc818a24ae5e3352592f",
+      "provenance": null,
+      "raw_sha256": "981f61a2dcac029df11f1c238d3973125575125dc7195e23992a5bac685199d5",
+      "reasons": [
+        "missing_coordinates"
+      ],
+      "resolution_status": "ambiguous",
+      "resolved": null,
+      "source_entity_id": "synthetic/1#b",
+      "source_id": "synthetic-test-source",
+      "source_type": "web_poi",
+      "stable_id": "web_poi:cea5380a04f7b4a46b448187fe64f3c3",
+      "status": "requires_review",
+      "synthetic": true
+    }
+  },
+  "pipeline_version": 3,
+  "scope": "social_web_oc050_synthetic_fixture::synthetic"
+}

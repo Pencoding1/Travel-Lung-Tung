@@ -1,5 +1,7 @@
 # ✈️ TRAVEL VO LO - Smart Travel Assistant Agent System
 
+> **Engineering handover, 29/10/2026:** Start with [the intern knowledge-transfer package](docs/handover/2026-10-29/README.md) and [agent onboarding](START_HERE_FOR_AGENTS.md). The historical overview below is not an acceptance report; current implementation gaps, approved scope and runtime evidence are documented in the handover.
+
 **Travel Vo Lo** is an advanced, AI-driven Smart Travel Assistant and Online Travel Agency (OTA) platform. Designed to eliminate the overwhelming and time-consuming process of trip planning, Travel Vo Lo leverages Multi-Agent Systems, Large Language Models (LLMs), and Graph RAG technologies to craft highly personalized, risk-free, and optimized travel experiences.
 
 ---

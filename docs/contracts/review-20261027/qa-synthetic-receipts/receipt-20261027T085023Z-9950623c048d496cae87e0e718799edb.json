@@ -1,0 +1,261 @@
+{
+  "schema_version": 1,
+  "receipt_id": "receipt-20261027T085023Z-9950623c048d496cae87e0e718799edb",
+  "created_at": "2026-10-27T08:50:23.714701+00:00",
+  "review_id": "TVLT-BEHAVIOR-REVIEW-20261027-v1",
+  "snapshot_sha256": "0f6179f2e63d73186f161991ca82aab49f9f6bf84f7a3baba2f526328499dc47",
+  "selected_ids": [
+    "F-UI"
+  ],
+  "decisions": {
+    "F-UI": {
+      "action": "keep_deferred",
+      "choice": "",
+      "comment": "SYNTHETIC QA ONLY — NOT OWNER APPROVAL"
+    }
+  },
+  "snapshot": {
+    "schema_version": 1,
+    "id": "TVLT-BEHAVIOR-REVIEW-20261027-v1",
+    "title": "TVLT — Duyệt behavior toàn hệ thống",
+    "date": "2026-10-27",
+    "reference": "School News Monitoring: selected_ids, confirm_existing/amend/keep_deferred, comment, snapshot-bound immutable receipt; original HTML unavailable in current reference docs.",
+    "notice": "Các trạng thái APPROVED/HOLD đã có từ chat. Chỉ mục được chọn mới vào biên nhận mới. Lưu nháp không phải gửi duyệt; biên nhận chưa tự sửa contract hoặc triển khai mã.",
+    "items": [
+      {
+        "id": "F-PLAN",
+        "group": "Chức năng",
+        "title": "F-PLAN",
+        "status": "APPROVED",
+        "behavior": "Nhận dữ liệu có cấu trúc đã được người dùng xác nhận từ Chat hoặc form; lấy POI đúng scope; model chỉ đề xuất; scheduler tính lịch và validator kiểm độc lập. Trả thứ tự, giờ, tuyến, trạng thái và dữ kiện chưa biết. Không bịa giá, giờ hoặc đường; lịch rỗng không feasible; no_plan không đồng nghĩa bất khả thi toán học. Chưa bao gồm booking, giao thông công cộng nhiều chặng hoặc tối ưu toàn cục.",
+        "source": "docs/contracts/APPROVAL_REVIEW_2026-10-27.md",
+        "choices": []
+      },
+      {
+        "id": "F-LOOKUP",
+        "group": "Chức năng",
+        "title": "F-LOOKUP",
+        "status": "APPROVED",
+        "behavior": "Tra POI, danh mục, ứng viên địa danh và tuyến có hướng; giữ đúng bộ lọc và scope; nhiều ứng viên địa danh thì không tự chọn. Thiếu dữ liệu trả unknown/rỗng có mã rõ; thiếu tọa độ không báo tuyến thành công; không fallback đường thẳng; lỗi không lộ traceback hoặc nội dung thô của provider. Chưa bao gồm ranking cá nhân hóa và tìm mờ quy mô lớn.",
+        "source": "docs/contracts/APPROVAL_REVIEW_2026-10-27.md",
+        "choices": []
+      },
+      {
+        "id": "F-MEMORY",
+        "group": "Chức năng",
+        "title": "F-MEMORY",
+        "status": "APPROVED",
+        "behavior": "người dùng xem/sửa/xóa hồ sơ sở thích và xóa ngữ cảnh phiên riêng biệt. Hồ sơ dài hạn chỉ thuộc danh tính đã xác thực; khách ẩn danh chỉ có ngữ cảnh phiên. Tắt memory thì không đọc/ghi hai tầng trong Chat/Planning; sở thích cũ không ghi đè ràng buộc mới; đổi scope loại ngữ cảnh nguồn cũ. Cập nhật lệch version trả xung đột; xóa phiên không xóa hồ sơ và ngược lại. Chưa gồm tự suy ra hồ sơ/grow-with-user hoặc đồng bộ đa thiết bị.",
+        "source": "docs/contracts/APPROVAL_REVIEW_2026-10-27.md",
+        "choices": []
+      },
+      {
+        "id": "F-SAVED",
+        "group": "Chức năng",
+        "title": "F-SAVED",
+        "status": "APPROVED",
+        "behavior": "người đã đăng nhập lưu, liệt kê, mở lại và xóa lịch trình của mình; ID do server cấp, phân trang có giới hạn. Lưu nguyên payload, không chạy lại planner hoặc tự nâng trạng thái khả thi. Truy cập lịch của người khác trả 404; storage lỗi/chưa cấu hình báo không sẵn sàng; không âm thầm tạo lại DB hỏng. Chưa gồm sửa lịch đã lưu, chia sẻ công khai, phiên bản hóa hay cộng tác.",
+        "source": "docs/contracts/APPROVAL_REVIEW_2026-10-27.md",
+        "choices": []
+      },
+      {
+        "id": "F-SCOPE",
+        "group": "Chức năng",
+        "title": "F-SCOPE",
+        "status": "APPROVED",
+        "behavior": "xem snapshot/vùng nguồn; chọn một, nhiều hoặc toàn bộ các vùng cụ thể trong cùng snapshot. Server giữ namespace/hash/vùng xuyên Chat, Planning và tra cứu; model không được mở rộng scope. Không có dữ liệu thì báo rõ, lỗi discovery hoặc snapshot trả về sai phải bị chặn. Nhãn vùng nguồn không được coi là địa giới hiện tại; source mode và current-admin mode loại trừ nhau. Chưa gồm chọn nhiều snapshot hoặc sửa dữ liệu nguồn trên UI.",
+        "source": "docs/contracts/APPROVAL_REVIEW_2026-10-27.md",
+        "choices": []
+      },
+      {
+        "id": "F-INGEST",
+        "group": "Chức năng",
+        "title": "F-INGEST",
+        "status": "APPROVED",
+        "behavior": "người vận hành nạp lô/tạo POI và dựng lại NEAR_BY, biết rõ số đã ghi và từng lỗi. Kiểm schema/tọa độ/ID, chạy canary trước phần còn lại; canary fail không báo cả lô thành công. Theo dõi job bằng tiến trình/SSE có terminal và replay cho người kết nối muộn; job lạ trả 404. Thiếu DB hoặc hết năng lực nhận job phải báo lỗi, không âm thầm mất dữ liệu. Cập nhật POI và thay cạnh liên quan trong cùng transaction; lỗi không lộ traceback. Chưa gồm idempotency nhiều worker hoặc migration taxonomy trên graph thật.",
+        "source": "docs/contracts/APPROVAL_REVIEW_2026-10-27.md",
+        "choices": []
+      },
+      {
+        "id": "F-ACQUIRE",
+        "group": "Chức năng",
+        "title": "F-ACQUIRE",
+        "status": "APPROVED",
+        "behavior": "từ GeoJSON/capture tạo POI ứng viên, lineage và quyết định accepted/quarantine có lý do kiểm lại được. Giữ nguyên dữ liệu nguồn và hash; gộp trùng có ledger, xung đột định danh hoặc mapping chưa review thì chặn; tách synthetic và dữ liệu thật. Capture thiếu/sai hash phải từ chối; chỉ fetch khi yêu cầu rõ và nguồn được phép; không ghi graph trực tiếp, dry-run imported=0, không tự tạo lineage OSM. Chưa gồm fetch hàng loạt, vượt chống bot hoặc tự import. Không mở triển khai crawler trước Finalizing.",
+        "source": "docs/contracts/APPROVAL_REVIEW_2026-10-27.md",
+        "choices": []
+      },
+      {
+        "id": "F-OPS",
+        "group": "Chức năng",
+        "title": "F-OPS",
+        "status": "APPROVED",
+        "behavior": "phân biệt service còn sống với dependency đã sẵn sàng; storage lỗi phải báo not-ready, không che bằng health xanh hoặc tạo lại dữ liệu để vượt kiểm tra. Công bố provider/model thực sự được dùng; không đổi provider ngầm. Lỗi có mã và thông điệp đã sanitize; usage không đo được giữ unknown/null. Trạng thái phải phản ánh kiểm tra hiện tại, không coi checkpoint cũ là uptime. Chưa bao gồm public deployment, tự mở rộng hạ tầng hoặc SLA production.",
+        "source": "docs/contracts/APPROVAL_REVIEW_2026-10-27.md",
+        "choices": []
+      },
+      {
+        "id": "F-CHAT",
+        "group": "Chức năng",
+        "title": "F-CHAT — Agent Chat MVP",
+        "status": "APPROVED",
+        "behavior": "# Feature: Agent Chat — MVP Behavior Contract\n\n- **ID:** `FT-CHAT-MVP-001` · **Version:** `1.0`\n- **Status:** `APPROVED` — chủ dự án tự định nghĩa và giao làm cơ sở cho test\n- **Owner/approver:** chủ dự án (người dùng) · **Ngày ghi vào repo:** 2026-10-22\n- **Nguồn:** nội dung do chủ dự án cung cấp trong phiên 2026-10-22 (nguyên văn bên dưới)\n- **Quan hệ:** thay thế phần định nghĩa intent của `FT-CHAT-001 v0.2` (CHITCHAT/TRAVEL/UNCERTAIN). Ba intent hiện hành: `CHITCHAT`, `BOOKING`, `PLAN`.\n- **Điều contract này không định nghĩa:** schema response, tên field quan sát được, payload bàn giao sang Booking/Itinerary Planning. Các điểm này ghi ở `F-CHAT_MVP_TEST_PLAN.md` §2 và §6.\n\n---\n\n## Nội dung contract (nguyên văn)\n\n### 1. Feature Definition\n\nAgent Chat là giao diện hội thoại hỗ trợ người dùng tìm kiếm thông tin du lịch tại TP.HCM, yêu cầu đặt dịch vụ và khởi tạo kế hoạch du lịch.\n\nFeature hỗ trợ ba nhóm intent:\n\n| Intent | Chức năng |\n|---|---|\n| `CHITCHAT` | Hỏi đáp, tìm kiếm thông tin, giá cả, địa điểm, dịch vụ |\n| `BOOKING` | Khởi tạo yêu cầu đặt bàn, vé phương tiện, phòng hoặc dịch vụ khác |\n| `PLAN` | Khởi tạo quy trình lập lịch trình du lịch |\n\nBooking types: `table`, `vehicle`, `room`, `service`.\n\nAgent Chat chỉ điều phối sang Booking hoặc Itinerary Planning; việc thực hiện đặt dịch vụ và sinh lịch trình thuộc các feature tương ứng.\n\n### 2. Intent Resolution\n\n**Pipeline:** User Message → Claim Extraction → Intent Classification → Intent Resolution → Feature Handler.\n\n**B1 — Claim Extraction**\n\n- Trích xuất các yêu cầu và thông tin thành atomic claims, mỗi claim biểu diễn một ý độc lập.\n- Giữ nguyên các thực thể, địa điểm, ràng buộc và ngữ cảnh cần thiết.\n- Không suy diễn thêm yêu cầu chưa được người dùng cung cấp.\n\n**B2 — Significant Intent**\n\n- Xác định intent chính dựa trên hành động mà người dùng yêu cầu thực hiện ngay.\n- Các claim khác được giữ làm context, không tự động kích hoạt feature khác.\n- Nếu không xác định được significant intent giữa nhiều yêu cầu, hỏi người dùng muốn thực hiện yêu cầu nào trước.\n- Không thực hiện nhiều intent trong cùng lượt nếu chưa được xác nhận.\n\n### 3. CHITCHAT\n\n**B3 — Grounded Answer**\n\n- Xác định phạm vi và đối tượng của câu hỏi.\n- Truy xuất thông tin từ Knowledge Database trước khi trả lời.\n- Chỉ đưa ra thông tin thực tế có căn cứ từ dữ liệu truy xuất.\n- Đối với câu hỏi về địa điểm, địa điểm phải tồn tại trong Knowledge Database.\n- Nếu địa điểm không tồn tại hoặc không có dữ liệu đủ để trả lời, thông báo không có thông tin phù hợp; không tự suy đoán.\n\n### 4. BOOKING\n\n**B4 — Booking Intent Extraction**\n\nKhi người dùng thể hiện yêu cầu đặt dịch vụ, Agent trích xuất:\n\n```json\n{\n  \"intent\": \"BOOKING\",\n  \"type\": \"vehicle | table | room | service\",\n  \"destination\": \"entity_id | null\",\n  \"destination_status\": \"FOUND | NOT_FOUND | UNSPECIFIED\"\n}\n```\n\n- `FOUND`: Đối tượng đặt dịch vụ được xác định trong database.\n- `NOT_FOUND`: Người dùng nêu đối tượng nhưng database không tìm thấy.\n- `UNSPECIFIED`: Người dùng chưa cung cấp đối tượng cụ thể.\n- Không tự tạo entity không tồn tại.\n- Chuyển yêu cầu sang Booking Feature sau khi xác định intent và đối tượng.\n\n### 5. PLAN\n\n**B5 — Planning Input**\n\n- Nhận diện các trường thông tin lập lịch trình đã có trong hội thoại: nhu cầu, địa điểm, ngân sách và sở thích.\n- Điền trước các trường có dữ liệu.\n- Hiển thị form cho phép người dùng bổ sung hoặc chỉnh sửa.\n- Cho phép các trường tùy chọn nhận giá trị `null`.\n\n**B6 — Scenario Generation**\n\nNếu người dùng không cung cấp đủ thông tin:\n\n- Tạo ít nhất ba phương án đề xuất từ các preference đã cung cấp.\n- Các phương án phải có sự khác biệt có ý nghĩa.\n- Cho phép người dùng chọn và chỉnh sửa phương án.\n- Không tự xác nhận phương án thay người dùng.\n\n**B7 — Planning Handoff**\n\nSau khi người dùng xác nhận:\n\n- Chuyển dữ liệu đã xác nhận sang Itinerary Planning.\n- Kích hoạt quá trình lập lịch trình.\n- Điều hướng sang giao diện Itinerary Planning.\n\n### 6. Global Constraints\n\n- Không tự thực hiện Booking hoặc Planning khi người dùng mới yêu cầu thông tin.\n- Không tạo dữ liệu thực tế không có căn cứ.\n",
+        "source": "docs/contracts/F-CHAT_MVP_CONTRACT.md",
+        "choices": []
+      },
+      {
+        "id": "F-BOOKING",
+        "group": "Chức năng",
+        "title": "F-BOOKING — query dịch vụ → Book Ngay → screen booking",
+        "status": "APPROVED",
+        "behavior": "# F-BOOKING — luồng booking MVP\n\n- Ngày: 27/10/2026.\n- Trạng thái: APPROVED — chủ dự án duyệt bản đã sửa ngày 27/10/2026.\n- Phạm vi: luồng chức năng và điều hướng trên UI draft; lệnh đặt chỗ tới dịch vụ khác được làm giả.\n- Liên quan: FT-CHAT-MVP-001, B1/B2/B4; không thay logic nhận diện intent, đối tượng và ràng buộc đã duyệt.\n\n## Luồng đích\n\n1. AI nhận diện yêu cầu BOOKING theo logic intent đã chốt; giữ loại dịch vụ, đối tượng và các ràng buộc người dùng cung cấp.\n2. Query dữ liệu đúng loại hình dịch vụ người dùng mong muốn: table, vehicle, room hoặc service. Không suy ra dịch vụ có thể đặt chỉ từ việc POI tồn tại.\n3. Hiển thị kết quả có căn cứ và hành động “Book Ngay” gắn với dịch vụ cụ thể. Khi chưa xác định được đối tượng hoặc không có kết quả phù hợp, hỏi/báo rõ; không tạo đối tượng giả để cho qua luồng.\n4. Người dùng bấm “Book Ngay” thì chuyển tới screen booking với dịch vụ đã chọn và thông tin liên quan đã có. Nhận diện intent hoặc query kết quả không tự kích hoạt lệnh đặt chỗ.\n5. Lệnh đặt chỗ từ screen booking tới dịch vụ khác là fake trong MVP. Giao diện phải phân biệt kết quả mô phỏng với xác nhận đặt chỗ thật.\n\n## Invariant\n\n- Chỉ hỏi thông tin không tự kích hoạt BOOKING; nhiều intent chưa rõ ưu tiên vẫn hỏi lại theo contract Chat.\n- Không bịa dịch vụ, tồn chỗ, giá hoặc xác nhận từ nhà cung cấp. Dữ liệu thiếu vẫn là chưa biết.\n- Chọn sai loại dịch vụ hoặc chuyển screen với đối tượng khác lựa chọn là lỗi.\n- Fake áp dụng cho lệnh đặt chỗ ra ngoài; không lấy fake command làm bằng chứng tích hợp booking thật.\n\n## Nghiệm thu dự kiến\n\n- Yêu cầu từng loại dịch vụ dẫn tới query đúng loại, kết quả đúng dữ liệu và ràng buộc có thể kiểm chứng.\n- Chưa bấm “Book Ngay” thì chưa chuyển screen do booking và chưa gọi lệnh đặt chỗ.\n- Bấm “Book Ngay” chuyển tới screen booking, giữ đúng đối tượng đã chọn và thông tin liên quan.\n- Không tìm thấy/chưa xác định đối tượng thì không bàn giao đối tượng bịa.\n- Fake booking không gửi lệnh tới nhà cung cấp; UI không tuyên bố đã đặt thật.\n\n## Giới hạn\n\n- Chưa bao gồm thanh toán thật, kiểm tồn chỗ trực tiếp, gửi yêu cầu thật hoặc hủy/hoàn tiền thật.\n- Bố cục OTA, thiết kế hình ảnh và UI cuối cùng đang HOLD, không phải tiêu chí phê duyệt trong contract này.\n- Đây là contract đích, chưa phải bằng chứng triển khai hoặc nghiệm thu chạy thật.\n",
+        "source": "docs/contracts/F-BOOKING_MVP_CONTRACT.md",
+        "choices": []
+      },
+      {
+        "id": "F-UI",
+        "group": "Chức năng",
+        "title": "F-UI — thiết kế OTA",
+        "status": "HOLD",
+        "behavior": "Chủ dự án chưa thấy UI hiện tại giống app OTA; sẽ quyết định thiết kế cuối cùng sau. Tạm hold phần chốt UI. Được sử dụng bản draft để demo chức năng. Không coi UI draft là thiết kế cuối cùng đã duyệt. Luồng Book Ngay → screen booking vẫn thuộc F-BOOKING đã duyệt.",
+        "source": "Quyết định chủ dự án trong chat ngày 27/10/2026",
+        "choices": []
+      },
+      {
+        "id": "CHAT-B1",
+        "group": "Chi tiết Chat",
+        "title": "B1 — Claim Extraction",
+        "status": "APPROVED",
+        "behavior": "- Trích xuất các yêu cầu và thông tin thành atomic claims, mỗi claim biểu diễn một ý độc lập.\n- Giữ nguyên các thực thể, địa điểm, ràng buộc và ngữ cảnh cần thiết.\n- Không suy diễn thêm yêu cầu chưa được người dùng cung cấp.",
+        "source": "docs/contracts/F-CHAT_MVP_CONTRACT.md",
+        "choices": []
+      },
+      {
+        "id": "CHAT-B2",
+        "group": "Chi tiết Chat",
+        "title": "B2 — Significant Intent",
+        "status": "APPROVED",
+        "behavior": "- Xác định intent chính dựa trên hành động mà người dùng yêu cầu thực hiện ngay.\n- Các claim khác được giữ làm context, không tự động kích hoạt feature khác.\n- Nếu không xác định được significant intent giữa nhiều yêu cầu, hỏi người dùng muốn thực hiện yêu cầu nào trước.\n- Không thực hiện nhiều intent trong cùng lượt nếu chưa được xác nhận.",
+        "source": "docs/contracts/F-CHAT_MVP_CONTRACT.md",
+        "choices": []
+      },
+      {
+        "id": "CHAT-B3",
+        "group": "Chi tiết Chat",
+        "title": "B3 — Grounded Answer",
+        "status": "APPROVED",
+        "behavior": "- Xác định phạm vi và đối tượng của câu hỏi.\n- Truy xuất thông tin từ Knowledge Database trước khi trả lời.\n- Chỉ đưa ra thông tin thực tế có căn cứ từ dữ liệu truy xuất.\n- Đối với câu hỏi về địa điểm, địa điểm phải tồn tại trong Knowledge Database.\n- Nếu địa điểm không tồn tại hoặc không có dữ liệu đủ để trả lời, thông báo không có thông tin phù hợp; không tự suy đoán.",
+        "source": "docs/contracts/F-CHAT_MVP_CONTRACT.md",
+        "choices": []
+      },
+      {
+        "id": "CHAT-B4",
+        "group": "Chi tiết Chat",
+        "title": "B4 — Booking Intent Extraction",
+        "status": "APPROVED",
+        "behavior": "Khi người dùng thể hiện yêu cầu đặt dịch vụ, Agent trích xuất:\n\n```json\n{\n  \"intent\": \"BOOKING\",\n  \"type\": \"vehicle | table | room | service\",\n  \"destination\": \"entity_id | null\",\n  \"destination_status\": \"FOUND | NOT_FOUND | UNSPECIFIED\"\n}\n```\n\n- `FOUND`: Đối tượng đặt dịch vụ được xác định trong database.\n- `NOT_FOUND`: Người dùng nêu đối tượng nhưng database không tìm thấy.\n- `UNSPECIFIED`: Người dùng chưa cung cấp đối tượng cụ thể.\n- Không tự tạo entity không tồn tại.\n- Chuyển yêu cầu sang Booking Feature sau khi xác định intent và đối tượng.",
+        "source": "docs/contracts/F-CHAT_MVP_CONTRACT.md",
+        "choices": []
+      },
+      {
+        "id": "CHAT-B5",
+        "group": "Chi tiết Chat",
+        "title": "B5 — Planning Input",
+        "status": "APPROVED",
+        "behavior": "- Nhận diện các trường thông tin lập lịch trình đã có trong hội thoại: nhu cầu, địa điểm, ngân sách và sở thích.\n- Điền trước các trường có dữ liệu.\n- Hiển thị form cho phép người dùng bổ sung hoặc chỉnh sửa.\n- Cho phép các trường tùy chọn nhận giá trị `null`.",
+        "source": "docs/contracts/F-CHAT_MVP_CONTRACT.md",
+        "choices": []
+      },
+      {
+        "id": "CHAT-B6",
+        "group": "Chi tiết Chat",
+        "title": "B6 — Scenario Generation",
+        "status": "APPROVED",
+        "behavior": "Nếu người dùng không cung cấp đủ thông tin:\n\n- Tạo ít nhất ba phương án đề xuất từ các preference đã cung cấp.\n- Các phương án phải có sự khác biệt có ý nghĩa.\n- Cho phép người dùng chọn và chỉnh sửa phương án.\n- Không tự xác nhận phương án thay người dùng.",
+        "source": "docs/contracts/F-CHAT_MVP_CONTRACT.md",
+        "choices": []
+      },
+      {
+        "id": "CHAT-B7",
+        "group": "Chi tiết Chat",
+        "title": "B7 — Planning Handoff",
+        "status": "APPROVED",
+        "behavior": "Sau khi người dùng xác nhận:\n\n- Chuyển dữ liệu đã xác nhận sang Itinerary Planning.\n- Kích hoạt quá trình lập lịch trình.\n- Điều hướng sang giao diện Itinerary Planning.",
+        "source": "docs/contracts/F-CHAT_MVP_CONTRACT.md",
+        "choices": []
+      },
+      {
+        "id": "CHAT-G",
+        "group": "Chi tiết Chat",
+        "title": "G — ràng buộc chung",
+        "status": "APPROVED",
+        "behavior": "Không tự Booking/Planning khi người dùng mới hỏi thông tin. Không tạo dữ liệu thực tế không có căn cứ.",
+        "source": "docs/contracts/F-CHAT_MVP_CONTRACT.md §6",
+        "choices": []
+      },
+      {
+        "id": "CHAT-RULES",
+        "group": "Chi tiết Chat",
+        "title": "Các quy tắc bổ sung đã chốt",
+        "status": "APPROVED",
+        "behavior": "Đủ thông tin = sở thích/nhu cầu + ngày khởi hành/sử dụng + ngân sách; khu vực và số người có thể null. Thiếu thì ≥3 phương án. Mỗi cặp phương án khác ≥2 chiều trong khu vực, nhịp, ngân sách, loại trải nghiệm và tập POI khác nhau. Ngày tương đối được quy đổi có date_text/date_source, theo timezone Việt Nam và clock tiêm cho test. Một hành động cùng câu hỏi: hành động thắng; thiếu đối tượng thì hỏi; hai hành động ngang hàng chưa rõ ưu tiên thì hỏi thứ tự. Tên field quan sát cụ thể vẫn là thiết kế kỹ thuật, không tự coi là schema frozen.",
+        "source": "docs/contracts/F-CHAT_MVP_TEST_PLAN.md §2.2–2.5",
+        "choices": []
+      },
+      {
+        "id": "TEST-GATE",
+        "group": "Còn quyết định",
+        "title": "TA-CHAT-001 — kiến trúc và cổng nghiệm thu",
+        "status": "PENDING",
+        "behavior": "Đề xuất: 20 test đặc tả executor được đọc + 100 test QA giữ riêng. Nghiệm thu: cả hai bộ đạt, kiểm tĩnh sạch, mỗi họ D1–D10 có mutation proof với tên test đỏ rồi hoàn nguyên. Không sửa kỳ vọng để lấy xanh; thay behavior phải có change request. Test Booking phải phản ánh contract mới: Book Ngay chuyển screen, lệnh đặt ra ngoài là fake. Đây là kiểm offline, không chứng minh model/booking thật. Baseline lưu ngày 22/10: T1 20 fail; T2 96 fail/4 pass, chưa chạy lại trong lượt này.",
+        "source": "docs/contracts/F-CHAT_MVP_TEST_ARCHITECTURE.md; F-CHAT_MVP_RED_BASELINE_2026-10-22.md",
+        "choices": [
+          "Duyệt kiến trúc và cổng nghiệm thu",
+          "Cần sửa — xem ghi chú",
+          "Giữ chờ quyết định"
+        ]
+      },
+      {
+        "id": "SEC-SCOPE",
+        "group": "Còn quyết định",
+        "title": "Thứ tự/phạm vi REST, JWT, CORS",
+        "status": "PENDING",
+        "behavior": "Lỗi không lộ traceback đã là behavior được duyệt trong F-LOOKUP/F-OPS. Phần còn mở: đưa nhóm sửa vào trước MVP hay backlog riêng? Phương án sửa: sanitize lỗi REST; JWT POI bắt buộc exp/sub như AI/backend; CORS dùng origin cụ thể, không wildcard với credentials. Origin cụ thể và ảnh hưởng client sẽ được kiểm tra trong brief; không tự mở public deployment. Không trì hoãn hay vô hiệu yêu cầu sanitize đã duyệt bằng việc chọn backlog.",
+        "source": "docs/contracts/FEATURE_BEHAVIOR_CONTRACT.md Q3–Q5; APPROVAL_REVIEW_2026-10-27.md",
+        "choices": [
+          "Lập gói sửa riêng trước MVP theo phạm vi nêu",
+          "Tách backlog riêng, không chặn MVP Chat",
+          "Cần phương án chi tiết trước khi duyệt sửa"
+        ]
+      },
+      {
+        "id": "CATALOG",
+        "group": "Phạm vi và quy trình",
+        "title": "Danh mục 11 chức năng",
+        "status": "APPROVED",
+        "behavior": "Giữ 10 chức năng: F-CHAT, F-PLAN, F-LOOKUP, F-MEMORY, F-SAVED, F-INGEST, F-ACQUIRE, F-SCOPE, F-UI, F-OPS; thêm F-BOOKING để định nghĩa riêng. Duyệt danh mục không tự duyệt implementation.",
+        "source": "Quyết định chủ dự án trong chat ngày 27/10/2026",
+        "choices": []
+      },
+      {
+        "id": "WORKFLOW",
+        "group": "Phạm vi và quy trình",
+        "title": "Duyệt behavior trước triển khai",
+        "status": "APPROVED",
+        "behavior": "Rà soát và duyệt từng chức năng toàn hệ thống trước triển khai. F-UI cuối cùng được HOLD theo chỉ đạo sau, có thể demo bằng draft. Chưa triển khai mã sản phẩm trong đợt rà soát này. Phê duyệt behavior không đồng nghĩa đã kiểm chứng chạy thật.",
+        "source": "docs/contracts/APPROVAL_REVIEW_2026-10-27.md",
+        "choices": []
+      },
+      {
+        "id": "BOUNDARIES",
+        "group": "Phạm vi và quy trình",
+        "title": "Các giới hạn giữ nguyên",
+        "status": "APPROVED",
+        "behavior": "Chưa đặt chỗ thật. Crawler mở rộng và grow-with-user theo Finalizing; duyệt contract F-ACQUIRE không mở phase này. H1, viết luận văn, public deployment không được mở bởi form duyệt behavior. Giữ dữ liệu/thí nghiệm primary đã đóng băng và thay đổi không liên quan của người dùng.",
+        "source": "docs/project/FOUR_PHASE_PLAN.md; APPROVAL_REVIEW_2026-10-27.md",
+        "choices": []
+      }
+    ]
+  },
+  "application_status": "NOT_APPLIED"
+}

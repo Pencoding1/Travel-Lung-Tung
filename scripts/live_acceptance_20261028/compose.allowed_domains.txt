@@ -1,0 +1,11 @@
+127.0.0.1
+api.typesafe.ai
+opencode.ai
+registry-1.docker.io
+auth.docker.io
+production.cloudflare.docker.com
+ghcr.io
+pypi.org
+files.pythonhosted.org
+deb.debian.org
+security.debian.org

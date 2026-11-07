@@ -1,0 +1,59 @@
+{
+  "attribution": "OpenStreetMap contributors, ODbL 1.0 (https://www.openstreetmap.org/copyright)",
+  "bbox": {
+    "maxlat": 10.79,
+    "maxlon": 106.7,
+    "minlat": 10.77,
+    "minlon": 106.68
+  },
+  "dataset": "expansion_20261015",
+  "derived_export_time_semantics": "Timestamp of this derived extraction event. It is NOT the PBF download/acquisition time and is NOT the OSM data timestamp.",
+  "derived_export_time_utc": "2026-10-15T10:52:59Z",
+  "export_file": "osm_local_sample.json",
+  "exported_count": 30,
+  "header_evidence": {
+    "generator": "https://download.BBBike.org",
+    "has_multiple_object_versions": false,
+    "osmosis_replication_base_url": null,
+    "osmosis_replication_sequence_number": null,
+    "osmosis_replication_timestamp": "2026-03-17T23:00:00Z",
+    "pbf_dense_nodes": "true",
+    "sorting": "Type_then_ID",
+    "source": null,
+    "writingprogram": null
+  },
+  "license": "ODbL-1.0",
+  "limitations": [
+    "Research sample only; exported counts are a bounded slice, not coverage.",
+    "District/administrative area is not inferred from the bounding box.",
+    "Only NODE geometry is used; way/relation centers are excluded.",
+    "OSM tags are source evidence, not independent ground truth."
+  ],
+  "origin": {
+    "generator_header": "https://download.BBBike.org",
+    "interpretation": "Header generator/source keys are the only origin evidence in the file. Download URL and acquisition time remain UNKNOWN; the filesystem mtime is not acquisition evidence.",
+    "osmosis_replication_timestamp": "2026-03-17T23:00:00Z",
+    "source_header": null,
+    "status": "header_evidence_only"
+  },
+  "osmium_version": "unknown",
+  "parent_pbf_bytes": 17907596,
+  "parent_pbf_path": "graphhopper\\data\\hcmc-latest.osm.pbf",
+  "parent_pbf_sha256": "c2b7057e7a022ff929692205e4219c59640fc67fd90525a82428022b43cf4afb",
+  "python_version": "3.14.0",
+  "selectors": {
+    "amenity": [
+      "cafe",
+      "restaurant"
+    ],
+    "geometry": "node",
+    "max_features": 30,
+    "named_only": true,
+    "tourism": [
+      "attraction",
+      "museum"
+    ]
+  },
+  "total_matched_before_limit": 401,
+  "truncated": true
+}

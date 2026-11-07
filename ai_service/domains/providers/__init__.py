@@ -4,9 +4,11 @@ Gemini remains the default. ``opencode_cli`` is an opt-in per-run model
 transport; tool/planner/validator authority stays in the AI service.
 """
 
-from .config import (DEFAULT_CLI_MODEL, MODEL_DISPLAY_NAME,
+from .aibox_provider import AdapterError, AiboxHttpProvider
+from .config import (DEFAULT_AIBOX_MODEL, DEFAULT_CLI_MODEL, MODEL_DISPLAY_NAME,
                      MODEL_UPSTREAM_NOTE, MODEL_UPSTREAM_VERSION_VERIFIED,
-                     PROVIDER_GEMINI, PROVIDER_OPENCODE_CLI, ProviderConfig,
+                     PROVIDER_AIBOX, PROVIDER_AIBOX_HTTP, PROVIDER_GEMINI,
+                     PROVIDER_OPENCODE_CLI, ProviderConfig,
                      load_provider_config)
 from .errors import ModelUnavailableError, ProviderConfigError, ProviderError
 from . import cli_runtime
@@ -17,10 +19,15 @@ from .opencode_cli import (CliCapabilities, OpenCodeCliProvider,
                            reset_capability_cache)
 
 __all__ = [
+    "AdapterError",
+    "AiboxHttpProvider",
+    "DEFAULT_AIBOX_MODEL",
     "DEFAULT_CLI_MODEL",
     "MODEL_DISPLAY_NAME",
     "MODEL_UPSTREAM_NOTE",
     "MODEL_UPSTREAM_VERSION_VERIFIED",
+    "PROVIDER_AIBOX",
+    "PROVIDER_AIBOX_HTTP",
     "PROVIDER_GEMINI",
     "PROVIDER_OPENCODE_CLI",
     "ProviderConfig",

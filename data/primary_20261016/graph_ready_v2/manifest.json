@@ -1,0 +1,146 @@
+{
+  "adapter_version": "oc-043.1",
+  "admin_current_unverified": true,
+  "administrative_labels_are_current_jurisdiction": false,
+  "arbitrary_hash_acceptance": false,
+  "catalog_version": "1e39b6e91122c6ee",
+  "category_ids": [
+    "apparel_and_gifts",
+    "attractions",
+    "coffee",
+    "convenience",
+    "entertainment",
+    "finance",
+    "fuel",
+    "health_and_beauty",
+    "lodging",
+    "public_services",
+    "restaurant",
+    "retail_center",
+    "specialty_food",
+    "transport"
+  ],
+  "counts": {
+    "category_count": 14,
+    "duplicate_ledger_records": 1,
+    "identity_index_records": 6367,
+    "input_features": 6368,
+    "input_quarantine": 0,
+    "model_validated_records": 6367,
+    "prepared_records": 6367,
+    "prepared_review_required": 411,
+    "registry_records": 6367,
+    "source_indices_accounted": 6368,
+    "summary_prepared_review_required": 411
+  },
+  "cross_export_matching_guaranteed": false,
+  "dataset_class": "real_supplied_primary_snapshot",
+  "future_real_synthetic_expansion_write_boundary": "T050",
+  "general_dataset_class_enforcement": false,
+  "index_accounting": {
+    "canonical_source_indices": 6367,
+    "covered_source_indices": 6368,
+    "duplicate_source_indices": [
+      4859
+    ],
+    "each_source_index_exactly_once": true,
+    "expected_source_indices": 6368,
+    "ledger_pairs": [
+      {
+        "canonical_source_index": 4855,
+        "duplicate_source_index": 4859,
+        "exact_feature_hash": "92f553352abbf6d43900fa5fd75c336101dfbbca7088d597643e03a6f8695e9d"
+      }
+    ]
+  },
+  "inputs": {
+    "catalog": {
+      "bytes": 3025,
+      "path": "data/primary_20261016/prepared/category_catalog.json",
+      "sha256": "80491fcc75c6bda724d10973124dab77189d86bc8ea629bc1c4c1bddeae7d6cc"
+    },
+    "geojson": {
+      "bytes": 2712731,
+      "path": "data/primary_20261016/hcm_pois_final.geojson",
+      "sha256": "713b07a62cf89bd2cad9093abaad2a4c5f01e23853321764b3d66bf9f7eee43c"
+    },
+    "ledger": {
+      "bytes": 387,
+      "path": "data/primary_20261016/prepared/duplicate_ledger.jsonl",
+      "sha256": "c00e8774c8203a75497f34ff2894ea26673d1ac919476e7b19f87f83823bbac2"
+    },
+    "lineage": {
+      "bytes": 12399103,
+      "path": "data/primary_20261016/prepared/lineage.jsonl",
+      "sha256": "70247a350da90ed11599a492cc1b8a453e560c5fe42540ec2a51e6b0cbdbabe4"
+    },
+    "prepared": {
+      "bytes": 3253885,
+      "path": "data/primary_20261016/prepared/prepared_pois.jsonl",
+      "sha256": "3944987f9e1d01f38c82b4e53b387a893d42811495a74ed461ea2f39d11485ad"
+    },
+    "provenance_manifest": {
+      "bytes": 2282,
+      "path": "data/primary_20261016/source_provenance_manifest.json",
+      "sha256": "6aff7d923b94642efbcdca48e517d19b64eb1374f8e8b3bd0a7bd4bf73e49c94"
+    },
+    "registry": {
+      "bytes": 3777966,
+      "path": "data/primary_20261016/prepared/identity_registry.json",
+      "sha256": "de5594af7fc9dbf9039269b6ee5bd0989b291ea4bebdbaab37b5218730a03b65"
+    },
+    "snapshot_manifest": {
+      "bytes": 2198,
+      "path": "data/primary_20261016/SNAPSHOT_MANIFEST.json",
+      "sha256": "b69f882b41296669ee6d01c5f36c2a260685a5127d9bcb10973da62318d60402"
+    },
+    "summary": {
+      "bytes": 4755,
+      "path": "data/primary_20261016/prepared/summary.json",
+      "sha256": "1b69c250842794e0bcd6942453a42af1f580eeecd5d42b84ed4a1d5f9d4d15be"
+    }
+  },
+  "internal_local_only": true,
+  "manifest_schema": "primary_graph_ready_snapshot/2",
+  "manifest_version": 2,
+  "namespace": "hcm_primary_geojson",
+  "not_claimed": [
+    "accepted graph nodes",
+    "verified venues",
+    "fresh data",
+    "genuine upstream/source identifiers",
+    "present-day administrative containment",
+    "routes",
+    "primary H2/H3 completion",
+    "full goal completion"
+  ],
+  "outputs": {
+    "prepared_pois.jsonl": {
+      "bytes": 20189659,
+      "records": 6367,
+      "sha256": "37340a8021ca7e8b37efc1053718c4c87879f95fa9937d8c53e1a0218f080dd1"
+    }
+  },
+  "provided_at": "2026-10-16",
+  "provided_at_is_snapshot_freshness": false,
+  "real_supplied_primary_dataset": true,
+  "reviewed_exact_snapshot_binding": true,
+  "scope_limits": [
+    "source_snapshot_area_only: administrative labels are source claims, not present-day containment",
+    "internal_local_only: ids are internal and are not upstream/source identifiers",
+    "cross_export_matching is not guaranteed",
+    "collection time, source URL, license and freshness are UNKNOWN",
+    "coordinate/name/category values are preserved, not repaired or enriched",
+    "no graph, network, model, Docker or API call is performed by this adapter"
+  ],
+  "source_snapshot_area_only": true,
+  "source_type": "hcm_primary_geojson_internal",
+  "synthetic_fixture": false,
+  "task_id": "OC-043",
+  "unknowns": {
+    "collection_time": "UNKNOWN",
+    "freshness": "UNKNOWN",
+    "license": "UNKNOWN",
+    "source_url": "UNKNOWN"
+  }
+}

@@ -3,3 +3,21 @@ mg_log/
 **/__pycache__/
 .venv/
 .git/
+
+# Credentials and local snapshots must never enter an image build context.
+.env
+.env.*
+**/.env
+**/.env.*
+**/credentials.json
+**/auth.json
+**/serviceAccountKey.json
+**/secrets/
+**/*.pem
+**/*.key
+**/KEY_EXPOSURE_EXCERPT_PRIVATE.txt
+legacy/
+.venv-*/
+**/node_modules/
+.runtime-native/
+docs/project/handoffs/

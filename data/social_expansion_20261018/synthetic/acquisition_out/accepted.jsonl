@@ -1,0 +1,1 @@
+{"address": {"city": "Ho Chi Minh City", "district": "District 1", "nation": "Vietnam"}, "id": "web_poi:5e382ed18b4cf665a448a4d9021a3960", "latitude": 10.7801, "longitude": 106.7001, "name": "Synthetic Museum A", "poi_categories": [{"context": "Test", "id": "attraction", "name": "Attraction"}], "source_id": "synthetic-test-source", "synthetic": true}

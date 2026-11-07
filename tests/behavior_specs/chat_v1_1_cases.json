@@ -1,0 +1,345 @@
+{
+  "contract": "FT-CHAT-MVP-001 v1.1",
+  "source": "docs/contracts/CHAT_INTENT_AMENDMENT_2026-10-28.md",
+  "kind": "APPROVED_BEHAVIOR_ACCEPTANCE_SPEC_NOT_TEST_RESULT",
+  "rules": [
+    "No mock/unit substitutions for live acceptance",
+    "No real booking",
+    "No primary writes",
+    "Legitimate dedicated test identities and isolated writable storage required for positive mutations",
+    "FAIL/BLOCKED/NOT_RUN distinct",
+    "Do not change old frozen tests/expected"
+  ],
+  "cases": [
+    {
+      "id": "I11-01",
+      "message": "Quán này mở cửa lúc nào?",
+      "preconditions": [
+        "one identified real POI in context"
+      ],
+      "expected": [
+        "CHITCHAT/LOOKUP",
+        "resolve current POI",
+        "retrieve actual hours or disclose unknown"
+      ],
+      "execution": "REAL_HTTP_AND_BROWSER_WHEN_REQUIRED",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "I11-02",
+      "message": "Gợi ý quán cà phê yên tĩnh trong vùng đã chọn.",
+      "preconditions": [],
+      "expected": [
+        "CHITCHAT/RECOMMEND",
+        "source scope preserved",
+        "recommend only retrieved POIs",
+        "quietness unknown disclosed if unsupported"
+      ],
+      "execution": "REAL_HTTP_AND_BROWSER_WHEN_REQUIRED",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "I11-03",
+      "message": "Từ điểm A đến điểm B đi bộ thế nào?",
+      "preconditions": [
+        "two real POIs A/B"
+      ],
+      "expected": [
+        "CHITCHAT/ROUTE",
+        "real foot routing for identified IDs",
+        "no straight-line fallback"
+      ],
+      "execution": "REAL_HTTP_AND_BROWSER_WHEN_REQUIRED",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "I11-04",
+      "message": "Lên lịch ngày 07/11/2026 cho hai người thích bảo tàng, ngân sách 2 triệu.",
+      "preconditions": [],
+      "expected": [
+        "PLAN/CREATE",
+        "prefill supplied data",
+        "no planning handoff before user confirmation"
+      ],
+      "execution": "REAL_HTTP_AND_BROWSER_WHEN_REQUIRED",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "I11-05",
+      "message": "Bỏ bảo tàng khỏi lịch này, thêm quán cà phê.",
+      "preconditions": [
+        "owned current plan with museum"
+      ],
+      "expected": [
+        "PLAN/MODIFY",
+        "resolve owned current plan",
+        "preserve other constraints",
+        "recompute route and independently validate"
+      ],
+      "execution": "REAL_HTTP_AND_BROWSER_WHEN_REQUIRED",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "I11-06",
+      "message": "Sửa lịch đó đi.",
+      "preconditions": [
+        "two plans in context"
+      ],
+      "expected": [
+        "PLAN/MODIFY",
+        "NEEDS_CLARIFICATION for ambiguous plan",
+        "no handler side effect"
+      ],
+      "execution": "REAL_HTTP_AND_BROWSER_WHEN_REQUIRED",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "I11-07",
+      "message": "Lưu lịch này lại.",
+      "preconditions": [
+        "authenticated user",
+        "current plan"
+      ],
+      "expected": [
+        "MANAGE_SAVED/SAVE",
+        "require authenticated owner",
+        "persist confirmed current payload without regenerating"
+      ],
+      "execution": "REAL_HTTP_AND_BROWSER_WHEN_REQUIRED",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "I11-08",
+      "message": "Cho tôi xem các lịch đã lưu.",
+      "preconditions": [
+        "authenticated user with saved plans"
+      ],
+      "expected": [
+        "MANAGE_SAVED/LIST",
+        "real bounded owner-only results"
+      ],
+      "execution": "REAL_HTTP_AND_BROWSER_WHEN_REQUIRED",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "I11-09",
+      "message": "Mở lịch đã lưu A.",
+      "preconditions": [
+        "owned saved record A"
+      ],
+      "expected": [
+        "MANAGE_SAVED/OPEN",
+        "load exact owner record",
+        "do not recompute itinerary"
+      ],
+      "execution": "REAL_HTTP_AND_BROWSER_WHEN_REQUIRED",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "I11-10",
+      "message": "Xóa lịch đã lưu A.",
+      "preconditions": [
+        "owned saved record A dedicated to acceptance"
+      ],
+      "expected": [
+        "MANAGE_SAVED/DELETE",
+        "delete only exact authorized target",
+        "auditable action"
+      ],
+      "execution": "REAL_HTTP_AND_BROWSER_WHEN_REQUIRED",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "I11-11",
+      "message": "Mở lịch B của người khác.",
+      "preconditions": [
+        "caller identity A",
+        "saved record B owned by another acceptance identity"
+      ],
+      "expected": [
+        "no unauthorized record disclosure",
+        "dispatch denied",
+        "no owner override from text"
+      ],
+      "execution": "REAL_HTTP_AND_BROWSER_WHEN_REQUIRED",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "I11-12",
+      "message": "Bạn đang nhớ sở thích gì của tôi?",
+      "preconditions": [],
+      "expected": [
+        "MANAGE_MEMORY/VIEW_PROFILE",
+        "only caller profile",
+        "anonymous cannot retrieve durable profile"
+      ],
+      "execution": "REAL_HTTP_AND_BROWSER_WHEN_REQUIRED",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "I11-13",
+      "message": "Cập nhật sở thích của tôi: thích bảo tàng.",
+      "preconditions": [
+        "legitimate acceptance identity"
+      ],
+      "expected": [
+        "MANAGE_MEMORY/UPDATE_PROFILE",
+        "authenticated owner",
+        "preserve other valid preferences",
+        "real version conflict handled"
+      ],
+      "execution": "REAL_HTTP_AND_BROWSER_WHEN_REQUIRED",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "I11-14",
+      "message": "Xóa hồ sơ sở thích của tôi.",
+      "preconditions": [
+        "dedicated acceptance profile"
+      ],
+      "expected": [
+        "MANAGE_MEMORY/DELETE_PROFILE",
+        "only caller profile removed",
+        "session history not implicitly removed"
+      ],
+      "execution": "REAL_HTTP_AND_BROWSER_WHEN_REQUIRED",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "I11-15",
+      "message": "Xóa ngữ cảnh cuộc trò chuyện này.",
+      "preconditions": [
+        "two separate acceptance sessions"
+      ],
+      "expected": [
+        "MANAGE_MEMORY/CLEAR_SESSION",
+        "only current namespace cleared",
+        "durable profile unchanged"
+      ],
+      "execution": "REAL_HTTP_AND_BROWSER_WHEN_REQUIRED",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "I11-16",
+      "message": "Tìm quán yên tĩnh rồi đặt bàn luôn… mà thôi, chỉ gợi ý trước.",
+      "preconditions": [],
+      "expected": [
+        "RECOMMEND remains active",
+        "BOOKING request CANCELLED",
+        "no booking handler call"
+      ],
+      "execution": "REAL_HTTP_AND_BROWSER_WHEN_REQUIRED",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "I11-17",
+      "message": "Đặt bàn nhà hàng X và tạo lịch hai ngày luôn.",
+      "preconditions": [],
+      "expected": [
+        "atomic requests BOOKING and PLAN",
+        "MULTIPLE_ACTIONS",
+        "ask priority",
+        "no feature side effects before clarification"
+      ],
+      "execution": "REAL_HTTP_AND_BROWSER_WHEN_REQUIRED",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "I11-18",
+      "message": "Quán này còn bàn không? Nếu còn thì giữ bàn cho bốn người.",
+      "preconditions": [],
+      "expected": [
+        "BOOKING primary",
+        "question retained as context",
+        "no invented availability",
+        "ask target if unspecified"
+      ],
+      "execution": "REAL_HTTP_AND_BROWSER_WHEN_REQUIRED",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "I11-19",
+      "message": "Đặt bàn ở quán đó.",
+      "preconditions": [
+        "two restaurants in context"
+      ],
+      "expected": [
+        "BOOKING",
+        "NEEDS_CLARIFICATION if entity ambiguous",
+        "no handler side effect"
+      ],
+      "execution": "REAL_HTTP_AND_BROWSER_WHEN_REQUIRED",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "I11-20",
+      "message": "Đặt bàn tại quán A.",
+      "preconditions": [
+        "actual known service A",
+        "browser interaction"
+      ],
+      "expected": [
+        "query correct service type and source",
+        "show Book Ngay for actual service",
+        "click transfers selected service to booking screen",
+        "external command fake clearly labeled"
+      ],
+      "execution": "REAL_HTTP_AND_BROWSER_WHEN_REQUIRED",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "I11-21",
+      "message": "Bỏ bảo tàng, thêm cà phê gần khách sạn tôi đang ở.",
+      "preconditions": [],
+      "expected": [
+        "separate remove/add claims",
+        "unknown hotel stays unresolved",
+        "no invented coordinates or entity",
+        "ask necessary clarification"
+      ],
+      "execution": "REAL_HTTP_AND_BROWSER_WHEN_REQUIRED",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "I11-22",
+      "message": "Không dùng sở thích cũ, lần này chỉ đi bảo tàng trong vùng B.",
+      "preconditions": [
+        "profile and prior scope A"
+      ],
+      "expected": [
+        "current constraints override stored preferences",
+        "scope B authoritative",
+        "no reuse of old-scope evidence"
+      ],
+      "execution": "REAL_HTTP_AND_BROWSER_WHEN_REQUIRED",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "I11-23",
+      "message": "Xin chào!",
+      "preconditions": [],
+      "expected": [
+        "CHITCHAT social greeting",
+        "no forced POI retrieval",
+        "no booking/planning/saved/memory side effect"
+      ],
+      "execution": "REAL_HTTP_AND_BROWSER_WHEN_REQUIRED",
+      "status": "NOT_RUN"
+    },
+    {
+      "id": "I11-24",
+      "message": "Xóa lịch A rồi thôi đừng xóa nữa, mở nó cho tôi xem.",
+      "preconditions": [
+        "owned acceptance saved record A"
+      ],
+      "expected": [
+        "DELETE request CANCELLED",
+        "OPEN selected",
+        "record preserved",
+        "request-level cancellation does not cancel OPEN"
+      ],
+      "execution": "REAL_HTTP_AND_BROWSER_WHEN_REQUIRED",
+      "status": "NOT_RUN"
+    }
+  ]
+}

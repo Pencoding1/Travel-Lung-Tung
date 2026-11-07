@@ -1,0 +1,58 @@
+{
+  "dataset": "social_web_oc050",
+  "dry_run": true,
+  "generated_at": "2026-10-18T00:01:00Z",
+  "limitations": {
+    "cross_source_equivalence": "unsupported",
+    "network_acquisition": "not_implemented"
+  },
+  "live_ingestion": false,
+  "manifest_path": "data\\social_expansion_20261018\\real\\acquisition_manifest.json",
+  "manifest_sha256": "0e3d4559a2502257de899ca9474749df30c7e34cda4fd2b6512d1aefb2e94bbb",
+  "mapping_path": "data\\social_expansion_20261018\\real\\mapping.json",
+  "outputs": {
+    "accepted": "data\\social_expansion_20261018\\real\\acquisition_out\\accepted.jsonl",
+    "candidates": "data\\social_expansion_20261018\\real\\acquisition_out\\candidates.jsonl",
+    "decisions": "data\\social_expansion_20261018\\real\\acquisition_out\\decisions.jsonl",
+    "quarantine": "data\\social_expansion_20261018\\real\\acquisition_out\\quarantine.jsonl",
+    "raw": "data\\social_expansion_20261018\\real\\acquisition_out\\raw.jsonl",
+    "summary": "data\\social_expansion_20261018\\real\\acquisition_out\\summary.json"
+  },
+  "pipeline_version": 3,
+  "policy_hash": "2ff44957c789fd8636e8f347fd8cf7e338798097f7b605f8933e6ab0eaf41e69",
+  "provenance": {},
+  "real_expansion_totals": {
+    "accepted": 0,
+    "candidates": 7
+  },
+  "run_id": "92e8817095c0270b",
+  "scope": "social_web_oc050::real",
+  "sources": [
+    {
+      "counts": {
+        "accepted": 0,
+        "candidates": 7,
+        "duplicate": 7,
+        "rejected": 0,
+        "requires_review": 0
+      },
+      "license": "UNKNOWN",
+      "retrieved_at": "2026-10-17T19:06:37.979429Z",
+      "reviewed_entities": 0,
+      "source_id": "vietnam-travel-node137",
+      "source_type": "web_poi",
+      "source_url": "https://vietnam.travel/node/137",
+      "synthetic": false
+    }
+  ],
+  "synthetic": false,
+  "totals": {
+    "accepted": 0,
+    "accepted_durable": 0,
+    "candidates": 7,
+    "duplicate": 7,
+    "quarantine_durable": 7,
+    "rejected": 0,
+    "requires_review": 0
+  }
+}

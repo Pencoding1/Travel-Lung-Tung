@@ -1,6 +1,7 @@
 # Feature: Agent Chat — MVP Behavior Contract
 
-- **ID:** `FT-CHAT-MVP-001` · **Version:** `1.0`
+- **ID:** `FT-CHAT-MVP-001` · **Version hiện hành:** `1.1` (amendment được duyệt 28/10/2026)
+- **Amendment hiện hành:** [CHAT_INTENT_AMENDMENT_2026-10-28.md](CHAT_INTENT_AMENDMENT_2026-10-28.md). Năm intent và năm lớp xử lý ở amendment thay phần intent/pipeline tương ứng bên dưới; nguyên văn v1.0 giữ để truy vết. Snapshot frozen v1.0 không đổi.
 - **Status:** `APPROVED` — chủ dự án tự định nghĩa và giao làm cơ sở cho test
 - **Owner/approver:** chủ dự án (người dùng) · **Ngày ghi vào repo:** 2026-10-22
 - **Nguồn:** nội dung do chủ dự án cung cấp trong phiên 2026-10-22 (nguyên văn bên dưới)

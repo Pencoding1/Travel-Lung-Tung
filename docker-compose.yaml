@@ -23,8 +23,9 @@ services:
       - MEMGRAPH_USER=${MEMGRAPH_USER}
       - MEMGRAPH_PASSWORD=${MEMGRAPH_PASSWORD}
     healthcheck:
-      test: ["CMD", "mgconsole", "--host", "127.0.0.1", "--port", "7687", "--username", "${MEMGRAPH_USER}", "--password", "${MEMGRAPH_PASSWORD}", "-e", "RETURN 1;"]      
+      test: ["CMD-SHELL", "echo 'RETURN 1;' | mgconsole --host 127.0.0.1 --port 7687 --username \"${MEMGRAPH_USER}\" --password \"${MEMGRAPH_PASSWORD}\""]
       interval: 10s
+
       timeout: 5s
       retries: 5
       start_period: 0s
@@ -73,6 +74,7 @@ services:
       - JWT_SECRET=${JWT_SECRET:?JWT_SECRET is required}
       - JWT_ALGORITHM=${JWT_ALGORITHM:-HS256}
       - FIRESTORE_ENABLED=${FIRESTORE_ENABLED:-false}
+      - GRAPHHOPPER_PROFILES=${GRAPHHOPPER_PROFILES:-car,foot}
     env_file:
       - path: ./POI_service/.env
         required: false
@@ -95,6 +97,7 @@ services:
       - JWT_SECRET=${JWT_SECRET:?JWT_SECRET is required}
       - JWT_ALGORITHM=${JWT_ALGORITHM:-HS256}
       - FIRESTORE_ENABLED=${FIRESTORE_ENABLED:-false}
+      - GRAPHHOPPER_PROFILES=${GRAPHHOPPER_PROFILES:-car,foot}
     env_file:
       - path: ./POI_service/.env
         required: false

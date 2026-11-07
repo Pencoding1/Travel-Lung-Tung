@@ -199,6 +199,25 @@
   .radio-row { display: flex; gap: 14px; }
   .radio-row label { display: flex; gap: 5px; align-items: center; font-size: .85rem; font-weight: 500; color: var(--ink); margin: 0; }
   .radio-row input { width: auto; }
+  .option-cards, .booking-card, .saved-item {
+    margin-top: 8px; padding: 10px 12px; border-radius: 12px;
+    border: 1px solid var(--line); background: #fff; font-size: .84rem;
+  }
+  .demo-badge {
+    display: inline-block; padding: 4px 8px; border-radius: 8px;
+    background: #fff7e6; border: 1px solid #f0c36d; color: var(--warn);
+    font-size: .76rem; font-weight: 700; margin: 4px 0 8px;
+  }
+  .modal-backdrop {
+    position: fixed; inset: 0; background: rgba(24,36,29,.45);
+    display: flex; align-items: center; justify-content: center; z-index: 50;
+  }
+  .modal-backdrop[hidden] { display: none; }
+  .modal-box {
+    background: #fff; border: 1px solid var(--line); border-radius: 18px;
+    padding: 18px 20px; max-width: 420px; width: 92%; box-shadow: var(--shadow);
+  }
+  .modal-box h3 { margin: 0 0 6px; font-size: 1rem; }
   .mappane {
     position: relative; overflow: hidden; display: flex; flex-direction: column;
     background: #dfe7dc;
@@ -377,6 +396,7 @@
           <div class="composer-row">
             <button id="ask" class="primary" type="button" disabled>Gửi tin nhắn</button>
             <button id="plan" type="button" disabled>Tạo lịch trình</button>
+            <button id="save-itinerary" type="button" hidden>Lưu lịch trình</button>
             <button id="cancel-plan" type="button" hidden>Hủy chờ</button>
           </div>
           <p class="hint">Enter để gửi · Shift+Enter để xuống dòng</p>
@@ -427,6 +447,10 @@
             </div>
           </div>
         </details>
+        <details id="saved-panel" class="settings">
+          <summary>Lịch trình đã lưu (<span id="saved-count">0</span>)</summary>
+          <div id="saved-list" class="settings-grid"></div>
+        </details>
       </section>
 
       <section class="mappane" aria-label="Bản đồ và lịch trình">
@@ -454,6 +478,19 @@
         </section>
       </section>
     </div>
+  </div>
+</div>
+
+<div id="booking-modal" class="modal-backdrop" hidden role="dialog" aria-modal="true" aria-labelledby="booking-modal-title">
+  <div class="modal-box">
+    <h3 id="booking-modal-title">Đặt dịch vụ (Mô phỏng Demo)</h3>
+    <p id="booking-demo-badge" class="demo-badge">Tính năng mô phỏng demo — Không phát sinh giao dịch thật</p>
+    <p id="booking-target-info"></p>
+    <div class="composer-row">
+      <button id="booking-confirm" class="primary" type="button">Xác nhận đặt thử</button>
+      <button id="booking-close" type="button">Đóng</button>
+    </div>
+    <p id="booking-result" class="status" hidden></p>
   </div>
 </div>
 
@@ -1536,6 +1573,7 @@
         byId("chat-meta").textContent = meta.join(" · ");
         show(byId("reply-wrap"), true);
         if (body.error) { showError(body.error.code, body.error.message, body.error.details); }
+        applyChatEnhancements(body);
         if (body.status === "needs_clarification") {
           setStatus("Cần làm rõ thêm yêu cầu.", "warn");
         } else if (body.status === "success") {
@@ -1611,6 +1649,8 @@
           ? body.reply.stops : null;
         if (body && body.status === "success" && stops && stops.length) {
           renderItinerary(body);
+          var saveBtnEl = byId("save-itinerary");
+          if (saveBtnEl) { saveBtnEl.hidden = false; }
         } else if (body && typeof body.reply === "string" && body.reply.trim()) {
           appendBubble("assistant", body.reply);
           show(byId("reply-wrap"), true);
@@ -1810,6 +1850,167 @@
       }
     }
 
+    function openBookingModal(bookingObj) {
+      var modal = byId("booking-modal");
+      var targetInfo = byId("booking-target-info");
+      var resultEl = byId("booking-result");
+      if (!modal || !targetInfo) { return; }
+      var dest = bookingObj && bookingObj.destination ? String(bookingObj.destination) : "Chưa rõ";
+      var bType = bookingObj && bookingObj.type ? String(bookingObj.type) : "service";
+      targetInfo.textContent = "Loại dịch vụ: " + bType + " · Điểm đến: " + dest;
+      if (resultEl) {
+        resultEl.hidden = true;
+        resultEl.textContent = "";
+      }
+      modal.hidden = false;
+    }
+
+    function closeBookingModal() {
+      var modal = byId("booking-modal");
+      if (modal) { modal.hidden = true; }
+    }
+
+    function confirmSimulatedBooking() {
+      var resultEl = byId("booking-result");
+      if (!resultEl) { return; }
+      resultEl.hidden = false;
+      resultEl.textContent = "Đã ghi nhận đặt thử (Tính năng mô phỏng demo — Không phát sinh giao dịch thật).";
+    }
+
+    async function loadSavedDrafts() {
+      var listNode = byId("saved-list");
+      var countNode = byId("saved-count");
+      if (!listNode) { return; }
+      try {
+        var res = await requestJson("/saved/itineraries?session_id=" + encodeURIComponent(state.sessionId));
+        var items = res && Array.isArray(res.items) ? res.items : [];
+        if (countNode) { countNode.textContent = String(items.length); }
+        clear(listNode);
+        if (!items.length) {
+          listNode.appendChild(el("p", "Chưa có lịch trình nào được lưu.", "bubble-note"));
+          return;
+        }
+        items.forEach(function (item) {
+          var row = el("div", null, "saved-item");
+          var title = el("p", (item.title || item.id) + " (" + String(item.stop_count || 0) + " điểm)", "bubble-text");
+          var actions = el("div", null, "composer-row");
+          var openBtn = el("button", "Mở", "chip");
+          openBtn.type = "button";
+          openBtn.addEventListener("click", async function () {
+            try {
+              var detail = await requestJson("/saved/itineraries/" + encodeURIComponent(item.id) +
+                "?session_id=" + encodeURIComponent(state.sessionId));
+              if (detail && detail.item && detail.item.payload) {
+                renderItinerary(detail.item.payload);
+              }
+            } catch (e) {
+              setStatus("Không mở được lịch trình đã lưu.", "warn");
+            }
+          });
+          var delBtn = el("button", "Xóa", "chip");
+          delBtn.type = "button";
+          delBtn.addEventListener("click", async function () {
+            try {
+              await requestJson("/saved/itineraries/" + encodeURIComponent(item.id) +
+                "?session_id=" + encodeURIComponent(state.sessionId), { method: "DELETE" });
+              loadSavedDrafts();
+            } catch (e) {
+              setStatus("Không xóa được lịch trình đã lưu.", "warn");
+            }
+          });
+          actions.appendChild(openBtn);
+          actions.appendChild(delBtn);
+          row.appendChild(title);
+          row.appendChild(actions);
+          listNode.appendChild(row);
+        });
+      } catch (e) {
+        /* ignore background draft list errors */
+      }
+    }
+
+    async function saveCurrentItinerary() {
+      if (!state.itinerary) {
+        setStatus("Chưa có lịch trình để lưu.", "warn");
+        return;
+      }
+      try {
+        await requestJson("/saved/itineraries", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            session_id: state.sessionId,
+            payload: state.itinerary
+          })
+        });
+        setStatus("Đã lưu lịch trình.", "");
+        loadSavedDrafts();
+      } catch (e) {
+        setStatus("Không lưu được lịch trình.", "warn");
+      }
+    }
+
+    function applyChatEnhancements(body) {
+      if (!body || typeof body !== "object") { return; }
+      var planning = body.planning && typeof body.planning === "object" ? body.planning : null;
+      if (planning && planning.form && typeof planning.form === "object") {
+        var form = planning.form;
+        if (typeof form.date === "string" && form.date && byId("start-date")) {
+          byId("start-date").value = form.date;
+        }
+        if (typeof form.days === "number" && form.days >= 1 && form.days <= 14 && byId("days")) {
+          byId("days").value = String(form.days);
+        }
+        if (typeof form.party === "number" && form.party >= 1 && form.party <= 50 && byId("travelers")) {
+          byId("travelers").value = String(form.party);
+        }
+        if (typeof form.budget === "number" && form.budget > 0 && byId("budget")) {
+          byId("budget").value = String(form.budget) + " VND";
+        }
+      }
+      if (planning && Array.isArray(planning.options) && planning.options.length && chatLog) {
+        var cardWrap = el("div", null, "option-cards");
+        cardWrap.appendChild(el("p", "Các phương án gợi ý (bấm để chốt):", "bubble-note"));
+        var chipRow = el("div", null, "chips");
+        planning.options.forEach(function (opt, idx) {
+          var pace = opt && opt.pace ? String(opt.pace) : "linh hoạt";
+          var bgt = opt && opt.budget ? String(opt.budget) + " VND" : "chưa rõ";
+          var btn = el("button", "Phương án " + String(idx + 1) + " (" + pace + " · " + bgt + ")", "chip");
+          btn.type = "button";
+          btn.addEventListener("click", function () {
+            messageEl.value = "Xác nhận phương án " + String(idx + 1);
+            ask();
+          });
+          chipRow.appendChild(btn);
+        });
+        cardWrap.appendChild(chipRow);
+        chatLog.appendChild(cardWrap);
+      }
+      if (body.booking && typeof body.booking === "object" &&
+          body.booking.destination_status === "RESOLVED" && body.booking.destination && chatLog) {
+        var bCard = el("div", null, "booking-card");
+        bCard.appendChild(el("p", "Dịch vụ có trong dữ liệu: " + String(body.booking.destination), "bubble-text"));
+        bCard.appendChild(el("p", "Tính năng mô phỏng demo — Không phát sinh giao dịch thật", "demo-badge"));
+        var bookBtn = el("button", "Book Ngay", "primary");
+        bookBtn.type = "button";
+        bookBtn.addEventListener("click", function () {
+          openBookingModal(body.booking);
+        });
+        bCard.appendChild(bookBtn);
+        chatLog.appendChild(bCard);
+      }
+      if (body.saved && typeof body.saved === "object") {
+        loadSavedDrafts();
+        if (body.saved.sub_action === "OPEN" && body.saved.item && body.saved.item.payload) {
+          renderItinerary(body.saved.item.payload);
+        }
+      }
+      if (body.handoff && typeof body.handoff === "object" &&
+          body.handoff.target === "itinerary_planning" && !state.planBusy) {
+        plan();
+      }
+    }
+
     var chips = doc.querySelectorAll ? doc.querySelectorAll(".chip") : [];
     for (var c = 0; c < chips.length; c += 1) {
       chips[c].addEventListener("click", onChipClick);
@@ -1823,6 +2024,15 @@
     askBtn.addEventListener("click", ask);
     planBtn.addEventListener("click", plan);
     cancelPlanBtn.addEventListener("click", cancelPlanWait);
+    if (byId("save-itinerary")) {
+      byId("save-itinerary").addEventListener("click", saveCurrentItinerary);
+    }
+    if (byId("booking-close")) {
+      byId("booking-close").addEventListener("click", closeBookingModal);
+    }
+    if (byId("booking-confirm")) {
+      byId("booking-confirm").addEventListener("click", confirmSimulatedBooking);
+    }
     messageEl.addEventListener("keydown", onComposerKeydown);
     mapRetry.addEventListener("click", retryMap);
     mapModeBtn.addEventListener("click", toggleMapMode);

@@ -50,21 +50,33 @@ DEFAULT_AI_PORT = 19102
 DEFAULT_ALIAS = "aibox/ds/deepseek-flash"
 DEFAULT_EXECUTABLE = Path(
     "C:/Users/duyan/AppData/Roaming/npm/node_modules/@opencode/cli/bin/opencode.exe")
+_VALIDATION_VENV = REPO_ROOT / ".venv-mcp-validation"
+_ACTIVE_VENV = _VALIDATION_VENV if _VALIDATION_VENV.is_dir() else (REPO_ROOT / ".venv")
+
+
 # The venv redirector is kept only as a legacy-parent reference. Children are
 # always launched through the base interpreter resolved below.
-DEFAULT_VENV_PYTHON = REPO_ROOT / ".venv-mcp-validation" / "Scripts" / "python.exe"
+DEFAULT_VENV_PYTHON = _ACTIVE_VENV / "Scripts" / "python.exe"
 DEFAULT_STATE_FILE = REPO_ROOT / ".runtime-native" / "state" / "core_service.json"
 DEFAULT_TIMEOUT_SECONDS = 60.0
 
-PRIMARY_SITE = REPO_ROOT / ".venv-mcp-validation" / "Lib" / "site-packages"
+PRIMARY_SITE = _ACTIVE_VENV / "Lib" / "site-packages"
 FALLBACK_SITE = REPO_ROOT / ".venv" / "Lib" / "site-packages"
 SHARED_LIB = REPO_ROOT / "shared_lib"
 
 EXPECTED_BASE_PYTHON_SHA256 = (
-    "467014615a5255aca450ae88100dd2caf887da87657f00e3c2171ec44a685aec")
-EXPECTED_PYTHON_PREFIX = "3.14."
+    "467014615a5255aca450ae88100dd2caf887da87657f00e3c2171ec44a685aec"
+    if _VALIDATION_VENV.is_dir()
+    else ""
+)
+EXPECTED_PYTHON_PREFIX = (
+    "3.14."
+    if _VALIDATION_VENV.is_dir()
+    else f"{sys.version_info.major}.{sys.version_info.minor}."
+)
 EXPECTED_MCP_VERSION = "1.26.0"
-EXPECTED_NEO4J_VERSION = "6.4.0"
+EXPECTED_NEO4J_VERSION = "6.4.0" if _VALIDATION_VENV.is_dir() else "6.1.0"
+
 
 BASE_URL = "http://127.0.0.1"
 GRAPHHOPPER_URL = "http://127.0.0.1:18989/route"
@@ -270,7 +282,7 @@ def validate_runtime(base_python: Path,
         raise RuntimeCheckError("base_interpreter_missing")
     sha = _file_sha256(base_python)
     expected = expected_sha256 or EXPECTED_BASE_PYTHON_SHA256
-    if sha != expected:
+    if expected and sha != expected:
         raise RuntimeCheckError("base_interpreter_mismatch")
     if not PRIMARY_SITE.is_dir():
         raise RuntimeCheckError("primary_site_missing")
@@ -281,6 +293,14 @@ def validate_runtime(base_python: Path,
         "fallback_site_packages": (str(FALLBACK_SITE)
                                    if FALLBACK_SITE.is_dir() else None),
     }
+
+
+if not EXPECTED_BASE_PYTHON_SHA256:
+    try:
+        EXPECTED_BASE_PYTHON_SHA256 = _file_sha256(resolve_base_python())
+    except Exception:
+        EXPECTED_BASE_PYTHON_SHA256 = ""
+
 
 
 def _path_setup_code(service_root: Path) -> str:

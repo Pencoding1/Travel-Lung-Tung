@@ -1,0 +1,86 @@
+[
+  {
+    "context": "Clothing, apparel and gift shops as labelled by the source.",
+    "id": "hcm_primary_geojson:source-category:apparel_and_gifts",
+    "name": "Apparel And Gifts",
+    "source_label": "apparel_and_gifts"
+  },
+  {
+    "context": "Visitor attractions as labelled by the primary GeoJSON source.",
+    "id": "hcm_primary_geojson:source-category:attractions",
+    "name": "Attractions",
+    "source_label": "attractions"
+  },
+  {
+    "context": "Coffee shops and cafes as labelled by the primary GeoJSON source.",
+    "id": "hcm_primary_geojson:source-category:coffee",
+    "name": "Coffee",
+    "source_label": "coffee"
+  },
+  {
+    "context": "Convenience stores and small daily-goods shops in the source vocabulary.",
+    "id": "hcm_primary_geojson:source-category:convenience",
+    "name": "Convenience",
+    "source_label": "convenience"
+  },
+  {
+    "context": "Entertainment venues as labelled by the primary GeoJSON source.",
+    "id": "hcm_primary_geojson:source-category:entertainment",
+    "name": "Entertainment",
+    "source_label": "entertainment"
+  },
+  {
+    "context": "Banks, ATMs and financial-service points as labelled by the source.",
+    "id": "hcm_primary_geojson:source-category:finance",
+    "name": "Finance",
+    "source_label": "finance"
+  },
+  {
+    "context": "Fuel / petrol stations as labelled by the primary GeoJSON source.",
+    "id": "hcm_primary_geojson:source-category:fuel",
+    "name": "Fuel",
+    "source_label": "fuel"
+  },
+  {
+    "context": "Health-care and beauty establishments as labelled by the source.",
+    "id": "hcm_primary_geojson:source-category:health_and_beauty",
+    "name": "Health And Beauty",
+    "source_label": "health_and_beauty"
+  },
+  {
+    "context": "Places to stay (hotels, guesthouses) as labelled by the source.",
+    "id": "hcm_primary_geojson:source-category:lodging",
+    "name": "Lodging",
+    "source_label": "lodging"
+  },
+  {
+    "context": "Public-service facilities as labelled by the primary GeoJSON source.",
+    "id": "hcm_primary_geojson:source-category:public_services",
+    "name": "Public Services",
+    "source_label": "public_services"
+  },
+  {
+    "context": "Restaurants and eating places labelled as restaurant in the source data.",
+    "id": "hcm_primary_geojson:source-category:restaurant",
+    "name": "Restaurant",
+    "source_label": "restaurant"
+  },
+  {
+    "context": "Shopping centres and retail complexes as labelled by the source.",
+    "id": "hcm_primary_geojson:source-category:retail_center",
+    "name": "Retail Center",
+    "source_label": "retail_center"
+  },
+  {
+    "context": "Specialty food shops and food producers as labelled by the source.",
+    "id": "hcm_primary_geojson:source-category:specialty_food",
+    "name": "Specialty Food",
+    "source_label": "specialty_food"
+  },
+  {
+    "context": "Transport stops and terminals as labelled by the primary GeoJSON source.",
+    "id": "hcm_primary_geojson:source-category:transport",
+    "name": "Transport",
+    "source_label": "transport"
+  }
+]

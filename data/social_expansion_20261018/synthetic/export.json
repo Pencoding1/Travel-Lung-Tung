@@ -1,0 +1,176 @@
+{
+    "schema_version": 1,
+    "synthetic": true,
+    "source": {
+        "source_id": "synthetic-test-source",
+        "profile": "synthetic_test_source",
+        "source_type": "web_poi",
+        "license": "SYNTHETIC-TEST-ONLY",
+        "reuse_status": "permitted",
+        "policy_evidence": []
+    },
+    "captures": [],
+    "records": [
+        {
+            "record_id": "synthetic/1#a",
+            "name": "Synthetic Museum A",
+            "address_raw": "1 Test Street, District 1, Ho Chi Minh City",
+            "address_hints": {
+                "addr:full": "1 Test Street, District 1, Ho Chi Minh City"
+            },
+            "description": "A synthetic narrative used only in tests.",
+            "review_text": "Synthetic review text (not a real review).",
+            "category_tags": [
+                "tourism=attraction"
+            ],
+            "coordinates": [
+                10.7801,
+                106.7001
+            ],
+            "opening_hours_raw": null,
+            "field_evidence": [
+                {
+                    "field": "name",
+                    "value": "Synthetic Museum A",
+                    "source_url": "https://example.test/pois",
+                    "fetched_at": "2026-10-18T00:00:00Z",
+                    "raw_capture_path": "raw/page.html",
+                    "raw_sha256": "f46c9c4a03a167b42087b6e7575bc3a6070f9adb92f694b4a74aa86494a952ab",
+                    "locator": "/section[name]"
+                },
+                {
+                    "field": "address_raw",
+                    "value": "1 Test Street, District 1, Ho Chi Minh City",
+                    "source_url": "https://example.test/pois",
+                    "fetched_at": "2026-10-18T00:00:00Z",
+                    "raw_capture_path": "raw/page.html",
+                    "raw_sha256": "f46c9c4a03a167b42087b6e7575bc3a6070f9adb92f694b4a74aa86494a952ab",
+                    "locator": "/section[address_raw]"
+                },
+                {
+                    "field": "description",
+                    "value": "A synthetic narrative used only in tests.",
+                    "source_url": "https://example.test/pois",
+                    "fetched_at": "2026-10-18T00:00:00Z",
+                    "raw_capture_path": "raw/page.html",
+                    "raw_sha256": "f46c9c4a03a167b42087b6e7575bc3a6070f9adb92f694b4a74aa86494a952ab",
+                    "locator": "/section[description]"
+                },
+                {
+                    "field": "review_text",
+                    "value": "Synthetic review text (not a real review).",
+                    "source_url": "https://example.test/pois",
+                    "fetched_at": "2026-10-18T00:00:00Z",
+                    "raw_capture_path": "raw/page.html",
+                    "raw_sha256": "f46c9c4a03a167b42087b6e7575bc3a6070f9adb92f694b4a74aa86494a952ab",
+                    "locator": "/section[review_text]"
+                }
+            ],
+            "issues": [],
+            "minimum_valid": true,
+            "page_url": "https://example.test/pois",
+            "page_capture_sha256": "f46c9c4a03a167b42087b6e7575bc3a6070f9adb92f694b4a74aa86494a952ab",
+            "page_capture_path": "raw/page.html",
+            "page_fetched_at": "2026-10-18T00:00:00Z",
+            "locator": "section.ac-chapter[0]#chapter-1"
+        },
+        {
+            "record_id": "synthetic/1#b",
+            "name": "Synthetic Place B",
+            "address_raw": "2 Synthetic Street, District 1, Ho Chi Minh City",
+            "address_hints": {
+                "addr:full": "2 Synthetic Street, District 1, Ho Chi Minh City"
+            },
+            "description": null,
+            "review_text": "Synthetic review text only.",
+            "category_tags": [
+                "tourism=attraction"
+            ],
+            "coordinates": null,
+            "opening_hours_raw": null,
+            "field_evidence": [
+                {
+                    "field": "name",
+                    "value": "Synthetic Place B",
+                    "source_url": "https://example.test/pois",
+                    "fetched_at": "2026-10-18T00:00:00Z",
+                    "raw_capture_path": "raw/page.html",
+                    "raw_sha256": "f46c9c4a03a167b42087b6e7575bc3a6070f9adb92f694b4a74aa86494a952ab",
+                    "locator": "/section[name]"
+                },
+                {
+                    "field": "address_raw",
+                    "value": "2 Synthetic Street, District 1, Ho Chi Minh City",
+                    "source_url": "https://example.test/pois",
+                    "fetched_at": "2026-10-18T00:00:00Z",
+                    "raw_capture_path": "raw/page.html",
+                    "raw_sha256": "f46c9c4a03a167b42087b6e7575bc3a6070f9adb92f694b4a74aa86494a952ab",
+                    "locator": "/section[address_raw]"
+                },
+                {
+                    "field": "review_text",
+                    "value": "Synthetic review text only.",
+                    "source_url": "https://example.test/pois",
+                    "fetched_at": "2026-10-18T00:00:00Z",
+                    "raw_capture_path": "raw/page.html",
+                    "raw_sha256": "f46c9c4a03a167b42087b6e7575bc3a6070f9adb92f694b4a74aa86494a952ab",
+                    "locator": "/section[review_text]"
+                }
+            ],
+            "issues": [],
+            "minimum_valid": true,
+            "page_url": "https://example.test/pois",
+            "page_capture_sha256": "f46c9c4a03a167b42087b6e7575bc3a6070f9adb92f694b4a74aa86494a952ab",
+            "page_capture_path": "raw/page.html",
+            "page_fetched_at": "2026-10-18T00:00:00Z",
+            "locator": "section.ac-chapter[0]#chapter-1"
+        },
+        {
+            "record_id": "synthetic/1#c",
+            "name": null,
+            "address_raw": "1 Test Street, District 1, Ho Chi Minh City",
+            "address_hints": {
+                "addr:full": "1 Test Street, District 1, Ho Chi Minh City"
+            },
+            "description": "A synthetic narrative used only in tests.",
+            "review_text": null,
+            "category_tags": [
+                "tourism=attraction"
+            ],
+            "coordinates": [
+                10.7803,
+                106.7003
+            ],
+            "opening_hours_raw": null,
+            "field_evidence": [
+                {
+                    "field": "address_raw",
+                    "value": "1 Test Street, District 1, Ho Chi Minh City",
+                    "source_url": "https://example.test/pois",
+                    "fetched_at": "2026-10-18T00:00:00Z",
+                    "raw_capture_path": "raw/page.html",
+                    "raw_sha256": "f46c9c4a03a167b42087b6e7575bc3a6070f9adb92f694b4a74aa86494a952ab",
+                    "locator": "/section[address_raw]"
+                },
+                {
+                    "field": "description",
+                    "value": "A synthetic narrative used only in tests.",
+                    "source_url": "https://example.test/pois",
+                    "fetched_at": "2026-10-18T00:00:00Z",
+                    "raw_capture_path": "raw/page.html",
+                    "raw_sha256": "f46c9c4a03a167b42087b6e7575bc3a6070f9adb92f694b4a74aa86494a952ab",
+                    "locator": "/section[description]"
+                }
+            ],
+            "issues": [
+                "missing_name"
+            ],
+            "minimum_valid": false,
+            "page_url": "https://example.test/pois",
+            "page_capture_sha256": "f46c9c4a03a167b42087b6e7575bc3a6070f9adb92f694b4a74aa86494a952ab",
+            "page_capture_path": "raw/page.html",
+            "page_fetched_at": "2026-10-18T00:00:00Z",
+            "locator": "section.ac-chapter[0]#chapter-1"
+        }
+    ]
+}

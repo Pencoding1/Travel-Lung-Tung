@@ -1,12 +1,13 @@
 # Test plan — Agent Chat MVP (`FT-CHAT-MVP-001`)
 
-- **ID:** `TP-CHAT-001` · **Version:** `0.4` · **Status:** `READY TO IMPLEMENT` (chờ chủ dự án quyết viết test ngay hay chờ brief)
+- **ID:** `TP-CHAT-001` · **Version:** `0.4` · **Status:** thiết kế kiểm thử thuộc cổng `TA-CHAT-001` đã `APPROVED` ngày 28/10/2026; không còn chờ duyệt kiến trúc 20 + 100 test.
 - **0.2:** thêm schema mock Knowledge Database lấy từ dataset thật (§2.1) và cặp đối chứng tồn tại / không tồn tại ở B3 theo yêu cầu chủ dự án.
 - **0.3:** sáu quyết định đã chốt (§2.2–§2.5, Q1–Q6); không còn case nào phải chờ để viết assert.
 - **0.4:** bộ case trong tệp này trở thành **tầng T1 (20 spec test)** của kiến trúc 120 test; 8 case còn lại làm hạt giống cho tầng T2. Xem `F-CHAT_MVP_TEST_ARCHITECTURE.md`.
 - **Dựa trên:** `docs/contracts/F-CHAT_MVP_CONTRACT.md` v1.0 (APPROVED, chủ dự án định nghĩa)
 - **Ngày:** 2026-10-22 · **Người soạn:** Hermes
-- **Trạng thái thực thi:** chưa viết test, chưa chạy. Tệp này là **đề xuất** test.
+- **Trạng thái thực thi hiện hành:** đã có bộ 20 test đặc tả và 100 test QA, cùng RED baseline ngày 22/10 (T1: 20 fail; T2: 96 fail/4 pass). Chưa chạy lại trong đợt áp dụng biên nhận 28/10. Các mô tả “chưa viết/chưa chạy” ở phần lịch sử bên dưới đã được trạng thái này thay thế. Phê duyệt thiết kế không phải nghiệm thu implementation.
+- **Booking hiện hành:** theo `F-BOOKING_MVP_CONTRACT.md`, chọn **Book Ngay** dẫn đến screen booking; lệnh đặt tới dịch vụ ngoài là fake. Các tên handler/field cũ trong case là thiết kế cần đối chiếu với contract này, không chứng minh đặt thật. Không tự sửa test/expected trong lượt cập nhật tài liệu.
 - **Phạm vi:** chỉ 8 khối B1–B7 + G. Không thêm behavior ngoài contract.
 
 ---

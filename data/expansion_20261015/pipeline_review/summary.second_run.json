@@ -1,0 +1,88 @@
+{
+  "dry_run": true,
+  "generated_at": "2026-10-15T10:54:00Z",
+  "limitations": {
+    "cross_source_equivalence": "unsupported",
+    "network_acquisition": "not_implemented"
+  },
+  "live_ingestion": false,
+  "manifest_path": "data\\expansion_20261015\\pipeline_review\\manifest.json",
+  "manifest_sha256": "34adaaac70711b395fa7346767a01b08ea7cc962da57d5b4dda2c1e977cbc769",
+  "mapping_path": "data\\expansion_20261015\\pipeline_review\\mapping.json",
+  "outputs": {
+    "accepted": "data\\expansion_20261015\\pipeline_review\\out\\accepted.jsonl",
+    "candidates": "data\\expansion_20261015\\pipeline_review\\out\\candidates.jsonl",
+    "decisions": "data\\expansion_20261015\\pipeline_review\\out\\decisions.jsonl",
+    "quarantine": "data\\expansion_20261015\\pipeline_review\\out\\quarantine.jsonl",
+    "raw": "data\\expansion_20261015\\pipeline_review\\out\\raw.jsonl",
+    "summary": "data\\expansion_20261015\\pipeline_review\\out\\summary.json"
+  },
+  "pipeline_version": 2,
+  "policy_hash": "1750fde2d6b247b88e3a0600f64c405f7cd264ff48f6b656677d3cc948f6cabe",
+  "provenance": {},
+  "real_expansion_totals": {
+    "accepted": 0,
+    "candidates": 32
+  },
+  "run_id": "6f99b12f479949d7",
+  "sources": [
+    {
+      "counts": {
+        "accepted": 0,
+        "candidates": 30,
+        "duplicate": 30,
+        "rejected": 0,
+        "requires_review": 0
+      },
+      "license": "ODbL-1.0",
+      "retrieved_at": "2026-10-15T10:52:59Z",
+      "reviewed_entities": 0,
+      "source_id": "osm-local-pbf-sample",
+      "source_type": "osm",
+      "source_url": "file://data/expansion_20261015/osm_local/osm_local_sample.json",
+      "synthetic": false
+    },
+    {
+      "counts": {
+        "accepted": 0,
+        "candidates": 1,
+        "duplicate": 1,
+        "rejected": 0,
+        "requires_review": 0
+      },
+      "license": "CC0-1.0",
+      "retrieved_at": "2026-10-15T10:26:40.536239Z",
+      "reviewed_entities": 0,
+      "source_id": "wikidata-expansion-q703871",
+      "source_type": "wikidata",
+      "source_url": "https://www.wikidata.org/wiki/Special:EntityData/Q703871.json",
+      "synthetic": false
+    },
+    {
+      "counts": {
+        "accepted": 0,
+        "candidates": 1,
+        "duplicate": 1,
+        "rejected": 0,
+        "requires_review": 0
+      },
+      "license": "CC0-1.0",
+      "retrieved_at": "2026-10-15T10:26:41.283260Z",
+      "reviewed_entities": 0,
+      "source_id": "wikidata-expansion-q933384",
+      "source_type": "wikidata",
+      "source_url": "https://www.wikidata.org/wiki/Special:EntityData/Q933384.json",
+      "synthetic": false
+    }
+  ],
+  "synthetic": false,
+  "totals": {
+    "accepted": 0,
+    "accepted_durable": 0,
+    "candidates": 32,
+    "duplicate": 32,
+    "quarantine_durable": 32,
+    "rejected": 0,
+    "requires_review": 0
+  }
+}

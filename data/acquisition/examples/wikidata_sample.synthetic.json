@@ -1,0 +1,167 @@
+{
+  "_comment": "SYNTHETIC fixture. Not real Wikidata data. Used only by the acquisition dry-run examples and tests.",
+  "synthetic": true,
+  "entities": {
+    "Q100": {
+      "id": "Q100",
+      "labels": {
+        "vi": {"language": "vi", "value": "Bảo tàng Demo"},
+        "en": {"language": "en", "value": "Demo Museum"}
+      },
+      "aliases": {"en": [{"language": "en", "value": "The Demo Museum"}]},
+      "claims": {
+        "P31": [
+          {
+            "mainsnak": {
+              "snaktype": "value",
+              "datavalue": {"value": {"id": "Q33506"}, "type": "wikibase-entityid"}
+            },
+            "rank": "normal"
+          }
+        ],
+        "P625": [
+          {
+            "mainsnak": {
+              "snaktype": "value",
+              "datavalue": {
+                "value": {
+                  "latitude": 10.7769,
+                  "longitude": 106.7009,
+                  "globe": "http://www.wikidata.org/entity/Q2"
+                },
+                "type": "globecoordinate"
+              }
+            },
+            "rank": "preferred"
+          }
+        ]
+      }
+    },
+    "Q200": {
+      "id": "Q200",
+      "labels": {"en": {"language": "en", "value": "Demo Landmark"}},
+      "claims": {
+        "P31": [
+          {
+            "mainsnak": {
+              "snaktype": "value",
+              "datavalue": {"value": {"id": "Q33506"}, "type": "wikibase-entityid"}
+            },
+            "rank": "normal"
+          }
+        ],
+        "P625": [
+          {
+            "mainsnak": {
+              "snaktype": "value",
+              "datavalue": {
+                "value": {
+                  "latitude": 10.7772,
+                  "longitude": 106.7015,
+                  "globe": "Q2"
+                },
+                "type": "globecoordinate"
+              }
+            },
+            "rank": "normal"
+          }
+        ]
+      }
+    },
+    "Q300": {
+      "id": "Q300",
+      "labels": {"vi": {"language": "vi", "value": "Địa điểm Deprecated"}},
+      "claims": {
+        "P31": [
+          {
+            "mainsnak": {
+              "snaktype": "value",
+              "datavalue": {"value": {"id": "Q33506"}, "type": "wikibase-entityid"}
+            },
+            "rank": "normal"
+          }
+        ],
+        "P625": [
+          {
+            "mainsnak": {
+              "snaktype": "value",
+              "datavalue": {
+                "value": {
+                  "latitude": 10.0,
+                  "longitude": 106.0,
+                  "globe": "Q2"
+                },
+                "type": "globecoordinate"
+              }
+            },
+            "rank": "deprecated"
+          }
+        ]
+      }
+    },
+    "Q400": {
+      "id": "Q400",
+      "labels": {"en": {"language": "en", "value": "Ambiguous Place"}},
+      "claims": {
+        "P31": [
+          {
+            "mainsnak": {
+              "snaktype": "value",
+              "datavalue": {"value": {"id": "Q33506"}, "type": "wikibase-entityid"}
+            },
+            "rank": "normal"
+          }
+        ],
+        "P625": [
+          {
+            "mainsnak": {
+              "snaktype": "value",
+              "datavalue": {
+                "value": {"latitude": 10.5, "longitude": 106.5, "globe": "Q2"},
+                "type": "globecoordinate"
+              }
+            },
+            "rank": "normal"
+          },
+          {
+            "mainsnak": {
+              "snaktype": "value",
+              "datavalue": {
+                "value": {"latitude": 10.6, "longitude": 106.6, "globe": "Q2"},
+                "type": "globecoordinate"
+              }
+            },
+            "rank": "normal"
+          }
+        ]
+      }
+    },
+    "Q500": {
+      "id": "Q500",
+      "labels": {"vi": {"language": "vi", "value": "Loại Không Rõ"}},
+      "claims": {
+        "P31": [
+          {
+            "mainsnak": {
+              "snaktype": "value",
+              "datavalue": {"value": {"id": "Q999999"}, "type": "wikibase-entityid"}
+            },
+            "rank": "normal"
+          }
+        ],
+        "P625": [
+          {
+            "mainsnak": {
+              "snaktype": "value",
+              "datavalue": {
+                "value": {"latitude": 10.8, "longitude": 106.7, "globe": "Q2"},
+                "type": "globecoordinate"
+              }
+            },
+            "rank": "normal"
+          }
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,133 @@
+{
+  "catalog": {
+    "catalog_version": "1e39b6e91122c6ee",
+    "categories": [
+      {
+        "id": "hcm_primary_geojson:source-category:apparel_and_gifts",
+        "name": "Apparel And Gifts",
+        "source_label": "apparel_and_gifts"
+      },
+      {
+        "id": "hcm_primary_geojson:source-category:attractions",
+        "name": "Attractions",
+        "source_label": "attractions"
+      },
+      {
+        "id": "hcm_primary_geojson:source-category:coffee",
+        "name": "Coffee",
+        "source_label": "coffee"
+      },
+      {
+        "id": "hcm_primary_geojson:source-category:convenience",
+        "name": "Convenience",
+        "source_label": "convenience"
+      },
+      {
+        "id": "hcm_primary_geojson:source-category:entertainment",
+        "name": "Entertainment",
+        "source_label": "entertainment"
+      },
+      {
+        "id": "hcm_primary_geojson:source-category:finance",
+        "name": "Finance",
+        "source_label": "finance"
+      },
+      {
+        "id": "hcm_primary_geojson:source-category:fuel",
+        "name": "Fuel",
+        "source_label": "fuel"
+      },
+      {
+        "id": "hcm_primary_geojson:source-category:health_and_beauty",
+        "name": "Health And Beauty",
+        "source_label": "health_and_beauty"
+      },
+      {
+        "id": "hcm_primary_geojson:source-category:lodging",
+        "name": "Lodging",
+        "source_label": "lodging"
+      },
+      {
+        "id": "hcm_primary_geojson:source-category:public_services",
+        "name": "Public Services",
+        "source_label": "public_services"
+      },
+      {
+        "id": "hcm_primary_geojson:source-category:restaurant",
+        "name": "Restaurant",
+        "source_label": "restaurant"
+      },
+      {
+        "id": "hcm_primary_geojson:source-category:retail_center",
+        "name": "Retail Center",
+        "source_label": "retail_center"
+      },
+      {
+        "id": "hcm_primary_geojson:source-category:specialty_food",
+        "name": "Specialty Food",
+        "source_label": "specialty_food"
+      },
+      {
+        "id": "hcm_primary_geojson:source-category:transport",
+        "name": "Transport",
+        "source_label": "transport"
+      }
+    ],
+    "size": 14
+  },
+  "counts": {
+    "candidate_features": 6367,
+    "exact_duplicate_extra": 1,
+    "input_features": 6368,
+    "prepared": 6367,
+    "prepared_review_required": 411,
+    "quarantine": 0
+  },
+  "dataset": {
+    "declared_provided_at": "2026-10-16",
+    "input_bytes": 2712731,
+    "input_features": 6368,
+    "input_path": "data/primary_20261016/hcm_pois_final.geojson",
+    "input_sha256": "713b07a62cf89bd2cad9093abaad2a4c5f01e23853321764b3d66bf9f7eee43c"
+  },
+  "identity": {
+    "cross_export_matching": "not_guaranteed",
+    "next_sequence": 6367,
+    "registry_path": "data/primary_20261016/prepared/identity_registry.json",
+    "registry_records": 6367,
+    "scope": "internal_local_only"
+  },
+  "internal_source_type": "hcm_primary_geojson_internal",
+  "namespace": "hcm_primary_geojson",
+  "next_integration_step": "Supply an authorised, dated administrative mapping (or a graph-side qualified-admin field) and a reviewed mapping of the 14 source category ids onto live graph Category ids; then add a storage/ingestion extension that carries this sidecar lineage into the graph.",
+  "not_claimed": [
+    "accepted graph nodes",
+    "verified venues",
+    "fresh data",
+    "genuine upstream/source identifiers"
+  ],
+  "prep_version": "oc-034.1",
+  "prepared_review_flags": {
+    "legacy_admin_qualification_unresolved": 411
+  },
+  "provenance": {
+    "collection_time": "UNKNOWN",
+    "freshness": "UNKNOWN",
+    "license": "UNKNOWN",
+    "note": "Lineage is a sidecar artifact only; it is NOT claimed to be persisted in any graph. A later storage/ingestion extension is required to carry this provenance into the graph.",
+    "provided_at": "2026-10-16",
+    "sidecar_only": true,
+    "source_url": "UNKNOWN"
+  },
+  "quarantine_reasons": {},
+  "semantic_gap": {
+    "admin": "The existing POI Address schema only carries free-text city/district/ward. It cannot express a qualified legacy area that may fall under a different present-day jurisdiction. Legacy source labels (Di An / Thuan An / Thu Dau Mot) are preserved verbatim and flagged for review; no current ward boundary or legislative containment is claimed from the coordinate bounding box.",
+    "categories": "The 14 source labels have no reviewed mapping onto live graph Category nodes; the prepared payload carries source-derived category ids only."
+  },
+  "status": "prepared/schema-validated candidates",
+  "sumcheck": {
+    "candidates_plus_duplicate_extra_equals_input": true,
+    "prepared_plus_quarantine_equals_candidates": true
+  },
+  "task_id": "OC-034"
+}

@@ -1,0 +1,53 @@
+{
+  "dataset": "expansion_20261015",
+  "original_thesis_dataset": false,
+  "query": "[out:json][timeout:25][maxsize:16777216];nwr[\"tourism\"=\"museum\"](10.77,106.68,10.79,106.70);out center 30;",
+  "requests": [
+    {
+      "file": "wikidata-Q703871.json",
+      "source_url": "https://www.wikidata.org/wiki/Special:EntityData/Q703871.json",
+      "license": "CC0-1.0",
+      "retrieved_at": "2026-10-15T10:26:40.536239+00:00",
+      "synthetic": false,
+      "http_status": 200,
+      "sha256": "d02395bdd4fad2bc6876844d388813b00aab0dadeac960a4fec1d5bebe3db26f",
+      "bytes": 25540,
+      "entities": 1,
+      "collection_status": "success"
+    },
+    {
+      "file": "wikidata-Q933384.json",
+      "source_url": "https://www.wikidata.org/wiki/Special:EntityData/Q933384.json",
+      "license": "CC0-1.0",
+      "retrieved_at": "2026-10-15T10:26:41.283260+00:00",
+      "synthetic": false,
+      "http_status": 200,
+      "sha256": "212d2b01c6af3c0437d5093d4866c9c529d22ca5b67ad2f18b0f7a97c777f164",
+      "bytes": 15081,
+      "entities": 1,
+      "collection_status": "success"
+    },
+    {
+      "file": "osm-museums.json",
+      "source_url": "https://overpass-api.de/api/interpreter?data=%5Bout%3Ajson%5D%5Btimeout%3A25%5D%5Bmaxsize%3A16777216%5D%3Bnwr%5B%22tourism%22%3D%22museum%22%5D%2810.77%2C106.68%2C10.79%2C106.70%29%3Bout+center+30%3B",
+      "license": "ODbL-1.0",
+      "retrieved_at": "2026-10-15T10:26:42.454718+00:00",
+      "synthetic": false,
+      "collection_status": "failed",
+      "error_type": "HTTPError",
+      "error": "HTTP Error 502: Bad Gateway"
+    },
+    {
+      "file": "osm-war-remnants-way.json",
+      "source_url": "https://overpass-api.de/api/interpreter?data=%5Bout%3Ajson%5D%5Btimeout%3A15%5D%5Bmaxsize%3A16777216%5D%3Bway%28186249226%29%3Bout+center%3B",
+      "license": "ODbL-1.0",
+      "retrieved_at": "2026-10-15T10:29:08.579180+00:00",
+      "synthetic": false,
+      "query": "[out:json][timeout:15][maxsize:16777216];way(186249226);out center;",
+      "purpose": "single bounded narrower retry after502",
+      "collection_status": "failed",
+      "error_type": "HTTPError",
+      "error": "HTTP Error 502: Bad Gateway"
+    }
+  ]
+}

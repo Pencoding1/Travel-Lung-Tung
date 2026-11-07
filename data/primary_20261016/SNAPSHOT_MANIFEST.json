@@ -1,0 +1,53 @@
+{
+  "manifest_version": 1,
+  "task_id": "OC-032",
+  "generated_by": "audit_primary_pois.py",
+  "frozen": true,
+  "note": "Frozen reproducible snapshot of the supplied primary dataset as received. The primary dataset file is immutable and was never modified. No graph writes occurred.",
+  "primary_dataset": {
+    "path": "data/primary_20261016/hcm_pois_final.geojson",
+    "role": "primary",
+    "immutable": true,
+    "bytes": 2712731,
+    "sha256": "713b07a62cf89bd2cad9093abaad2a4c5f01e23853321764b3d66bf9f7eee43c",
+    "features": 6368,
+    "geometry_types": {
+      "Point": 6368
+    },
+    "crs": "urn:ogc:def:crs:OGC:1.3:CRS84",
+    "declared_name": "hcm_pois_final",
+    "provenance": "user-supplied copy of C:/Users/duyan/Downloads/Telegram Desktop/hcm_pois_final.geojson (copied by parent); original not written or re-read by this task",
+    "asserted_by_user": {
+      "revised_scale": "200 -> 1000+ processed POIs",
+      "independently_counted_features": 6368
+    },
+    "observed": {
+      "features": 6368,
+      "sha256_matches_parent_assertion": true,
+      "bytes_matches_parent_assertion": true
+    }
+  },
+  "audit_artifacts": {
+    "script": "data/primary_20261016/audit_primary_pois.py",
+    "summary_json": "data/primary_20261016/audit_summary.json",
+    "summary_sha256": "4e47f2c817cf3e576ac33794c889c474fd73adda25c9dc91fa8239ffa124e3fb",
+    "deterministic_rerun": "byte-identical across two consecutive runs",
+    "report": "docs/data/PRIMARY_POI_AUDIT.md"
+  },
+  "separation_of_datasets": {
+    "primary": {
+      "path": "data/primary_20261016/hcm_pois_final.geojson",
+      "features": 6368,
+      "source": "user-supplied primary GeoJSON"
+    },
+    "expansion_source": {
+      "path": "data/expansion_20261015/",
+      "candidates": 32,
+      "accepted": 0,
+      "composition": "30 OSM nodes (osm-local-pbf-sample) + 2 Wikidata entities (Q703871, Q933384)",
+      "source": "per data/expansion_20261015/REVIEW.md and pipeline_review/out/summary.json",
+      "disjoint_from_primary": true,
+      "note": "The 32-record expansion research sample is a distinct source family; it must never be summed into or substituted for the 6368-feature primary count."
+    }
+  }
+}

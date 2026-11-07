@@ -1,0 +1,14 @@
+{
+  "kind": "SYNTHETIC_HTTP_QA_NOT_OWNER_APPROVAL",
+  "passed": 8,
+  "checks": [
+    "GET snapshot",
+    "POST /submit: expected 403",
+    "POST /submit: expected 403",
+    "POST /submit: expected 415",
+    "GET /../content.json: expected 404",
+    "POST /submit: expected 422",
+    "POST /submit: expected 422",
+    "two unique synthetic receipts bound to server snapshot, selected-only, not applied"
+  ]
+}

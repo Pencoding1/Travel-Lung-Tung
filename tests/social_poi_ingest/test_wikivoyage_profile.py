@@ -371,3 +371,33 @@ def test_cli_list_exposes_the_attribution_obligation(capsys, monkeypatch):
     assert wikivoyage["share_alike"] is True
     # The restrictive source keeps its own status in the same listing.
     assert listed["vietnam_travel_hcmc7"]["reuse_status"] == "not_permitted"
+
+
+@pytest.mark.parametrize(
+    "profile_name,expected_slug",
+    [
+        ("wikivoyage_en_hcmc", "Ho_Chi_Minh_City"),
+        ("wikivoyage_en_danang", "Da_Nang"),
+        ("wikivoyage_en_hoian", "Hoi_An"),
+        ("wikivoyage_en_hue", "Hue"),
+        ("wikivoyage_en_dalat", "Da_Lat"),
+        ("wikivoyage_en_hanoi", "Hanoi"),
+    ],
+)
+def test_multi_city_wikivoyage_profiles_declare_permitted_cc_by_sa(
+    profile_name: str, expected_slug: str
+):
+    declared = get_profile(profile_name)
+    assert declared.license == "CC-BY-SA-4.0"
+    assert declared.reuse_status == REUSE_PERMITTED
+    assert declared.attribution_required is True
+    assert declared.share_alike is True
+    assert "CC BY-SA 4.0" in declared.attribution_text
+    assert declared.extractor == "wikivoyage_listings_v1"
+    assert declared.host == "en.wikivoyage.org"
+    assert declared.allow_hosts == ("en.wikivoyage.org",)
+    assert declared.start_urls == (f"https://en.wikivoyage.org/wiki/{expected_slug}",)
+    assert all("/w/" not in url and "/api/" not in url for url in declared.start_urls)
+    assert policy_allows_reuse(declared) is True
+    assert gate_for_profile(declared) is None
+

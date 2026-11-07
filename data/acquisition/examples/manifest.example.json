@@ -1,0 +1,25 @@
+{
+  "manifest_version": 1,
+  "_comment": "SYNTHETIC example manifest. Fixtures are clearly labelled and excluded from real expansion counts.",
+  "synthetic": true,
+  "sources": [
+    {
+      "source_id": "osm-demo-synthetic",
+      "source_type": "osm",
+      "source_url": "file://data/acquisition/examples/osm_sample.synthetic.json",
+      "license": "ODbL-1.0",
+      "retrieved_at": "2026-10-15T00:00:00Z",
+      "export_path": "osm_sample.synthetic.json",
+      "synthetic": true
+    },
+    {
+      "source_id": "wikidata-demo-synthetic",
+      "source_type": "wikidata",
+      "source_url": "file://data/acquisition/examples/wikidata_sample.synthetic.json",
+      "license": "CC0-1.0",
+      "retrieved_at": "2026-10-15T00:00:00Z",
+      "export_path": "wikidata_sample.synthetic.json",
+      "synthetic": true
+    }
+  ]
+}

@@ -1,9 +1,20 @@
 # Kiến trúc bộ test Agent Chat MVP — 120 test, hai tầng
 
-- **ID:** `TA-CHAT-001` · **Version:** `1.0` · **Status:** `PROPOSAL` (chờ chủ dự án duyệt)
+- **ID:** `TA-CHAT-001` · **Version:** `1.0` · **Status:** `APPROVED` — chủ dự án duyệt ngày 28/10/2026 qua biên nhận `receipt-20261028T095530Z-da8144773f584090ab604bfc46005cfb`, mục `TEST-GATE`.
 - **Ngày:** 2026-10-22 · **Dựa trên:** `FT-CHAT-MVP-001` (contract đã duyệt) và `TP-CHAT-001` v0.3 (28 case hành vi)
 - **Mục tiêu:** 20 test đặc tả + 100 test chống tối ưu-vì-test. Tổng **120**.
 - **Vấn đề gốc cần chặn:** agent đọc test rồi làm hệ thống trả đúng chuỗi mà test mong đợi, thay vì xây hành vi đúng.
+
+---
+
+## Quyết định hiện hành — 28/10/2026
+
+- Chủ dự án chọn **“Duyệt kiến trúc và cổng nghiệm thu”**, không có ghi chú sửa đổi, trên snapshot `TVLT-BEHAVIOR-REVIEW-20261028-v2`.
+- Giữ cổng nghiệm thu: 20/20 test đặc tả; 100/100 test QA giữ riêng; kiểm tĩnh sạch; mỗi họ D1–D10 có mutation proof ghi tên test đỏ rồi hoàn nguyên. Không sửa kỳ vọng để lấy xanh; thay behavior phải qua change request.
+- Test Booking phải phản ánh contract đã duyệt ngày 27/10: query đúng loại dịch vụ, người dùng bấm **Book Ngay** để chuyển screen booking; lệnh đặt ra dịch vụ khác là fake. Việc bàn giao sang screen và việc gửi lệnh đặt chỗ là hai bước khác nhau; không dùng tên `booking.create` để khẳng định đã đặt thật.
+- Đây là phê duyệt thiết kế kiểm thử offline, không phải kết quả 120 test đạt hoặc chứng minh model/booking thật. RED baseline ngày 22/10 vẫn là bằng chứng lịch sử, không được nâng thành PASS từ quyết định này.
+- Những dòng `PROPOSAL`, `chưa thực hiện` hoặc đường dẫn trước khi tách bộ test ở các phần lịch sử bên dưới không phải trạng thái phê duyệt hiện tại. Phần **Đã hiện thực — hai bộ tách rời** mô tả tổ chức bộ test đã ghi nhận; chưa kiểm lại kết quả chạy trong đợt áp dụng biên nhận này.
+- Biên nhận gốc: [receipt](review-20261027/receipts/receipt-20261028T095530Z-da8144773f584090ab604bfc46005cfb.json). Báo cáo áp dụng: [APPLIED](review-20261027/applications/receipt-20261028T095530Z-da8144773f584090ab604bfc46005cfb/APPLIED.md).
 
 ---
 

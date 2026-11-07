@@ -1,0 +1,133 @@
+{
+  "id": "TVLT-BEHAVIOR-20261028-v1",
+  "status": "FROZEN_APPROVED_BEHAVIOR_NOT_IMPLEMENTATION_PASS",
+  "created_at": "2026-10-28T10:06:13.272013+00:00",
+  "ui_design": "HOLD",
+  "contract_sources": "explicit allowlist; excludes secrets, private incident, unrelated history",
+  "git_head": "3ea9f08d6ca68e0650275194669c154c588b0b22",
+  "files": [
+    {
+      "source": "docs/contracts/FREEZE_2026-10-28.md",
+      "snapshot_path": "sources/docs/contracts/FREEZE_2026-10-28.md",
+      "sha256": "4e8131762acff2ab2ceec124dc6683a9ef58ef2410741d478106fffcdc2f0d7d"
+    },
+    {
+      "source": "docs/contracts/F-CHAT_MVP_CONTRACT.md",
+      "snapshot_path": "sources/docs/contracts/F-CHAT_MVP_CONTRACT.md",
+      "sha256": "ab932dae6b7effd0f3743a733fda1cd5cd335cf77b214945110d75a223c37045"
+    },
+    {
+      "source": "docs/contracts/F-BOOKING_MVP_CONTRACT.md",
+      "snapshot_path": "sources/docs/contracts/F-BOOKING_MVP_CONTRACT.md",
+      "sha256": "0edf7efb2680ce8174d47048251663d2611b71c171ab732020a6d6f072c6a168"
+    },
+    {
+      "source": "docs/contracts/APPROVAL_REVIEW_2026-10-27.md",
+      "snapshot_path": "sources/docs/contracts/APPROVAL_REVIEW_2026-10-27.md",
+      "sha256": "cb3678c9a73f0518d93bc15f88d0a6844987d943fb3c6ab3de97c8b8b728cc7d"
+    },
+    {
+      "source": "docs/contracts/F-CHAT_MVP_TEST_ARCHITECTURE.md",
+      "snapshot_path": "sources/docs/contracts/F-CHAT_MVP_TEST_ARCHITECTURE.md",
+      "sha256": "150641f633d61e336f6b54ca7fb3f44187119537df6abc00e6bb7a9419ac686b"
+    },
+    {
+      "source": "docs/contracts/F-CHAT_MVP_TEST_PLAN.md",
+      "snapshot_path": "sources/docs/contracts/F-CHAT_MVP_TEST_PLAN.md",
+      "sha256": "ff9528c256e6c8fbd3cbe6835f42f8c43bb4d5f56bd53ad42ee6bb92cf644a9e"
+    },
+    {
+      "source": "docs/contracts/review-20261027/content.json",
+      "snapshot_path": "sources/docs/contracts/review-20261027/content.json",
+      "sha256": "73b688f0cb03c357e5be957ad813f233de0cbb69a350abb644f1aa39bfbf8175"
+    },
+    {
+      "source": "docs/contracts/review-20261027/receipts/receipt-20261028T095530Z-da8144773f584090ab604bfc46005cfb.json",
+      "snapshot_path": "sources/docs/contracts/review-20261027/receipts/receipt-20261028T095530Z-da8144773f584090ab604bfc46005cfb.json",
+      "sha256": "e041ae5a7256e0a08f3bb1eda363e3018aed226e6a0cfe0477383d8f613eb384"
+    },
+    {
+      "source": "docs/contracts/review-20261027/applications/receipt-20261028T095530Z-da8144773f584090ab604bfc46005cfb/application.json",
+      "snapshot_path": "sources/docs/contracts/review-20261027/applications/receipt-20261028T095530Z-da8144773f584090ab604bfc46005cfb/application.json",
+      "sha256": "b7f905d6f3aa5bfbf1b906077e7517708f2bacf453e54f2e7b531190218b5298"
+    }
+  ],
+  "code_baseline": [
+    {
+      "path": "ai_service/main.py",
+      "sha256": "20901ce68ee35a92a883b546648ba8c5b10d52eace2d2b2533fabb24eb793ec1"
+    },
+    {
+      "path": "ai_service/domains/payloads.py",
+      "sha256": "6f75b57138da299ab940d3e1cbbbf25f5fe82210b052895bdf0f86b12997157e"
+    },
+    {
+      "path": "ai_service/domains/jev_intent.py",
+      "sha256": "10e9f6dcb29051f9d3160c3d9fc2d9bd060cd7a5bed6e2d12e30222d4b7c0e0d"
+    },
+    {
+      "path": "ai_service/domains/chat_agent.py",
+      "sha256": "5f03dfbbf20d0e11b1e03785a355832bd50f4e1c93b6a4599c8cc12899fc5b07"
+    },
+    {
+      "path": "ai_service/domains/source_gate.py",
+      "sha256": "805f1ae264ddad22e029d3a83ae076c11ff7a535a38a3e0086d0f2e1d3a58dcc"
+    },
+    {
+      "path": "ai_service/domains/grounding.py",
+      "sha256": "f37b263130119605eac3cfa6628846a04edfa6e8b04a9e72a2250a9176438947"
+    },
+    {
+      "path": "ai_service/domains/planning_adapter.py",
+      "sha256": "06242f709fe191ebb92b4d99506065b797a2d742d98d521841885d9c268f940f"
+    },
+    {
+      "path": "ai_service/domains/planning/scheduler.py",
+      "sha256": "3eaf4112ab55b1ab94e96585e70ad818e022f3643dc3244ba426255eb1bbfca5"
+    },
+    {
+      "path": "ai_service/domains/planning/validator.py",
+      "sha256": "4d2c6717b1785043406a8eaf77c784017689ebc24b43aa6d7799dedd9251e654"
+    },
+    {
+      "path": "ai_service/domains/providers/opencode_cli.py",
+      "sha256": "3e30054731a28654391ea35981c5ae346ccf7493692734c74397920bf6b57899"
+    },
+    {
+      "path": "ai_service/domains/providers/config.py",
+      "sha256": "ef7bddcbdd76eef24515159436b6513ffaca2107e97f92926760e4f65c14a418"
+    },
+    {
+      "path": "ai_service/domains/memory.py",
+      "sha256": "0811ae302a1b854502057fd8f43e5270700510e5e2d1ea5c0a1fb8737323a8ca"
+    },
+    {
+      "path": "ai_service/static/travel.html",
+      "sha256": "24748e0248a6b081e98f7fe21a65482b00291bfb53d147a8fbc873495d390526"
+    },
+    {
+      "path": "POI_service/app/api/mcp/tools.py",
+      "sha256": "a7a4e59eb017b3a3ea56e7a1be514eed4d7a113c8cfefdc27c95df87ae060f41"
+    },
+    {
+      "path": "backend_service/app/main.py",
+      "sha256": "fa2024141387d02ee51e2ab8611c9984ddf1c3ce839776d6b22e825f9855f5b0"
+    },
+    {
+      "path": "backend_service/app/api/rest/v1/endpoint_itinerary.py",
+      "sha256": "f096bee8bc0f7c501d5afd4576a52b05a9e89ad02b6254ce5b271cc561f13daf"
+    },
+    {
+      "path": "POI_service/app/api/rest/v1/endpoint_ingestion.py",
+      "sha256": "9bbbb6362104b31f0836cc3ef000c4a1f1e7167e2694c5cb0de6512b96a0c46f"
+    },
+    {
+      "path": "POI_service/app/main.py",
+      "sha256": "4854e718f1498c0496913d78f5dafa5d4cb18dfe67866604d9b61f77f48db311"
+    }
+  ],
+  "commit_or_tag_created": false,
+  "real_booking_authorized": false,
+  "live_acceptance_authorized": true,
+  "test_outcome": "NOT_RUN"
+}

@@ -1,0 +1,17 @@
+{
+  "counts": {
+    "accepted_rows": 0,
+    "imported": 0,
+    "payload_rejected": 0,
+    "payload_rows": 0
+  },
+  "dataset": "social_web_oc050",
+  "dry_run": true,
+  "evidence_path": "ingestion_evidence.jsonl",
+  "note": "Evidence sidecar preserves description/review/raw lineage; the POI payload itself is unchanged.",
+  "opt_in": false,
+  "payload_path": "ingestion_payload.jsonl",
+  "rejected": [],
+  "schema_version": 1,
+  "synthetic": false
+}

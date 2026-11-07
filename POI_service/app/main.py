@@ -1,4 +1,5 @@
 import logging
+import os
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
@@ -65,12 +66,21 @@ app = FastAPI(
 
 # 4. CORS Middleware 
 # Essential for your student startup competition UI to talk to this backend.
+_DEFAULT_ALLOWED_ORIGINS = (
+    "http://localhost:8002,http://127.0.0.1:8002,"
+    "http://localhost:3000,http://127.0.0.1:3000"
+)
+_ALLOWED_ORIGINS = [
+    origin.strip()
+    for origin in os.getenv("ALLOWED_ORIGINS", _DEFAULT_ALLOWED_ORIGINS).split(",")
+    if origin.strip() and origin.strip() != "*"
+]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"], # Adjust to specific domains for production
+    allow_origins=_ALLOWED_ORIGINS,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type"],
 )
 
 # 5. Global Exception Handler

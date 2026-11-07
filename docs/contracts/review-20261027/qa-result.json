@@ -1,0 +1,22 @@
+{
+  "kind": "SYNTHETIC_VALIDATION_QA_NOT_OWNER_APPROVAL",
+  "passed": 14,
+  "checks": [
+    "empty selection",
+    "unknown id",
+    "duplicate id",
+    "stale snapshot",
+    "extra unselected decision",
+    "missing action",
+    "missing amend comment",
+    "invalid choice",
+    "pending cannot confirm existing",
+    "valid selected-only approval",
+    "hold without extra radio",
+    "amend approved item with verbatim comment",
+    "25 unique items and 11 functions",
+    "no owner receipts created by QA"
+  ],
+  "snapshot_sha256": "d1b84d354616f9d83f48c9432059c21aff92b44ed81abfd165d406f5f6a97f83",
+  "browser": "Page rendered; no approval controls selected or submitted by QA."
+}

@@ -12,7 +12,7 @@ load_dotenv()
 
 
 # Pull dynamically, with a fallback just in case the .env doesn't mount properly
-JWT_SECRET = os.getenv("JWT_SECRET", None) 
+JWT_SECRET = os.getenv("JWT_SECRET", None)
 JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
 
 if JWT_SECRET is None:
@@ -24,10 +24,12 @@ if JWT_SECRET is None:
 # If the header is missing, it automatically throws a 403 Forbidden!
 security_scheme = HTTPBearer()
 
+
 class TokenPayload(BaseModel):
     """The expected structure of your JWT payload."""
     sub: str          # Usually the User ID or Service ID
     role: str = "user" # Example: to restrict ingestion to 'admin' or 'system'
+
 
 def verify_jwt_token(
     credentials: HTTPAuthorizationCredentials = Depends(security_scheme)
@@ -39,9 +41,17 @@ def verify_jwt_token(
     token = credentials.credentials
 
     try:
-        decoded_payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM]) # type: ignore
+        decoded_payload = jwt.decode(
+            token,
+            JWT_SECRET,  # type: ignore[arg-type]
+            algorithms=[JWT_ALGORITHM],
+            options={"require": ["sub", "exp"]},
+        )
+        sub = decoded_payload.get("sub")
+        if not isinstance(sub, str) or not sub.strip():
+            raise jwt.InvalidTokenError("Missing or empty sub claim")
         return TokenPayload(**decoded_payload)
-        
+
     except jwt.ExpiredSignatureError:
         logger.warning("Rejected request: JWT Token expired.")
         raise HTTPException(
@@ -49,15 +59,15 @@ def verify_jwt_token(
             detail="Token has expired. Please authenticate again.",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    except jwt.InvalidTokenError as e:
-        logger.warning(f"Rejected request: Invalid JWT Token - {str(e)}")
+    except jwt.InvalidTokenError:
+        logger.warning("Rejected request: Invalid JWT Token.")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid authentication credentials.",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    except Exception as e:
-        logger.warning(f"Rejected request: Internal Error - {str(e)}")
+    except Exception:
+        logger.warning("Rejected request: Internal authentication error.")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Server Internal Error.",

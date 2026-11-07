@@ -141,9 +141,10 @@ def test_capacity_stays_held_until_cancelled_child_cleanup_finishes():
 
     async def _run():
         first = asyncio.create_task(provider.complete(_payload()))
-        await asyncio.sleep(0.02)
+        await asyncio.to_thread(first_started.wait, 2.0)
         assert first_started.is_set()
         first.cancel()
+
         second = asyncio.create_task(provider.complete(_payload()))
         try:
             await first

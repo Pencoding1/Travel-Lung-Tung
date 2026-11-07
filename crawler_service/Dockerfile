@@ -1,46 +1,28 @@
 # syntax=docker/dockerfile:1.7-labs
 #
-# STATUS: unsupported / not wired into docker-compose.yaml.
-# The crawler entrypoint (`app.main:app`) exists, but `crawler_service` is not a
-# member of the root uv workspace ([tool.uv.workspace].members does not list
-# it), so `uv export --package crawler_service` cannot resolve and this image
-# does not build as-is. Do not add it to Compose until the workspace membership
-# and its heavy browser dependencies are verified. See
-# docs/deployment/RUNBOOK.md.
+# Crawler Service Dockerfile (`app.main:app` on port 8004).
+# Uses standalone uv pip installation so the root `uv.lock` for the 4 core
+# workspace members (`shared_lib`, `backend_service`, `POI_service`, `ai_service`)
+# remains strictly locked (`--locked`).
 
-# ==========================================
-# STAGE 1: The Graph Resolver (Builder)
-# ==========================================
-FROM python:3.12-slim-bookworm AS builder
-
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
-WORKDIR /workspace
-
-# Dynamically copy the monorepo skeleton to satisfy uv's workspace validation
-COPY pyproject.toml uv.lock ./
-COPY --parents */pyproject.toml ./
-
-# Export ONLY the crawler's 3rd-party dependencies to a flat file
-RUN uv export --package crawler_service --no-emit-workspace --no-dev --locked -o /requirements.txt
-
-# ==========================================
-# STAGE 2: The Production Image
-# ==========================================
 FROM python:3.12-slim-bookworm
 
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 ENV PYTHONUNBUFFERED=1
+ENV PYTHONDONTWRITEBYTECODE=1
 ENV UV_COMPILE_BYTECODE=1
-ENV UV_SYSTEM_PYTHON=1 
-ENV UV_CACHE_DIR=/root/.cache/uv 
+ENV UV_SYSTEM_PYTHON=1
+ENV UV_CACHE_DIR=/root/.cache/uv
 
 WORKDIR /workspace
 
-# 1. Cache-Mounted Dependency Layer
-COPY --from=builder /requirements.txt ./
+COPY shared_lib/ ./shared_lib/
+COPY crawler_service/ ./crawler_service/
+
+# 1. Install shared_lib and crawler_service dependencies
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv pip install -r requirements.txt
+    uv pip install -e ./shared_lib -e ./crawler_service
 
 # 2. OS Dependencies Layer (Playwright/Browsers)
 RUN apt-get update && \
@@ -50,19 +32,11 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# 3. Application Code Layer
-COPY pyproject.toml uv.lock ./
-COPY --parents */pyproject.toml ./
-
-COPY shared_lib/ ./shared_lib/
-COPY crawler_service/ ./crawler_service/
-
-# Link the local workspace packages
-RUN uv pip install -e ./shared_lib -e ./crawler_service
-
-# 4. Permissions & Execution
+# 3. Permissions & Execution
 WORKDIR /workspace/crawler_service
-RUN mkdir -p cache && chmod 777 cache
+RUN mkdir -p cache logs
 
-EXPOSE 8001
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8001"]
+EXPOSE 8004
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8004/', timeout=3)" || exit 1
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8004"]

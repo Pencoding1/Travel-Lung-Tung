@@ -1,0 +1,26 @@
+{
+  "contract": "FT-CHAT-MVP-001 v1.1",
+  "status": "FROZEN_APPROVED_AMENDMENT",
+  "authority": "direct user approval 2026-10-28",
+  "supersedes": "intent/pipeline portions of v1.0 only; original frozen bytes preserved",
+  "files": [
+    {
+      "source": "docs/contracts/CHAT_INTENT_AMENDMENT_2026-10-28.md",
+      "snapshot": "CHAT_INTENT_AMENDMENT_2026-10-28.md",
+      "sha256": "d8f421d0bedad7ef6b2ca554dc82a531a69443436c282abb8c33309d208a9b8f"
+    },
+    {
+      "source": "docs/contracts/F-CHAT_MVP_CONTRACT.md",
+      "snapshot": "F-CHAT_MVP_CONTRACT.md",
+      "sha256": "f5e2a425ff475c9495df72df1b978797f64c4a5c1cd5f8c2fea4ece156bdd585"
+    },
+    {
+      "source": "tests/behavior_specs/chat_v1_1_cases.json",
+      "snapshot": "chat_v1_1_cases.json",
+      "sha256": "20c42c520422cde8630d5dc54ee11dd29989b40fd486d371f9550b3c02e52734"
+    }
+  ],
+  "implementation": "NOT_IMPLEMENTED",
+  "acceptance_cases": 24,
+  "test_results": "NOT_RUN"
+}

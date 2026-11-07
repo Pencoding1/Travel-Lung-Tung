@@ -94,47 +94,97 @@ WIKIVOYAGE_ATTRIBUTION = (
     "Keep this notice and the source page URL; adaptations stay CC BY-SA 4.0."
 )
 
-WIKIVOYAGE_EN_HCMC = SourceProfile(
+_WIKIVOYAGE_POLICY_EVIDENCE = (
+    "docs/project/handoffs/OC-050/source-review-addendum.md",
+)
+
+_WIKIVOYAGE_NOTES = (
+    "Reviewed 2026-10-18 in the OC-050 source addendum: article text is "
+    "CC BY-SA 4.0 with explicit attribution and share-alike obligations "
+    "(https://en.wikivoyage.org/wiki/Wikivoyage:Copyleft), and "
+    "https://en.wikivoyage.org/robots.txt welcomes low-speed article bots "
+    "while disallowing /w/, /api/ and /Special. Only the plain /wiki/ article "
+    "path is declared. Reuse is permitted WITH attribution: every exported "
+    "record and source block carries the notice, and share_alike is declared "
+    "true. No live request was made while adding this profile, so no raw "
+    "policy capture exists yet; the first approved --fetch run must store "
+    "robots.txt and the licence page alongside the content capture. The "
+    "listing selectors (vcard/listing-name/listing-address/listing-content) "
+    "follow the documented Wikivoyage listing rendering and still have to be "
+    "confirmed against real bytes. Address and admin review remain gates."
+)
+
+
+def _wikivoyage_profile(
+    *, name: str, source_id: str, article_slug: str
+) -> SourceProfile:
+    return SourceProfile(
+        name=name,
+        source_id=source_id,
+        dataset="social_web_oc050",
+        host="en.wikivoyage.org",
+        allow_hosts=("en.wikivoyage.org",),
+        start_urls=(f"https://en.wikivoyage.org/wiki/{article_slug}",),
+        extractor="wikivoyage_listings_v1",
+        # The listing heading Wikivoyage uses (See/Do/Eat/Drink/Sleep) is not
+        # converted into a POI category here: that is a review decision, so every
+        # record stays untagged and is flagged ``unknown_category`` downstream
+        # instead of being labelled an attraction without evidence.
+        category_tags=(),
+        license=WIKIVOYAGE_LICENSE,
+        reuse_status=REUSE_PERMITTED,
+        attribution_required=True,
+        attribution_text=WIKIVOYAGE_ATTRIBUTION,
+        share_alike=True,
+        policy_evidence=_WIKIVOYAGE_POLICY_EVIDENCE,
+        notes=_WIKIVOYAGE_NOTES,
+    )
+
+
+WIKIVOYAGE_EN_HCMC = _wikivoyage_profile(
     name="wikivoyage_en_hcmc",
     source_id="wikivoyage-en-hcmc",
-    dataset="social_web_oc050",
-    host="en.wikivoyage.org",
-    allow_hosts=("en.wikivoyage.org",),
-    start_urls=("https://en.wikivoyage.org/wiki/Ho_Chi_Minh_City",),
-    extractor="wikivoyage_listings_v1",
-    # The listing heading Wikivoyage uses (See/Do/Eat/Drink/Sleep) is not
-    # converted into a POI category here: that is a review decision, so every
-    # record stays untagged and is flagged ``unknown_category`` downstream
-    # instead of being labelled an attraction without evidence.
-    category_tags=(),
-    license=WIKIVOYAGE_LICENSE,
-    reuse_status=REUSE_PERMITTED,
-    attribution_required=True,
-    attribution_text=WIKIVOYAGE_ATTRIBUTION,
-    share_alike=True,
-    policy_evidence=(
-        "docs/project/handoffs/OC-050/source-review-addendum.md",
-    ),
-    notes=(
-        "Reviewed 2026-10-18 in the OC-050 source addendum: article text is "
-        "CC BY-SA 4.0 with explicit attribution and share-alike obligations "
-        "(https://en.wikivoyage.org/wiki/Wikivoyage:Copyleft), and "
-        "https://en.wikivoyage.org/robots.txt welcomes low-speed article bots "
-        "while disallowing /w/, /api/ and /Special. Only the plain /wiki/ article "
-        "path is declared. Reuse is permitted WITH attribution: every exported "
-        "record and source block carries the notice, and share_alike is declared "
-        "true. No live request was made while adding this profile, so no raw "
-        "policy capture exists yet; the first approved --fetch run must store "
-        "robots.txt and the licence page alongside the content capture. The "
-        "listing selectors (vcard/listing-name/listing-address/listing-content) "
-        "follow the documented Wikivoyage listing rendering and still have to be "
-        "confirmed against real bytes. Address and admin review remain gates."
-    ),
+    article_slug="Ho_Chi_Minh_City",
+)
+
+WIKIVOYAGE_EN_DANANG = _wikivoyage_profile(
+    name="wikivoyage_en_danang",
+    source_id="wikivoyage-en-danang",
+    article_slug="Da_Nang",
+)
+
+WIKIVOYAGE_EN_HOIAN = _wikivoyage_profile(
+    name="wikivoyage_en_hoian",
+    source_id="wikivoyage-en-hoian",
+    article_slug="Hoi_An",
+)
+
+WIKIVOYAGE_EN_HUE = _wikivoyage_profile(
+    name="wikivoyage_en_hue",
+    source_id="wikivoyage-en-hue",
+    article_slug="Hue",
+)
+
+WIKIVOYAGE_EN_DALAT = _wikivoyage_profile(
+    name="wikivoyage_en_dalat",
+    source_id="wikivoyage-en-dalat",
+    article_slug="Da_Lat",
+)
+
+WIKIVOYAGE_EN_HANOI = _wikivoyage_profile(
+    name="wikivoyage_en_hanoi",
+    source_id="wikivoyage-en-hanoi",
+    article_slug="Hanoi",
 )
 
 _PROFILES: Dict[str, SourceProfile] = {
     VIETNAM_TRAVEL_HCMC7.name: VIETNAM_TRAVEL_HCMC7,
     WIKIVOYAGE_EN_HCMC.name: WIKIVOYAGE_EN_HCMC,
+    WIKIVOYAGE_EN_DANANG.name: WIKIVOYAGE_EN_DANANG,
+    WIKIVOYAGE_EN_HOIAN.name: WIKIVOYAGE_EN_HOIAN,
+    WIKIVOYAGE_EN_HUE.name: WIKIVOYAGE_EN_HUE,
+    WIKIVOYAGE_EN_DALAT.name: WIKIVOYAGE_EN_DALAT,
+    WIKIVOYAGE_EN_HANOI.name: WIKIVOYAGE_EN_HANOI,
 }
 
 

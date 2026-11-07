@@ -1,0 +1,6 @@
+command: extract_local_pbf.py --derived-at 2026-10-15T10:52:59Z
+pbf: graphhopper\data\hcmc-latest.osm.pbf
+pbf_sha256: c2b7057e7a022ff929692205e4219c59640fc67fd90525a82428022b43cf4afb
+derived_export_time_utc: 2026-10-15T10:52:59Z
+bbox: {'minlat': 10.77, 'minlon': 106.68, 'maxlat': 10.79, 'maxlon': 106.7}
+exported: 30 (matched before cap: 401)

@@ -1,0 +1,83 @@
+{
+  "_comment": "SYNTHETIC fixture. Not real OSM data. Used only by the acquisition dry-run examples and tests.",
+  "synthetic": true,
+  "version": 0.6,
+  "elements": [
+    {
+      "type": "node",
+      "id": 1,
+      "lat": 10.7769,
+      "lon": 106.7009,
+      "tags": {
+        "name": "Cafe Demo",
+        "amenity": "cafe",
+        "addr:district": "Quan 1",
+        "addr:street": "Le Loi",
+        "opening_hours": "Mo-Su 07:00-22:00"
+      }
+    },
+    {
+      "type": "node",
+      "id": 2,
+      "lat": 10.7771,
+      "lon": 106.7012,
+      "tags": {
+        "name": "Cafe Demo",
+        "tourism": "attraction",
+        "addr:district": "Quan 1"
+      }
+    },
+    {
+      "type": "node",
+      "id": 3,
+      "lat": 10.778,
+      "lon": 106.702,
+      "tags": {
+        "amenity": "cafe",
+        "addr:district": "Quan 1"
+      }
+    },
+    {
+      "type": "node",
+      "id": 4,
+      "lat": 10.779,
+      "lon": 106.703,
+      "tags": {
+        "name": "Unknown Category Demo",
+        "amenity": "nightclub",
+        "addr:district": "Quan 1"
+      }
+    },
+    {
+      "type": "node",
+      "id": 5,
+      "lat": 10.78,
+      "lon": 106.704,
+      "tags": {
+        "name": "Malformed Coordinate Demo",
+        "amenity": "cafe",
+        "addr:district": "Quan 1"
+      }
+    },
+    {
+      "type": "way",
+      "id": 10,
+      "center": {"lat": 10.781, "lon": 106.705},
+      "tags": {
+        "name": "Demo Area Way",
+        "tourism": "attraction",
+        "addr:district": "Quan 1"
+      }
+    },
+    {
+      "type": "relation",
+      "id": 20,
+      "bounds": {"minlat": 10.78, "minlon": 106.7, "maxlat": 10.79, "maxlon": 106.71},
+      "tags": {
+        "name": "Demo Relation",
+        "tourism": "attraction",
+        "addr:district": "Quan 1"
+      }
+    }
+  ]
+}

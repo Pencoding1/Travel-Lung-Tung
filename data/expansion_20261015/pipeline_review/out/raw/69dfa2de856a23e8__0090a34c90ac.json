@@ -1,0 +1,638 @@
+{
+  "_comment": "Real OSM NODE point features derived from a local PBF. Research sample only; not a coverage claim. District is NOT inferred from the bounding box. Only node geometry is used; ways/relations are excluded to avoid centroid approximation.",
+  "derived": {
+    "bbox": {
+      "maxlat": 10.79,
+      "maxlon": 106.7,
+      "minlat": 10.77,
+      "minlon": 106.68
+    },
+    "derivation": "bounded_readonly_local_pbf_node_extraction",
+    "derived_export_time_utc": "2026-10-15T10:52:59Z",
+    "download_time": "UNKNOWN",
+    "download_url": "UNKNOWN",
+    "exported": 30,
+    "parent_pbf_bytes": 17907596,
+    "parent_pbf_path": "graphhopper\\data\\hcmc-latest.osm.pbf",
+    "parent_pbf_sha256": "c2b7057e7a022ff929692205e4219c59640fc67fd90525a82428022b43cf4afb",
+    "selectors": {
+      "amenity": [
+        "cafe",
+        "restaurant"
+      ],
+      "geometry": "node",
+      "max_features": 30,
+      "named_only": true,
+      "tourism": [
+        "attraction",
+        "museum"
+      ]
+    },
+    "total_matched_before_limit": 401,
+    "truncated": true
+  },
+  "elements": [
+    {
+      "changeset": 120725846,
+      "id": 714567078,
+      "lat": 10.7811643,
+      "lon": 106.6898451,
+      "tags": {
+        "addr:street": "Ngô Thời Nhiệm",
+        "amenity": "cafe",
+        "name": "Cà Phê Acoustic",
+        "operator": "Wednesday / ladysnight",
+        "phone": "0839307627"
+      },
+      "timestamp": "2022-05-09 04:14:06+00:00",
+      "type": "node",
+      "uid": 13899044,
+      "user": "Senior_Intern",
+      "version": 4
+    },
+    {
+      "changeset": 121180564,
+      "id": 714567113,
+      "lat": 10.7809198,
+      "lon": 106.689929,
+      "tags": {
+        "amenity": "cafe",
+        "name": "Cà Phê Sỏi Đá",
+        "name:en": "Soi Da"
+      },
+      "timestamp": "2022-05-19 07:58:11+00:00",
+      "type": "node",
+      "uid": 13899044,
+      "user": "Senior_Intern",
+      "version": 3
+    },
+    {
+      "changeset": 121076023,
+      "id": 1275863719,
+      "lat": 10.7732622,
+      "lon": 106.6938064,
+      "tags": {
+        "addr:street": "Nguyễn Du",
+        "amenity": "cafe",
+        "internet_access": "yes",
+        "internet_access:fee": "no",
+        "name": "Cà Phê Napoli",
+        "smoking": "yes"
+      },
+      "timestamp": "2022-05-17 03:53:11+00:00",
+      "type": "node",
+      "uid": 13899044,
+      "user": "Senior_Intern",
+      "version": 3
+    },
+    {
+      "changeset": 8073985,
+      "id": 1275863735,
+      "lat": 10.7853912,
+      "lon": 106.6966905,
+      "tags": {
+        "amenity": "cafe",
+        "name": "Cafe Thứ 7",
+        "smoking": "yes"
+      },
+      "timestamp": "2011-05-07 14:31:32+00:00",
+      "type": "node",
+      "uid": 147582,
+      "user": "Mạnh",
+      "version": 1
+    },
+    {
+      "changeset": 120730805,
+      "id": 1407135685,
+      "lat": 10.7787503,
+      "lon": 106.6981182,
+      "tags": {
+        "addr:city": "Thành phố Hồ Chí Minh",
+        "addr:district": "Quận 1",
+        "addr:housenumber": "32",
+        "addr:street": "Hàn Thuyên",
+        "amenity": "cafe",
+        "cuisine": "mediterranean",
+        "internet_access": "wlan",
+        "name": "Cà Phê Au Parc",
+        "opening_hours": "Mo-Sa 07:30-22:30; Su 08:00-17:00",
+        "phone": "3829 2772",
+        "wheelchair": "limited"
+      },
+      "timestamp": "2022-05-09 06:48:50+00:00",
+      "type": "node",
+      "uid": 13899044,
+      "user": "Senior_Intern",
+      "version": 5
+    },
+    {
+      "changeset": 127862964,
+      "id": 1770193818,
+      "lat": 10.7820744,
+      "lon": 106.6977069,
+      "tags": {
+        "name": "Phòng Truyền thống Thành Đoàn",
+        "name:en": "HCMC Youth Museum",
+        "tourism": "museum"
+      },
+      "timestamp": "2022-10-21 05:02:55+00:00",
+      "type": "node",
+      "uid": 12198525,
+      "user": "Tommybara",
+      "version": 3
+    },
+    {
+      "changeset": 120771420,
+      "id": 1770193865,
+      "lat": 10.7805631,
+      "lon": 106.6975344,
+      "tags": {
+        "addr:housenumber": "4",
+        "addr:street": "Alexandre de Rhodes",
+        "amenity": "cafe",
+        "cuisine": "coffee_shop",
+        "internet_access": "wlan",
+        "internet_access:fee": "no",
+        "name": "Cà Phê Đá"
+      },
+      "timestamp": "2022-05-10 03:35:57+00:00",
+      "type": "node",
+      "uid": 13899044,
+      "user": "Senior_Intern",
+      "version": 4
+    },
+    {
+      "changeset": 120725003,
+      "id": 1770193890,
+      "lat": 10.781379,
+      "lon": 106.697592,
+      "tags": {
+        "amenity": "cafe",
+        "name": "Cà Phê 4A"
+      },
+      "timestamp": "2022-05-09 03:33:45+00:00",
+      "type": "node",
+      "uid": 13899044,
+      "user": "Senior_Intern",
+      "version": 3
+    },
+    {
+      "changeset": 121177852,
+      "id": 1770193906,
+      "lat": 10.7826304,
+      "lon": 106.6972822,
+      "tags": {
+        "addr:housename": "Centec Tower",
+        "addr:housenumber": "72-74",
+        "addr:street": "Nguyễn Thị Minh Khai",
+        "amenity": "restaurant",
+        "cuisine": "international",
+        "name": "Nhà Hàng Shri Lounge"
+      },
+      "timestamp": "2022-05-19 07:02:13+00:00",
+      "type": "node",
+      "uid": 13899044,
+      "user": "Senior_Intern",
+      "version": 3
+    },
+    {
+      "changeset": 165543903,
+      "id": 1770193907,
+      "lat": 10.7819478,
+      "lon": 106.6979915,
+      "tags": {
+        "amenity": "cafe",
+        "cuisine": "coffee_shop",
+        "internet_access": "wlan",
+        "internet_access:fee": "no",
+        "name": "Hội Quán Thanh Niên"
+      },
+      "timestamp": "2025-04-28 11:07:36+00:00",
+      "type": "node",
+      "uid": 9093997,
+      "user": "crgbsly",
+      "version": 3
+    },
+    {
+      "changeset": 121085774,
+      "id": 1770597595,
+      "lat": 10.7754764,
+      "lon": 106.6956779,
+      "tags": {
+        "amenity": "restaurant",
+        "cuisine": "vietnamese",
+        "name": "Nhà Hàng Tiệc Cưới 108 Nguyễn Du"
+      },
+      "timestamp": "2022-05-17 08:05:49+00:00",
+      "type": "node",
+      "uid": 13899044,
+      "user": "Senior_Intern",
+      "version": 3
+    },
+    {
+      "changeset": 120771420,
+      "id": 1770597603,
+      "lat": 10.7761438,
+      "lon": 106.6946963,
+      "tags": {
+        "addr:street": "Huyền Trân Công Chúa",
+        "amenity": "cafe",
+        "name": "Cà Phê 30-4",
+        "phone": "08085413"
+      },
+      "timestamp": "2022-05-10 03:35:57+00:00",
+      "type": "node",
+      "uid": 13899044,
+      "user": "Senior_Intern",
+      "version": 4
+    },
+    {
+      "changeset": 121180564,
+      "id": 1773221986,
+      "lat": 10.7876581,
+      "lon": 106.6999764,
+      "tags": {
+        "addr:housename": "SFC Tower",
+        "addr:housenumber": "9",
+        "addr:street": "Đinh Tiên Hoàng",
+        "amenity": "cafe",
+        "cuisine": "coffee_shop",
+        "name": "Cà Phê Smart"
+      },
+      "timestamp": "2022-05-19 07:58:11+00:00",
+      "type": "node",
+      "uid": 13899044,
+      "user": "Senior_Intern",
+      "version": 3
+    },
+    {
+      "changeset": 159152155,
+      "id": 1969358646,
+      "lat": 10.7797991,
+      "lon": 106.6949139,
+      "tags": {
+        "addr:housenumber": "106",
+        "addr:street": "Nguyễn Thị Minh Khai",
+        "amenity": "restaurant",
+        "name": "Topping Beef"
+      },
+      "timestamp": "2024-11-15 01:50:14+00:00",
+      "type": "node",
+      "uid": 12695849,
+      "user": "tversteeg",
+      "version": 3
+    },
+    {
+      "changeset": 120864857,
+      "id": 1969358661,
+      "lat": 10.7805315,
+      "lon": 106.6956539,
+      "tags": {
+        "addr:housenumber": "94",
+        "addr:street": "Nguyễn Thị Minh Khai",
+        "amenity": "cafe",
+        "brand": "The Coffee Bean & Tea Leaf",
+        "brand:wikidata": "Q1141384",
+        "cuisine": "coffee_shop",
+        "name": "The Coffee Bean & Tea Leaf",
+        "takeaway": "yes"
+      },
+      "timestamp": "2022-05-12 03:16:21+00:00",
+      "type": "node",
+      "uid": 13899044,
+      "user": "Senior_Intern",
+      "version": 2
+    },
+    {
+      "changeset": 165543903,
+      "id": 1969392566,
+      "lat": 10.7817145,
+      "lon": 106.6982688,
+      "tags": {
+        "addr:housename": "Cafe Trung Nguyên",
+        "addr:housenumber": "7",
+        "addr:street": "Nguyễn Văn Chiêm",
+        "alt_name": "Cafe Trung Nguyên",
+        "amenity": "cafe",
+        "branch": "Legend Café   Nguyễn Văn Chiêm",
+        "brand": "Trung Nguyên",
+        "brand:wikidata": "Q3541154",
+        "brand:wikipedia": "vi:Trung Nguyên (công ty)",
+        "cuisine": "coffee_shop;vietnamese",
+        "int_name": "Cafe Trung Nguyen",
+        "internet_access": "wlan",
+        "internet_access:fee": "no",
+        "name": "Trung Nguyên Coffee",
+        "name:en": "Trung Nguyên Coffee",
+        "name:vi": "Cà phê Trung Nguyên",
+        "takeaway": "yes",
+        "website": "http://www.trungnguyen.com.vn/quan/thanhniensangtao.aspx"
+      },
+      "timestamp": "2025-04-28 11:07:36+00:00",
+      "type": "node",
+      "uid": 9093997,
+      "user": "crgbsly",
+      "version": 4
+    },
+    {
+      "changeset": 120146972,
+      "id": 1969579631,
+      "lat": 10.7833122,
+      "lon": 106.6956127,
+      "tags": {
+        "addr:housename": "Cafe Papa",
+        "addr:housenumber": "6B",
+        "addr:street": "Công trường Quốc Tế",
+        "amenity": "cafe",
+        "cuisine": "coffee_shop",
+        "name": "Quán Cà Phê Papa"
+      },
+      "timestamp": "2022-04-25 05:17:20+00:00",
+      "type": "node",
+      "uid": 13899044,
+      "user": "Senior_Intern",
+      "version": 2
+    },
+    {
+      "changeset": 120146972,
+      "id": 1969579682,
+      "lat": 10.783145,
+      "lon": 106.6955418,
+      "tags": {
+        "addr:housenumber": "10",
+        "addr:street": "Công trường Quốc tế",
+        "amenity": "cafe",
+        "cuisine": "coffee_shop",
+        "internet_access": "wlan",
+        "internet_access:fee": "no",
+        "name": "Cà Phê Gió Bấc"
+      },
+      "timestamp": "2022-04-25 05:17:20+00:00",
+      "type": "node",
+      "uid": 13899044,
+      "user": "Senior_Intern",
+      "version": 4
+    },
+    {
+      "changeset": 171779101,
+      "id": 1969579993,
+      "lat": 10.7786273,
+      "lon": 106.6999908,
+      "tags": {
+        "addr:city": "TP HCM",
+        "addr:district": "Quận 1",
+        "addr:housename": "Metropolitan",
+        "addr:housenumber": "235",
+        "addr:province": "Thành phố Hồ Chí Minh",
+        "addr:street": "Đường Ðồng Khởi",
+        "addr:subdistrict": "Phường Bến Nghé",
+        "amenity": "cafe",
+        "brand": "The Coffee Bean & Tea Leaf",
+        "brand:wikidata": "Q1141384",
+        "brand:wikipedia": "en:The Coffee Bean & Tea Leaf",
+        "cuisine": "coffee_shop",
+        "name": "The Coffee Bean & Tea Leaf;235 Đồng Khởi",
+        "takeaway": "yes",
+        "website": "https://coffeebean.com.vn"
+      },
+      "timestamp": "2025-09-11 11:15:42+00:00",
+      "type": "node",
+      "uid": 22134485,
+      "user": "alex-321",
+      "version": 7
+    },
+    {
+      "changeset": 120863847,
+      "id": 1969580038,
+      "lat": 10.7826261,
+      "lon": 106.6965122,
+      "tags": {
+        "addr:housenumber": "10A",
+        "addr:street": "Phạm Ngọc Thạch",
+        "amenity": "cafe",
+        "cuisine": "coffee_shop",
+        "name": "Cà Phê Cuộc Sống Dễ Dàng"
+      },
+      "timestamp": "2022-05-12 02:12:57+00:00",
+      "type": "node",
+      "uid": 13899044,
+      "user": "Senior_Intern",
+      "version": 2
+    },
+    {
+      "changeset": 121133183,
+      "id": 1969599008,
+      "lat": 10.7718157,
+      "lon": 106.697747,
+      "tags": {
+        "addr:housename": "Phở 2000",
+        "amenity": "restaurant",
+        "cuisine": "vietnamese",
+        "diet:vegetarian": "yes",
+        "name": "Quán Phở 2000",
+        "name:de": "Phở 2000"
+      },
+      "timestamp": "2022-05-18 08:15:04+00:00",
+      "type": "node",
+      "uid": 13899044,
+      "user": "Senior_Intern",
+      "version": 4
+    },
+    {
+      "changeset": 164234598,
+      "id": 1969599014,
+      "lat": 10.772661,
+      "lon": 106.6954006,
+      "tags": {
+        "amenity": "cafe",
+        "brand": "Trung Nguyên",
+        "brand:wikidata": "Q3541154",
+        "cuisine": "coffee_shop;vietnamese",
+        "name": "Trung Nguyên Coffee",
+        "name:de": "Cafe Trung Nguyên",
+        "name:en": "Trung Nguyên Coffee",
+        "name:vi": "Cà phê Trung Nguyên",
+        "takeaway": "yes"
+      },
+      "timestamp": "2025-03-29 05:44:36+00:00",
+      "type": "node",
+      "uid": 16194143,
+      "user": "Tewuzij",
+      "version": 5
+    },
+    {
+      "changeset": 120730805,
+      "id": 1985346231,
+      "lat": 10.7773464,
+      "lon": 106.6996325,
+      "tags": {
+        "addr:housenumber": "160",
+        "addr:street": "Pasteur",
+        "amenity": "restaurant",
+        "cuisine": "vietnamese",
+        "name": "Nhà Hàng Ngon",
+        "phone": "08 3827 7131"
+      },
+      "timestamp": "2022-05-09 06:48:50+00:00",
+      "type": "node",
+      "uid": 13899044,
+      "user": "Senior_Intern",
+      "version": 7
+    },
+    {
+      "changeset": 120875319,
+      "id": 1985346259,
+      "lat": 10.7736789,
+      "lon": 106.6992615,
+      "tags": {
+        "addr:housenumber": "2-4-6",
+        "addr:street": "Lưu Văn Lang",
+        "amenity": "restaurant",
+        "cuisine": "american",
+        "name": "Nhà Hàng Rơm BBQ"
+      },
+      "timestamp": "2022-05-12 08:28:44+00:00",
+      "type": "node",
+      "uid": 13899044,
+      "user": "Senior_Intern",
+      "version": 3
+    },
+    {
+      "changeset": 121133183,
+      "id": 1985346309,
+      "lat": 10.7718553,
+      "lon": 106.6975823,
+      "tags": {
+        "amenity": "restaurant",
+        "brand": "Phở 24",
+        "brand:wikidata": "Q63863118",
+        "cuisine": "vietnamese;noodle",
+        "name": "Phở 24",
+        "name:de": "Phở 24",
+        "name:en": "Pho 24",
+        "name:vi": "Phở 24"
+      },
+      "timestamp": "2022-05-18 08:15:04+00:00",
+      "type": "node",
+      "uid": 13899044,
+      "user": "Senior_Intern",
+      "version": 3
+    },
+    {
+      "changeset": 120735254,
+      "id": 1985832654,
+      "lat": 10.7748184,
+      "lon": 106.6992492,
+      "tags": {
+        "addr:housenumber": "135",
+        "addr:street": "Nam Kỳ Khởi Nghĩa",
+        "amenity": "restaurant",
+        "name": "Nhà Hàng Nướng Barbecue Garden"
+      },
+      "timestamp": "2022-05-09 08:26:52+00:00",
+      "type": "node",
+      "uid": 13899044,
+      "user": "Senior_Intern",
+      "version": 2
+    },
+    {
+      "changeset": 133396427,
+      "id": 2036596623,
+      "lat": 10.7809781,
+      "lon": 106.6980644,
+      "tags": {
+        "amenity": "cafe",
+        "brand": "Highlands Coffee",
+        "brand:wikidata": "Q5759361",
+        "cuisine": "coffee_shop;vietnamese",
+        "name": "Highlands Coffee",
+        "name:en": "Highlands Coffee",
+        "name:vi": "Cafe Hight Land 2",
+        "takeaway": "yes"
+      },
+      "timestamp": "2023-03-07 10:03:09+00:00",
+      "type": "node",
+      "uid": 17678394,
+      "user": "Khakha01",
+      "version": 5
+    },
+    {
+      "changeset": 14069730,
+      "id": 2037626761,
+      "lat": 10.7838752,
+      "lon": 106.6992161,
+      "tags": {
+        "addr:city": "Quận 1",
+        "addr:country": "VN",
+        "addr:housenumber": "25",
+        "addr:province": "Hồ Chí Minh",
+        "addr:street": "Nguyễn Thị Minh Khai",
+        "amenity": "restaurant",
+        "cuisine": "vietnamese",
+        "drive_in": "no",
+        "internet_access": "no",
+        "internet_access:fee": "no",
+        "microbrewery": "no",
+        "name": "Phở Bắc Hải",
+        "outdoor_seating": "no",
+        "smoking": "yes",
+        "takeaway": "yes",
+        "wheelchair": "no"
+      },
+      "timestamp": "2012-11-28 07:58:02+00:00",
+      "type": "node",
+      "uid": 625303,
+      "user": "TuanIfan",
+      "version": 2
+    },
+    {
+      "changeset": 120153131,
+      "id": 2041380423,
+      "lat": 10.78415,
+      "lon": 106.6975046,
+      "tags": {
+        "addr:city": "Quận 1",
+        "addr:country": "VN",
+        "addr:housenumber": "19",
+        "addr:province": "Hồ Chí Minh",
+        "addr:street": "Trần Cao Vân",
+        "amenity": "restaurant",
+        "cuisine": "vietnamese",
+        "drive_in": "no",
+        "internet_access:fee": "no",
+        "microbrewery": "no",
+        "name": "Bún Bò Huế Gia Hội",
+        "outdoor_seating": "no",
+        "smoking": "yes",
+        "takeaway": "yes"
+      },
+      "timestamp": "2022-04-25 07:54:52+00:00",
+      "type": "node",
+      "uid": 13899044,
+      "user": "Senior_Intern",
+      "version": 2
+    },
+    {
+      "changeset": 120153131,
+      "id": 2041384535,
+      "lat": 10.784324,
+      "lon": 106.697355,
+      "tags": {
+        "addr:city": "Quận 1",
+        "addr:country": "VN",
+        "addr:housenumber": "20",
+        "addr:province": "Hồ Chí Minh",
+        "addr:street": "Trần Cao Vân",
+        "amenity": "restaurant",
+        "cuisine": "vietnamese",
+        "name": "Nhà Hàng Hồ Tây"
+      },
+      "timestamp": "2022-04-25 07:54:52+00:00",
+      "type": "node",
+      "uid": 13899044,
+      "user": "Senior_Intern",
+      "version": 2
+    }
+  ],
+  "version": 0.6
+}

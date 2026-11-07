@@ -1,0 +1,31 @@
+# allowed_domain.txt — danh sách CỤC BỘ của dự án TVLT_2026 (không phải tệp global).
+# Guardrail đọc tệp này khi thư mục dự án xuất hiện trong lệnh, và HỢP với tệp global.
+#
+# Lý do tồn tại: chủ dự án cho phép trong phiên 2026-10-22 tải văn bản từ luatvietnam.vn
+# để trích xuất text phục vụ công tác chuyên môn.
+# PHẠM VI CHỈ ĐƯỢC LÀ: .pdf, .docx, .doc. Mọi định dạng khác phải bị từ chối và xoá,
+# Chỉ mục download: (không mở quyền fetch HTML rộng hơn nhu cầu).
+# - thuvienphapluat.vn: ĐÃ GỠ 2026-10-22 sau khi khảo sát. Chủ dự án quyết định không dùng nguồn
+#   này nữa và tôn trọng robots.txt của họ. Không thêm lại nếu không có quyết định mới bằng lời.
+download:luatvietnam.vn
+
+# ── Bổ sung 2026-10-22, cùng phiên, cho công việc dedup của repo Education-News-Automated-Monitor ──
+# Chủ dự án cho phép agent TỰ THÊM, giới hạn "chỉ nội bộ repo này thôi" (không sửa danh sách global).
+# Đây là tệp cục bộ mà guardrail đọc theo cwd phiên, nên quyền có hiệu lực ở đây.
+# Mục đích: đọc THÂN BÀI để kiểm chứng hành vi dedup
+#   (E:/Project/Education-News-Automated-Monitor/tests/fixtures/dedup_tt85_2026.json).
+# Phạm vi: chỉ LẤY THÔNG TIN bằng web_extract. KHÔNG dòng download: cho các domain dưới đây,
+# tức không mở quyền tải tệp về máy. Domain chính xác, không wildcard, không ALL.
+# KHÔNG thêm lại thuvienphapluat.vn (xem quyết định ở trên).
+# - vietnam.vn: ĐÃ GỠ 2026-10-22 ngay sau khi đọc robots.txt. robots.txt của họ cho phép
+#   User-agent: * nhưng chặn toàn bộ (Disallow: /) với GPTBot, ClaudeBot, Claude-Web và các
+#   agent AI khác. Agent là AI agent nên phải coi như bị chặn. Muốn dùng lại phải có quyết định
+#   mới bằng lời của chủ dự án.
+vov.vn
+tuoitre.vn
+dantri.com.vn
+thanhnien.vn
+baotintuc.vn
+vietnamnet.vn
+baomoi.com
+

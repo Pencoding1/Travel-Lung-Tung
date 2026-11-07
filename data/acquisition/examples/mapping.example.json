@@ -1,0 +1,65 @@
+{
+  "mapping_version": 1,
+  "_comment": "SYNTHETIC example mapping. Administrative acceptance is per reviewed ENTITY (entities map), never per file. Illustrative only, not an operational approval.",
+  "categories": [
+    {"id": "cafe", "name": "Cafe", "context": "Coffee shops and cafes"},
+    {"id": "attraction", "name": "Attraction", "context": "Tourist attractions and landmarks"},
+    {"id": "museum", "name": "Museum", "context": "Museums and cultural exhibition venues"}
+  ],
+  "sources": {
+    "osm-demo-synthetic": {
+      "synthetic": false,
+      "districts": {"Quan 1": "District 1"},
+      "category_map": {
+        "amenity=cafe": "cafe",
+        "tourism=attraction": "attraction"
+      },
+      "entities": {
+        "osm/node/1": {
+          "reviewer": "example-reviewer",
+          "evidence_reference": "docs/research/DATA_SOURCE_SURVEY.md#openstreetmap-extracts",
+          "city": "Ho Chi Minh City",
+          "district": "District 1",
+          "nation": "Vietnam"
+        },
+        "osm/node/2": {
+          "reviewer": "example-reviewer",
+          "evidence_reference": "docs/research/DATA_SOURCE_SURVEY.md#openstreetmap-extracts",
+          "city": "Ho Chi Minh City",
+          "district": "District 1",
+          "nation": "Vietnam"
+        },
+        "osm/node/5": {
+          "reviewer": "example-reviewer",
+          "evidence_reference": "docs/research/DATA_SOURCE_SURVEY.md#openstreetmap-extracts",
+          "city": "Ho Chi Minh City",
+          "district": "District 1",
+          "nation": "Vietnam"
+        }
+      }
+    },
+    "wikidata-demo-synthetic": {
+      "synthetic": false,
+      "districts": {},
+      "category_map": {
+        "P31=Q33506": "museum"
+      },
+      "entities": {
+        "wikidata/Q100": {
+          "reviewer": "example-reviewer",
+          "evidence_reference": "docs/research/DATA_SOURCE_SURVEY.md#wikidata-structured-entities",
+          "city": "Ho Chi Minh City",
+          "district": "District 1",
+          "nation": "Vietnam"
+        },
+        "wikidata/Q200": {
+          "reviewer": "example-reviewer",
+          "evidence_reference": "docs/research/DATA_SOURCE_SURVEY.md#wikidata-structured-entities",
+          "city": "Ho Chi Minh City",
+          "district": "District 1",
+          "nation": "Vietnam"
+        }
+      }
+    }
+  }
+}

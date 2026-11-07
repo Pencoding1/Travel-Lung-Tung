@@ -1,0 +1,53 @@
+{
+  "manifest_version": 1,
+  "task_id": "OC-032",
+  "dataset": "data/primary_20261016/hcm_pois_final.geojson",
+  "provenance_status": "INCOMPLETE_UNKNOWN",
+  "summary": "The supplied GeoJSON carries no provenance block and no per-feature source identifier. Collection time, source platform, license and freshness are UNKNOWN and must not be inferred from the filename or the derived 'processed_name' field.",
+  "evidence": {
+    "top_level_keys_observed": ["crs", "features", "name", "type"],
+    "has_provenance_block": false,
+    "per_feature_id_fields_observed": [],
+    "feature_property_keys": [
+      "name",
+      "opening_ho",
+      "addr_full",
+      "addr_house",
+      "addr_stree",
+      "addr_city",
+      "cluster",
+      "addr_district",
+      "addr_ward",
+      "processed_name",
+      "poi_category",
+      "lat",
+      "lon"
+    ]
+  },
+  "known": {
+    "file_bytes": 2712731,
+    "file_sha256": "713b07a62cf89bd2cad9093abaad2a4c5f01e23853321764b3d66bf9f7eee43c",
+    "features": 6368,
+    "crs": "urn:ogc:def:crs:OGC:1.3:CRS84",
+    "geometry": "Point only",
+    "declared_city": "HCMC (addr_city field, all 6368 records)"
+  },
+  "unknown": [
+    "collection / retrieval timestamp",
+    "upstream source platform or URL",
+    "license / reuse permission",
+    "snapshot freshness (the provided-at date is not retrieval or snapshot freshness)",
+    "whether the 'processed_name' value implies any upstream pipeline"
+  ],
+  "do_not_infer": [
+    "Do not treat the filename 'hcm_pois_final' as proof of finality or of an OSM (or any) upstream.",
+    "Do not treat 'processed_name' as evidence of a particular processing pipeline or license.",
+    "Do not claim the record set equals the original ~200-POI thesis dataset or is fully recovered from it.",
+    "Do not claim these 6368 features are unique entities; only 1 exact duplicate pair was found, but 312 normalized-name collision groups exist and require review."
+  ],
+  "sibling_source_for_contrast": {
+    "path": "data/expansion_20261015/",
+    "provenance_status": "DOCUMENTED",
+    "note": "The 32-record expansion sample DOES record raw SHA256, retrieval UTC, URL, license and HTTP outcome in data/expansion_20261015/fetch_manifest.json. The primary dataset does not. The two must not be conflated."
+  }
+}

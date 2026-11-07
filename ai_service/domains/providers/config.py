@@ -22,10 +22,18 @@ from .errors import ProviderConfigError
 
 PROVIDER_GEMINI = "gemini"
 PROVIDER_OPENCODE_CLI = "opencode_cli"
-VALID_PROVIDERS = frozenset({PROVIDER_GEMINI, PROVIDER_OPENCODE_CLI})
+PROVIDER_AIBOX = "aibox"
+PROVIDER_AIBOX_HTTP = "aibox_http"
+VALID_PROVIDERS = frozenset({
+    PROVIDER_GEMINI,
+    PROVIDER_OPENCODE_CLI,
+    PROVIDER_AIBOX,
+    PROVIDER_AIBOX_HTTP,
+})
 
 DEFAULT_GEMINI_MODEL = "gemini-2.5-pro"
 DEFAULT_CLI_MODEL = "aibox/ds/deepseek-flash"
+DEFAULT_AIBOX_MODEL = "ds/deepseek-flash"
 DEFAULT_CLI_AGENT = "travel-ai-cli-transport"
 # A unique, per-process agent name: it never merges with a user/global agent.
 DEFAULT_CLI_TIMEOUT_SECONDS = 120.0
@@ -72,6 +80,10 @@ class ProviderConfig:
     @property
     def is_cli(self) -> bool:
         return self.provider == PROVIDER_OPENCODE_CLI
+
+    @property
+    def is_aibox(self) -> bool:
+        return self.provider in (PROVIDER_AIBOX, PROVIDER_AIBOX_HTTP)
 
 
 def _text(source: Mapping[str, str], name: str, default: str) -> str:
@@ -168,13 +180,18 @@ def load_provider_config(env: Optional[Mapping[str, str]] = None
     if provider not in VALID_PROVIDERS:
         raise ProviderConfigError(
             "invalid_provider_config",
-            "AI_LLM_PROVIDER must be exactly 'gemini' or 'opencode_cli'.")
+            "AI_LLM_PROVIDER must be 'gemini', 'opencode_cli', or 'aibox'.")
 
     gemini_model = _validate_model(
         _text(source, "GEMINI_MODEL", DEFAULT_GEMINI_MODEL), "GEMINI_MODEL")
 
     if provider == PROVIDER_GEMINI:
         return ProviderConfig(provider=PROVIDER_GEMINI, model=gemini_model)
+
+    if provider in (PROVIDER_AIBOX, PROVIDER_AIBOX_HTTP):
+        aibox_model = _validate_model(
+            _text(source, "AIBOX_MODEL", DEFAULT_AIBOX_MODEL), "AIBOX_MODEL")
+        return ProviderConfig(provider=PROVIDER_AIBOX, model=aibox_model)
 
     model = _validate_model(_text(source, "AI_CLI_MODEL", DEFAULT_CLI_MODEL),
                             "AI_CLI_MODEL")

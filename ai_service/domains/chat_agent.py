@@ -399,6 +399,7 @@ async def run_agent_loop(
                 error_code="insufficient_data", loop_limit=False,
                 message=INSUFFICIENT_DATA_MESSAGE)
         assistant_bootstrap = {"role": "assistant",
+                               "content": None,
                                "tool_calls": bootstrap_calls}
         messages.append(assistant_bootstrap)
         turn_messages.append(assistant_bootstrap)
@@ -520,6 +521,7 @@ async def run_agent_loop(
                 error_code="insufficient_data", loop_limit=False,
                 message=INSUFFICIENT_DATA_MESSAGE)
 
+        assistant_msg.setdefault("content", None)
         messages.append(assistant_msg)
         turn_messages.append(assistant_msg)
 

@@ -9,10 +9,13 @@ repository and the whole HTTP surface runs with no database or network.
 
 from __future__ import annotations
 
+import logging
+import os
 from contextlib import asynccontextmanager
 from typing import Any, Dict, Optional
 
 from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from app.api.rest.v1.endpoint_itinerary import router as itinerary_router
@@ -54,6 +57,21 @@ def create_app(*, repository: Optional[ItineraryDraftRepository] = None,
             repository.close()
 
     app = FastAPI(title="TVLT Backend Service", version="0.1.0", lifespan=lifespan)
+    allowed_origins = [
+        origin.strip()
+        for origin in os.getenv(
+            "ALLOWED_ORIGINS",
+            "http://localhost:8002,http://127.0.0.1:8002,http://localhost:3000,http://127.0.0.1:3000",
+        ).split(",")
+        if origin.strip() and origin.strip() != "*"
+    ]
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=allowed_origins,
+        allow_credentials=True,
+        allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
+        allow_headers=["Authorization", "Content-Type"],
+    )
     app.add_middleware(BoundedJsonBodyMiddleware)
     app.state.repository = repository
     app.state.settings = settings
@@ -67,6 +85,25 @@ def create_app(*, repository: Optional[ItineraryDraftRepository] = None,
             status_code=422,
             content={"detail": {"code": "payload_too_deep",
                                 "message": "Request JSON nesting is too deep."}})
+
+    @app.exception_handler(Exception)
+    async def global_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+        logging.error(
+            "BACKEND_UNHANDLED_EXCEPTION method=%s type=%s",
+            request.method,
+            type(exc).__name__,
+        )
+        return JSONResponse(
+            status_code=500,
+            content={
+                "is_success": False,
+                "error_type": "internal_server_error",
+                "detail": {
+                    "code": "internal_error",
+                    "message": "An unexpected internal error occurred.",
+                },
+            },
+        )
 
     @app.get("/health", tags=["health"])
     def health() -> Dict[str, Any]:

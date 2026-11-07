@@ -1,0 +1,29 @@
+{
+  "receipt_id": "receipt-20261028T095530Z-da8144773f584090ab604bfc46005cfb",
+  "receipt_sha256": "e041ae5a7256e0a08f3bb1eda363e3018aed226e6a0cfe0477383d8f613eb384",
+  "source_snapshot_sha256": "d1b84d354616f9d83f48c9432059c21aff92b44ed81abfd165d406f5f6a97f83",
+  "selected_ids": [
+    "TEST-GATE"
+  ],
+  "decisions": {
+    "TEST-GATE": {
+      "action": "approve",
+      "choice": "Duyệt kiến trúc và cổng nghiệm thu",
+      "comment": ""
+    }
+  },
+  "status": "DOC_APPLIED",
+  "product_code_changed": false,
+  "tests_or_expected_changed": false,
+  "owner_receipt_modified": false,
+  "new_snapshot_id": "TVLT-BEHAVIOR-REVIEW-20261028-v3",
+  "new_snapshot_sha256": "73b688f0cb03c357e5be957ad813f233de0cbb69a350abb644f1aa39bfbf8175",
+  "checks": [
+    "receipt bytes unchanged",
+    "source v2 bytes hash matches",
+    "snapshot object matches",
+    "only TEST-GATE changed",
+    "UI HOLD preserved",
+    "zero pending items; not implementation acceptance"
+  ]
+}

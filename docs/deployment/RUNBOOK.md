@@ -224,14 +224,19 @@ No check in this section was executed against a running stack.
 | backend_service liveness | `GET http://127.0.0.1:18003/health` (integration stack) | Path verified in `backend_service/app/main.py` (`/health` returns `ok` regardless of store); not runtime-run |
 | backend_service readiness | `GET http://127.0.0.1:18003/ready` (integration stack) | `503` until the initialized SQLite store is present; verified in source; not runtime-run |
 
-Routing: only the **`car`** profile is enabled
-(`graphhopper/data/config.yml`; `POI_service/app/api/mcp/tools.py:29`). Foot and
-bike requests are unsupported and must not be advertised.
+Routing: **`car`**, **`foot`**, and **`bike`** profiles are configured in
+`graphhopper/data/config.yml` and wired via
+`GRAPHHOPPER_PROFILES=${GRAPHHOPPER_PROFILES:-car,foot}` in
+`docker-compose.yaml` (`POI_service/app/api/mcp/tools.py` accepts any profile
+listed in `GRAPHHOPPER_PROFILES`, e.g. `GRAPHHOPPER_PROFILES=car,foot,bike`, and
+automatically sets `ch.disable=true` for profiles without pre-built Contraction
+Hierarchies).
 
-Model availability: `ai_service` calls Gemini's OpenAI-compatible endpoint using
-`GEMINI_MODEL`. Verify the key and quota out-of-band before claiming itinerary
-generation; such requests are real external calls. Model availability is not
-verified here.
+Model availability: `ai_service` supports `AI_PROVIDER=gemini` (default, calling
+Gemini's OpenAI-compatible endpoint using `GEMINI_MODEL`) and `AI_PROVIDER=aibox`
+(local OpenAI-compatible adapter `scripts/aibox_adapter.py` via
+`AIBOX_BASE_URL` / `AIBOX_MODEL`). Verify external model keys and quota
+out-of-band before claiming live cloud itinerary generation.
 
 ## 6. Known blockers and unfinished services (accurate status)
 
@@ -249,10 +254,17 @@ verified here.
   host port `18003`, own `int_backend_drafts` SQLite volume). The Docker engine is
   unavailable here, so the image build/start is **not** verified; only the static
   contract is checked.
-- **crawler_service**: `app.main:app` exists but the service is **not** a member
-  of the root uv workspace, so the image does not build as-is. Not added to
-  Compose; treat as unsupported until workspace membership and browser
-  dependencies are verified.
+- **crawler_service**: registered in the root `uv` workspace (`pyproject.toml`
+  member `crawler_service`), with `crawler_service/Dockerfile` exposing port
+  `8004` (`HEALTHCHECK` on `http://127.0.0.1:8004/`) and isolated Compose file
+  `docker-compose.crawler.yaml` (`127.0.0.1:18004:8004`, requiring
+  `CRAWLER_API_KEY` via `hmac.compare_digest`). Multi-city ingestion (`KT-10`)
+  is orchestrated via `scripts/multi_city_ingest.py` (`--mode dry-run` for
+  offline verification and `--mode fetch` for operator-approved live crawl).
+- **Live test suites & Digest freeze**: `tests/live_model`, `tests/memory_live`,
+  and `tests/spatial_live` require a running Memgraph/GraphHopper stack and live
+  model credentials. Image variables default to `:latest` tags; pin `@sha256`
+  digests in `.env` when the Docker engine is available.
 - **Digest freeze**: image variables default to the previously used `:latest`
   tags. Reproducibility requires pinning `@sha256` digests; this remains an
   acceptance dependency.

@@ -128,3 +128,15 @@ def test_exactly_one_http_request_per_call(monkeypatch):
     seen = _capture(_ok)
     tools.get_itinerary_route(["p1", "p2"], vehicle="foot")
     assert len(seen) == 1
+
+
+def test_bike_without_built_ch_sends_ch_disable(monkeypatch):
+    monkeypatch.setenv("GRAPHHOPPER_PROFILES", "car,foot,bike")
+    _set_pois({"p1": poi_stub(), "p2": poi_stub(11.0, 107.0)})
+    seen = _capture(_ok)
+    payload = _parse(tools.get_itinerary_route(["p1", "p2"], vehicle="bike"))
+    assert payload["success"] is True
+    assert payload["route_profile"] == "bike"
+    assert _query(seen[0])["profile"] == "bike"
+    assert _query(seen[0])["ch.disable"] == "true"
+

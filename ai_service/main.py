@@ -15,6 +15,7 @@ from collections import OrderedDict
 from pathlib import Path
 from typing import List, Dict, Any, Mapping, Optional, Set, Tuple
 from fastapi import FastAPI, Header, HTTPException, Request
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 
 # MCP Client Imports
@@ -27,7 +28,7 @@ from domains.payloads import (
     ClearMemoryRequest,
     ItineraryRequest,
 )
-from domains import chat_agent, grounding, jev_intent, memory, memory_auth, planning_adapter
+from domains import chat_agent, chat_mvp, grounding, jev_intent, memory, memory_auth, planning_adapter
 from domains import source_gate
 from domains.jev_intent import configure_intent_router
 from domains.memory import ProfileConflict, get_profile_store
@@ -35,10 +36,13 @@ from domains.memory_auth import AuthError
 from domains.planning import schedule as planning_schedule
 from domains.planning import validate as planning_validate
 from domains.providers import (
+    AiboxHttpProvider,
+    DEFAULT_AIBOX_MODEL,
     DEFAULT_CLI_MODEL,
     MODEL_DISPLAY_NAME,
     MODEL_UPSTREAM_NOTE,
     MODEL_UPSTREAM_VERSION_VERIFIED,
+    PROVIDER_AIBOX,
     PROVIDER_GEMINI,
     PROVIDER_OPENCODE_CLI,
     ModelUnavailableError,
@@ -149,6 +153,8 @@ def _synthesis_label() -> str:
     """Keep the historical Gemini label for the default provider only."""
     if PROVIDER is not None and PROVIDER.is_cli:
         return "OpenCode CLI Synthesis"
+    if PROVIDER is not None and PROVIDER.is_aibox:
+        return "AIbox HTTP Synthesis"
     return "Gemini Synthesis"
 
 
@@ -173,6 +179,21 @@ def _provider_block() -> Dict[str, Any]:
             "requested_model": GEMINI_MODEL,
             "identity_source": "unavailable",
             "config_error": PROVIDER_CONFIG_ERROR,
+        })
+        return block
+    if PROVIDER is not None and PROVIDER.is_aibox:
+        observed_aibox = sorted({
+            entry.get("observed_model") for entry in calls
+            if entry.get("ok") and entry.get("observed_model")
+        })
+        block.update({
+            "selected": PROVIDER_AIBOX,
+            "requested_model": PROVIDER.model,
+            "observed_model": (observed_aibox[0]
+                               if len(observed_aibox) == 1 else None),
+            "identity_source": "aibox_http_response",
+            "usage_note": ("Provider-reported usage is accumulated when present; "
+                           "unknown token values stay null."),
         })
         return block
     if not PROVIDER.is_cli:
@@ -218,6 +239,38 @@ def _begin_provider_calls() -> None:
 
 
 app = FastAPI(title="Travel Lung Tung AI Hub")
+_AI_ALLOWED_ORIGINS = [
+    origin.strip()
+    for origin in os.getenv(
+        "ALLOWED_ORIGINS",
+        "http://localhost:8002,http://127.0.0.1:8002,http://localhost:3000,http://127.0.0.1:3000",
+    ).split(",")
+    if origin.strip() and origin.strip() != "*"
+]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=_AI_ALLOWED_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type"],
+)
+
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception) -> JSONResponse:
+    logger.error("AI_UNHANDLED_EXCEPTION method=%s type=%s",
+                 request.method, type(exc).__name__)
+    return JSONResponse(
+        status_code=500,
+        content={
+            "is_success": False,
+            "error_type": "internal_server_error",
+            "detail": {
+                "code": "internal_error",
+                "message": "An unexpected internal error occurred.",
+            },
+        },
+    )
 
 # Bounded, session-isolated working memory for the chat surface (OC-009).
 WORKING_MEMORY = memory.WorkingMemory()
@@ -488,6 +541,8 @@ async def gemini_chat_completion(payload: Dict[str, Any]) -> Dict[str, Any]:
     try:
         if PROVIDER.provider == PROVIDER_GEMINI:
             data = await _gemini_chat_completion(payload)
+        elif PROVIDER.is_aibox:
+            data = await AiboxHttpProvider(PROVIDER).complete(payload)
         else:
             data = await _get_cli_provider().complete(payload)
     except ProviderError as exc:
@@ -510,7 +565,14 @@ async def gemini_chat_completion(payload: Dict[str, Any]) -> Dict[str, Any]:
     return data
 
 
-VALID_INTENTS = frozenset({"CHITCHAT", "TRAVEL"})
+VALID_INTENTS = frozenset({
+    "CHITCHAT",
+    "TRAVEL",
+    "BOOKING",
+    "PLAN",
+    "MANAGE_SAVED",
+    "MANAGE_MEMORY",
+})
 PROVIDER_TYPESAFE = "typesafe"
 
 
@@ -602,10 +664,16 @@ def _safe_text(value: Any, *, maximum: int = 64) -> Optional[str]:
 
 
 def _safe_probabilities(value: Any) -> Optional[Dict[str, float]]:
-    if not isinstance(value, dict) or set(value.keys()) != set(jev_intent.CHOICES):
+    if not isinstance(value, dict):
+        return None
+    if set(value.keys()) == set(jev_intent.CHOICES):
+        labels = jev_intent.CHOICES
+    elif set(value.keys()) == set(jev_intent.CHOICES_V1_1):
+        labels = jev_intent.CHOICES_V1_1
+    else:
         return None
     probabilities: Dict[str, float] = {}
-    for label in jev_intent.CHOICES:
+    for label in labels:
         parsed = _finite_number(value.get(label), 0.0, 1.0)
         if parsed is None:
             return None
@@ -2122,6 +2190,11 @@ async def generate_itinerary_http(request: ItineraryRequest,
 
     if isinstance(result, dict):
         result["memory"] = memory_meta
+        if result.get("status") == "success":
+            chat_mvp.SAVED_DRAFT_STORE.remember_generated(
+                _memory_key(subject, request.session_id),
+                _public_result(result),
+            )
     return _public_result(result)
 
 
@@ -2198,14 +2271,60 @@ def _unresolved_chat_response(request: ChatRequest, subject: Optional[str],
 async def _dispatch_intent(intent: str, messages: List[Dict[str, Any]],
                            usage: Dict[str, Any], *,
                            source_selection: Optional[Dict[str, str]] = None,
-                           transport_mode: str = "car") -> Dict[str, Any]:
-    """Dispatch only the two executable intents; never a TRAVEL catch-all."""
-    if intent == "CHITCHAT":
-        return await _run_chitchat(messages, usage)
+                           transport_mode: str = "car",
+                           owner_key: Optional[str] = None) -> Dict[str, Any]:
+    """Dispatch validated executable intents (v1 and v1.1)."""
+    user_message = ""
+    prior_messages: List[Dict[str, Any]] = []
+    for msg in messages:
+        if isinstance(msg, dict) and msg.get("role") == "user":
+            user_message = str(msg.get("content") or "")
+    if len(messages) > 2:
+        prior_messages = messages[1:-1]
+
     if intent == "TRAVEL":
-        return await _run_travel_turn(messages, usage,
-                                      source_selection=source_selection,
-                                      transport_mode=transport_mode)
+        result = await _run_travel_turn(messages, usage,
+                                        source_selection=source_selection,
+                                        transport_mode=transport_mode)
+        return chat_mvp.apply_mvp_contract(
+            intent=intent,
+            user_message=user_message,
+            prior_messages=prior_messages,
+            result=result,
+            owner_key=owner_key,
+        )
+
+    if intent == "CHITCHAT":
+        if chat_mvp.is_poi_lookup_question(user_message):
+            result = await chat_mvp.run_grounded_poi_lookup(
+                user_message=user_message,
+                messages=messages,
+                usage=usage,
+                open_mcp_session_fn=open_mcp_session,
+                call_model_fn=gemini_chat_completion,
+                selected_model=_selected_model(),
+                completion_controls=_completion_limit_controls(500),
+            )
+        else:
+            result = await _run_chitchat(messages, usage)
+        return chat_mvp.apply_mvp_contract(
+            intent=intent,
+            user_message=user_message,
+            prior_messages=prior_messages,
+            result=result,
+            owner_key=owner_key,
+        )
+
+    if intent in ("BOOKING", "PLAN", "MANAGE_SAVED", "MANAGE_MEMORY"):
+        result = await _run_chitchat(messages, usage)
+        return chat_mvp.apply_mvp_contract(
+            intent=intent,
+            user_message=user_message,
+            prior_messages=prior_messages,
+            result=result,
+            owner_key=owner_key,
+        )
+
     raise RuntimeError("unresolved intent reached dispatch")
 
 
@@ -2341,7 +2460,8 @@ async def chat_endpoint(request: ChatRequest,
                 result = await _dispatch_intent(
                     intent, messages, usage,
                     source_selection=source_selection,
-                    transport_mode=transport_mode)
+                    transport_mode=transport_mode,
+                    owner_key=memory_key)
                 memory_meta = WORKING_MEMORY.commit(
                     entry, result.get("turn_messages", []), request.message)
         except memory.SessionCapacityError:
@@ -2364,7 +2484,8 @@ async def chat_endpoint(request: ChatRequest,
         result = await _dispatch_intent(
             intent, messages, usage,
             source_selection=source_selection,
-            transport_mode=transport_mode)
+            transport_mode=transport_mode,
+            owner_key=_memory_key(subject, request.session_id))
         memory_meta: Dict[str, Any] = {"discarded_turns": 0}
 
     _finalize_usage(usage)
@@ -2400,6 +2521,18 @@ async def chat_endpoint(request: ChatRequest,
         response["grounding_status"] = result["grounding_status"]
     if result.get("source_evidence_ids") is not None:
         response["source_evidence_ids"] = result["source_evidence_ids"]
+    if result.get("claims") is not None:
+        response["claims"] = result["claims"]
+    if result.get("actions") is not None:
+        response["actions"] = result["actions"]
+    if result.get("booking") is not None:
+        response["booking"] = result["booking"]
+    if result.get("planning") is not None:
+        response["planning"] = result["planning"]
+    if result.get("saved") is not None:
+        response["saved"] = result["saved"]
+    if "handoff" in result:
+        response["handoff"] = result["handoff"]
     if result.get("loop_limit"):
         response["loop_limit"] = True
     if result.get("error"):
@@ -2676,3 +2809,74 @@ async def clear_short_memory(request: ClearMemoryRequest,
         "cleared": existed,
         "scope": "verified_user" if subject else "anonymous_local_only",
     }
+
+
+# ---------------------------------------------------------------------------
+# Owner-scoped saved itinerary drafts (KT-07 / MANAGE_SAVED)
+# ---------------------------------------------------------------------------
+@app.get("/saved/itineraries")
+async def list_saved_itineraries(session_id: str = "default",
+                                 authorization: Optional[str] = Header(default=None)):
+    try:
+        subject = memory_auth.optional_bearer(authorization)
+    except AuthError as exc:
+        raise _auth_http(exc)
+    owner_key = _memory_key(subject, session_id or "default")
+    items, total = chat_mvp.SAVED_DRAFT_STORE.list(owner_key)
+    return {"status": "ok", "items": items, "total": total}
+
+
+@app.post("/saved/itineraries", status_code=201)
+async def save_itinerary_draft(body: Dict[str, Any],
+                               authorization: Optional[str] = Header(default=None)):
+    try:
+        subject = memory_auth.optional_bearer(authorization)
+    except AuthError as exc:
+        raise _auth_http(exc)
+    session_id = str(body.get("session_id") or "default").strip() or "default"
+    payload = body.get("payload")
+    if not isinstance(payload, dict):
+        raise HTTPException(status_code=422, detail={
+            "code": "invalid_payload",
+            "message": "payload must be a JSON object.",
+        })
+    title = body.get("title") if isinstance(body.get("title"), str) else None
+    owner_key = _memory_key(subject, session_id)
+    record = chat_mvp.SAVED_DRAFT_STORE.save(owner_key, payload, title=title)
+    return {"status": "ok", "item": record}
+
+
+@app.get("/saved/itineraries/{draft_id}")
+async def get_saved_itinerary_draft(draft_id: str,
+                                    session_id: str = "default",
+                                    authorization: Optional[str] = Header(default=None)):
+    try:
+        subject = memory_auth.optional_bearer(authorization)
+    except AuthError as exc:
+        raise _auth_http(exc)
+    owner_key = _memory_key(subject, session_id or "default")
+    record = chat_mvp.SAVED_DRAFT_STORE.get(owner_key, draft_id)
+    if record is None:
+        raise HTTPException(status_code=404, detail={
+            "code": "draft_not_found",
+            "message": "Saved itinerary draft not found.",
+        })
+    return {"status": "ok", "item": record}
+
+
+@app.delete("/saved/itineraries/{draft_id}")
+async def delete_saved_itinerary_draft(draft_id: str,
+                                       session_id: str = "default",
+                                       authorization: Optional[str] = Header(default=None)):
+    try:
+        subject = memory_auth.optional_bearer(authorization)
+    except AuthError as exc:
+        raise _auth_http(exc)
+    owner_key = _memory_key(subject, session_id or "default")
+    deleted = chat_mvp.SAVED_DRAFT_STORE.delete(owner_key, draft_id)
+    if not deleted:
+        raise HTTPException(status_code=404, detail={
+            "code": "draft_not_found",
+            "message": "Saved itinerary draft not found.",
+        })
+    return {"status": "ok", "deleted": True, "id": draft_id}

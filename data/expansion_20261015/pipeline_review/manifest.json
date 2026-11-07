@@ -1,0 +1,41 @@
+{
+  "manifest_version": 1,
+  "_comment": "OC-012 real-only acquisition manifest. No synthetic sources, no network use. The OSM source is a bounded read-only extract derived from a local PBF; its provenance is separate (data/expansion_20261015/osm_local/osm_local_provenance.json).",
+  "synthetic": false,
+  "sources": [
+    {
+      "source_id": "osm-local-pbf-sample",
+      "source_type": "osm",
+      "source_url": "file://data/expansion_20261015/osm_local/osm_local_sample.json",
+      "license": "ODbL-1.0",
+      "retrieved_at": "2026-10-15T10:52:59Z",
+      "export_path": "../osm_local/osm_local_sample.json",
+      "synthetic": false,
+      "_retrieved_at_semantics": "Derived export timestamp of the bounded local-PBF extraction. Not the PBF download/acquisition time and not the underlying OSM data timestamp.",
+      "_derivation": {
+        "parent_pbf_path": "graphhopper/data/hcmc-latest.osm.pbf",
+        "parent_pbf_sha256": "c2b7057e7a022ff929692205e4219c59640fc67fd90525a82428022b43cf4afb",
+        "download_url": "UNKNOWN",
+        "download_time": "UNKNOWN"
+      }
+    },
+    {
+      "source_id": "wikidata-expansion-q703871",
+      "source_type": "wikidata",
+      "source_url": "https://www.wikidata.org/wiki/Special:EntityData/Q703871.json",
+      "license": "CC0-1.0",
+      "retrieved_at": "2026-10-15T10:26:40.536239+00:00",
+      "export_path": "../raw/wikidata-Q703871.json",
+      "synthetic": false
+    },
+    {
+      "source_id": "wikidata-expansion-q933384",
+      "source_type": "wikidata",
+      "source_url": "https://www.wikidata.org/wiki/Special:EntityData/Q933384.json",
+      "license": "CC0-1.0",
+      "retrieved_at": "2026-10-15T10:26:41.283260+00:00",
+      "export_path": "../raw/wikidata-Q933384.json",
+      "synthetic": false
+    }
+  ]
+}

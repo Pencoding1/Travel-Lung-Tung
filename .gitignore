@@ -72,3 +72,9 @@ tests/ai_chat_mvp_hidden/
 # Downloaded packages, extracted Memgraph runtime, fresh data dir and logs stay
 # machine-local; reproducible helpers and the written report remain tracked.
 .runtime-native/
+
+# Local preserved application snapshot; never commit or push legacy.
+/legacy/
+
+# Generated documentation handover archives; sources/manifests remain reviewable.
+/docs/handover/releases/

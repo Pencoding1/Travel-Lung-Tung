@@ -13,8 +13,8 @@ AI Agent Rules:
 """
 
 GET_EXPLORE_DESC="""
-Searches for Points of Interest. You MUST use exact _id parameters (city_id, district_id, street_id, category_id) obtained from the discovery tools. DO NOT pass normal text names here.
-    Provide at least one search criterion. All supplied ids are applied together (conjunction), and a category_id is matched exactly, never replaced by a display name.
+Searches for Points of Interest. You MUST use exact _id parameters (city_id, district_id, street_id, category_id) obtained from the discovery tools, OR pass `product_keyword` (e.g. 'bánh mì', 'cà phê', 'phở', or a place/dish name) for keyword matching against POI names and product offerings. DO NOT pass normal text names into _id fields.
+    Provide at least one search criterion. All supplied ids and product_keyword are applied together (conjunction), and a category_id is matched exactly, never replaced by a display name. When the user asks for a specific dish, food item, or named specialty (such as 'bánh mì'), pass it in `product_keyword` alongside `city_id`/`district_id` rather than guessing an unverified `category_id`.
     Use this for discovery when you do not have a specific POI ID.
     Returns a token-optimized list of matching places with their IDs, which you MUST then pass to get_poi_details or get_itinerary_route.
     When an item has `administrative_scope` = "source_snapshot_area_only", its address is a source display claim and its administrative context is unverified, not present-day jurisdiction.

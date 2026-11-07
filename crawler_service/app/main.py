@@ -1,7 +1,8 @@
-import traceback
-
+import os
 from typing import Optional
-from fastapi import FastAPI, Depends, APIRouter, HTTPException
+from fastapi import FastAPI, Depends, APIRouter, HTTPException, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from pydantic import HttpUrl, TypeAdapter, ValidationError
 
 from app.core.config.settings import (
@@ -28,6 +29,31 @@ app = FastAPI(
     title="Data Producer - Crawler Service",
     description="Agentic skill and bulk extraction service for travel data.",
 )
+
+_allowed_origins = [
+    origin.strip()
+    for origin in os.getenv(
+        "ALLOWED_ORIGINS", "http://localhost:8002,http://127.0.0.1:8002"
+    ).split(",")
+    if origin.strip()
+]
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=_allowed_origins,
+    allow_credentials=False,
+    allow_methods=["GET", "POST"],
+    allow_headers=["Content-Type", "X-API-Key"],
+)
+
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    logger.error("Unhandled error on %s: %s", request.url.path, exc.__class__.__name__)
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "Internal Server Error"},
+    )
+
 
 async def crawl(url: str, crawl_type: Optional[str], discover: bool):
     load = LoadPipelineSetting(
@@ -72,8 +98,7 @@ async def execute_crawl(payload: CrawlPayload):
             return {"status": "success", "result": result}
         return {"status": "failed", "result": {}}
     except Exception as e:
-        logger.error(f"Crawl failed: {str(e)}")
-        print(traceback.format_exc()) 
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error("Crawl failed (%s)", e.__class__.__name__)
+        raise HTTPException(status_code=500, detail="Crawl execution failed")
 
 app.include_router(protected_router)

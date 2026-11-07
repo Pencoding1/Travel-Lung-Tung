@@ -209,11 +209,12 @@ def test_fixed_bootstrap_argv_never_runs_the_venv_redirector():
 
 def test_runtime_fingerprint_proves_primary_versions_and_path_order():
     result = helper.probe_runtime_fingerprint(BASE_PYTHON)
-    assert result["python"].startswith("3.14.")
-    assert result["mcp"] == "1.26.0"
-    assert result["neo4j"] == "6.4.0"
+    assert result["python"].startswith(helper.EXPECTED_PYTHON_PREFIX)
+    assert result["mcp"] == helper.EXPECTED_MCP_VERSION
+    assert result["neo4j"] == helper.EXPECTED_NEO4J_VERSION
     assert result["site_packages"] == str(helper.PRIMARY_SITE)
     assert result["base_python_sha256"] == helper.EXPECTED_BASE_PYTHON_SHA256
+
 
 
 # ---------------------------------------------------------------------------

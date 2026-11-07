@@ -1,0 +1,293 @@
+{
+  "entries": {
+    "web_poi:25531a45f5c06c3dc9de99a616386dd4": {
+      "category_ids": [],
+      "conflicted": false,
+      "fact_fingerprint": "942985487036a3fbd7d24ec2609faf9c186205c2ce0f397feba7382a9d008e80",
+      "first_seen": "2026-10-18T00:00:00Z",
+      "history": [
+        {
+          "at": "2026-10-18T00:00:00Z",
+          "category_ids": [],
+          "outcome": "requires_review",
+          "policy_hash": "2ff44957c789fd8636e8f347fd8cf7e338798097f7b605f8933e6ab0eaf41e69",
+          "reasons": [
+            "policy_unverified",
+            "entity_unreviewed",
+            "unknown_admin",
+            "missing_coordinates"
+          ],
+          "resolution_status": "ambiguous",
+          "run_id": "01c20df35172bdef"
+        }
+      ],
+      "info_codes": [],
+      "last_seen": "2026-10-18T00:01:00Z",
+      "policy_hash": "2ff44957c789fd8636e8f347fd8cf7e338798097f7b605f8933e6ab0eaf41e69",
+      "provenance": null,
+      "raw_sha256": "4a0af9b224537aec2ce61c5cbfa5b6298be6e3f88cce40421183740ca94d6a3f",
+      "reasons": [
+        "policy_unverified",
+        "entity_unreviewed",
+        "unknown_admin",
+        "missing_coordinates"
+      ],
+      "resolution_status": "ambiguous",
+      "resolved": null,
+      "source_entity_id": "node/137#chapter-6",
+      "source_id": "vietnam-travel-node137",
+      "source_type": "web_poi",
+      "stable_id": "web_poi:25531a45f5c06c3dc9de99a616386dd4",
+      "status": "requires_review",
+      "synthetic": false
+    },
+    "web_poi:82852f3746a6fe1bab080e939014d2c3": {
+      "category_ids": [],
+      "conflicted": false,
+      "fact_fingerprint": "63c74e078c61910ad31789838b0fd712d877b824e3b35adf8a05b2402c18bd5a",
+      "first_seen": "2026-10-18T00:00:00Z",
+      "history": [
+        {
+          "at": "2026-10-18T00:00:00Z",
+          "category_ids": [],
+          "outcome": "requires_review",
+          "policy_hash": "2ff44957c789fd8636e8f347fd8cf7e338798097f7b605f8933e6ab0eaf41e69",
+          "reasons": [
+            "policy_unverified",
+            "entity_unreviewed",
+            "unknown_admin",
+            "missing_coordinates"
+          ],
+          "resolution_status": "ambiguous",
+          "run_id": "01c20df35172bdef"
+        }
+      ],
+      "info_codes": [],
+      "last_seen": "2026-10-18T00:01:00Z",
+      "policy_hash": "2ff44957c789fd8636e8f347fd8cf7e338798097f7b605f8933e6ab0eaf41e69",
+      "provenance": null,
+      "raw_sha256": "4a0af9b224537aec2ce61c5cbfa5b6298be6e3f88cce40421183740ca94d6a3f",
+      "reasons": [
+        "policy_unverified",
+        "entity_unreviewed",
+        "unknown_admin",
+        "missing_coordinates"
+      ],
+      "resolution_status": "ambiguous",
+      "resolved": null,
+      "source_entity_id": "node/137#chapter-4",
+      "source_id": "vietnam-travel-node137",
+      "source_type": "web_poi",
+      "stable_id": "web_poi:82852f3746a6fe1bab080e939014d2c3",
+      "status": "requires_review",
+      "synthetic": false
+    },
+    "web_poi:8545f09eb12bb91cda24bce7bb910277": {
+      "category_ids": [],
+      "conflicted": false,
+      "fact_fingerprint": "7bf60382755cecd732b5ce59405b733a75414246f5df8252b966866c6a744f57",
+      "first_seen": "2026-10-18T00:00:00Z",
+      "history": [
+        {
+          "at": "2026-10-18T00:00:00Z",
+          "category_ids": [],
+          "outcome": "requires_review",
+          "policy_hash": "2ff44957c789fd8636e8f347fd8cf7e338798097f7b605f8933e6ab0eaf41e69",
+          "reasons": [
+            "policy_unverified",
+            "entity_unreviewed",
+            "unknown_admin",
+            "missing_coordinates"
+          ],
+          "resolution_status": "ambiguous",
+          "run_id": "01c20df35172bdef"
+        }
+      ],
+      "info_codes": [],
+      "last_seen": "2026-10-18T00:01:00Z",
+      "policy_hash": "2ff44957c789fd8636e8f347fd8cf7e338798097f7b605f8933e6ab0eaf41e69",
+      "provenance": null,
+      "raw_sha256": "4a0af9b224537aec2ce61c5cbfa5b6298be6e3f88cce40421183740ca94d6a3f",
+      "reasons": [
+        "policy_unverified",
+        "entity_unreviewed",
+        "unknown_admin",
+        "missing_coordinates"
+      ],
+      "resolution_status": "ambiguous",
+      "resolved": null,
+      "source_entity_id": "node/137#chapter-1",
+      "source_id": "vietnam-travel-node137",
+      "source_type": "web_poi",
+      "stable_id": "web_poi:8545f09eb12bb91cda24bce7bb910277",
+      "status": "requires_review",
+      "synthetic": false
+    },
+    "web_poi:aebbf58c2de6827e3b98d69186548120": {
+      "category_ids": [],
+      "conflicted": false,
+      "fact_fingerprint": "5f2630434f20972c697a1b540a0884c61fefb14de1e9a52f32856bb82a1080a5",
+      "first_seen": "2026-10-18T00:00:00Z",
+      "history": [
+        {
+          "at": "2026-10-18T00:00:00Z",
+          "category_ids": [],
+          "outcome": "requires_review",
+          "policy_hash": "2ff44957c789fd8636e8f347fd8cf7e338798097f7b605f8933e6ab0eaf41e69",
+          "reasons": [
+            "policy_unverified",
+            "entity_unreviewed",
+            "unknown_admin",
+            "missing_coordinates"
+          ],
+          "resolution_status": "ambiguous",
+          "run_id": "01c20df35172bdef"
+        }
+      ],
+      "info_codes": [],
+      "last_seen": "2026-10-18T00:01:00Z",
+      "policy_hash": "2ff44957c789fd8636e8f347fd8cf7e338798097f7b605f8933e6ab0eaf41e69",
+      "provenance": null,
+      "raw_sha256": "4a0af9b224537aec2ce61c5cbfa5b6298be6e3f88cce40421183740ca94d6a3f",
+      "reasons": [
+        "policy_unverified",
+        "entity_unreviewed",
+        "unknown_admin",
+        "missing_coordinates"
+      ],
+      "resolution_status": "ambiguous",
+      "resolved": null,
+      "source_entity_id": "node/137#chapter-5",
+      "source_id": "vietnam-travel-node137",
+      "source_type": "web_poi",
+      "stable_id": "web_poi:aebbf58c2de6827e3b98d69186548120",
+      "status": "requires_review",
+      "synthetic": false
+    },
+    "web_poi:bb54f87c22a489a124747a4fbe282402": {
+      "category_ids": [],
+      "conflicted": false,
+      "fact_fingerprint": "471fd609fde5ec3d36b864b6ca5276142d82666b60f9976b58ea93b4da45e517",
+      "first_seen": "2026-10-18T00:00:00Z",
+      "history": [
+        {
+          "at": "2026-10-18T00:00:00Z",
+          "category_ids": [],
+          "outcome": "requires_review",
+          "policy_hash": "2ff44957c789fd8636e8f347fd8cf7e338798097f7b605f8933e6ab0eaf41e69",
+          "reasons": [
+            "policy_unverified",
+            "entity_unreviewed",
+            "unknown_admin",
+            "missing_coordinates"
+          ],
+          "resolution_status": "ambiguous",
+          "run_id": "01c20df35172bdef"
+        }
+      ],
+      "info_codes": [],
+      "last_seen": "2026-10-18T00:01:00Z",
+      "policy_hash": "2ff44957c789fd8636e8f347fd8cf7e338798097f7b605f8933e6ab0eaf41e69",
+      "provenance": null,
+      "raw_sha256": "4a0af9b224537aec2ce61c5cbfa5b6298be6e3f88cce40421183740ca94d6a3f",
+      "reasons": [
+        "policy_unverified",
+        "entity_unreviewed",
+        "unknown_admin",
+        "missing_coordinates"
+      ],
+      "resolution_status": "ambiguous",
+      "resolved": null,
+      "source_entity_id": "node/137#chapter-3",
+      "source_id": "vietnam-travel-node137",
+      "source_type": "web_poi",
+      "stable_id": "web_poi:bb54f87c22a489a124747a4fbe282402",
+      "status": "requires_review",
+      "synthetic": false
+    },
+    "web_poi:d029e88c31b25afe7195b43e5feedc1b": {
+      "category_ids": [],
+      "conflicted": false,
+      "fact_fingerprint": "57f01d216fb6e71b783f039b3fb67859c5bb91a6fd12d1c2f3824dae85cc405c",
+      "first_seen": "2026-10-18T00:00:00Z",
+      "history": [
+        {
+          "at": "2026-10-18T00:00:00Z",
+          "category_ids": [],
+          "outcome": "requires_review",
+          "policy_hash": "2ff44957c789fd8636e8f347fd8cf7e338798097f7b605f8933e6ab0eaf41e69",
+          "reasons": [
+            "policy_unverified",
+            "entity_unreviewed",
+            "unknown_admin",
+            "missing_coordinates"
+          ],
+          "resolution_status": "ambiguous",
+          "run_id": "01c20df35172bdef"
+        }
+      ],
+      "info_codes": [],
+      "last_seen": "2026-10-18T00:01:00Z",
+      "policy_hash": "2ff44957c789fd8636e8f347fd8cf7e338798097f7b605f8933e6ab0eaf41e69",
+      "provenance": null,
+      "raw_sha256": "4a0af9b224537aec2ce61c5cbfa5b6298be6e3f88cce40421183740ca94d6a3f",
+      "reasons": [
+        "policy_unverified",
+        "entity_unreviewed",
+        "unknown_admin",
+        "missing_coordinates"
+      ],
+      "resolution_status": "ambiguous",
+      "resolved": null,
+      "source_entity_id": "node/137#chapter-2",
+      "source_id": "vietnam-travel-node137",
+      "source_type": "web_poi",
+      "stable_id": "web_poi:d029e88c31b25afe7195b43e5feedc1b",
+      "status": "requires_review",
+      "synthetic": false
+    },
+    "web_poi:d8234e5d9ea1d4079d920f6a30796cd2": {
+      "category_ids": [],
+      "conflicted": false,
+      "fact_fingerprint": "581116d8c9495e3a8005073599f74f14e4455c7cbefa02dc55cd049688ea545e",
+      "first_seen": "2026-10-18T00:00:00Z",
+      "history": [
+        {
+          "at": "2026-10-18T00:00:00Z",
+          "category_ids": [],
+          "outcome": "requires_review",
+          "policy_hash": "2ff44957c789fd8636e8f347fd8cf7e338798097f7b605f8933e6ab0eaf41e69",
+          "reasons": [
+            "policy_unverified",
+            "entity_unreviewed",
+            "unknown_admin",
+            "missing_coordinates"
+          ],
+          "resolution_status": "ambiguous",
+          "run_id": "01c20df35172bdef"
+        }
+      ],
+      "info_codes": [],
+      "last_seen": "2026-10-18T00:01:00Z",
+      "policy_hash": "2ff44957c789fd8636e8f347fd8cf7e338798097f7b605f8933e6ab0eaf41e69",
+      "provenance": null,
+      "raw_sha256": "4a0af9b224537aec2ce61c5cbfa5b6298be6e3f88cce40421183740ca94d6a3f",
+      "reasons": [
+        "policy_unverified",
+        "entity_unreviewed",
+        "unknown_admin",
+        "missing_coordinates"
+      ],
+      "resolution_status": "ambiguous",
+      "resolved": null,
+      "source_entity_id": "node/137#chapter-7",
+      "source_id": "vietnam-travel-node137",
+      "source_type": "web_poi",
+      "stable_id": "web_poi:d8234e5d9ea1d4079d920f6a30796cd2",
+      "status": "requires_review",
+      "synthetic": false
+    }
+  },
+  "pipeline_version": 3,
+  "scope": "social_web_oc050::real"
+}

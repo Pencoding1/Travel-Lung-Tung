@@ -1,0 +1,1 @@
+{"manifest_version": 1, "dataset": "social_web_oc050_synthetic_fixture", "synthetic": true, "sources": [{"source_id": "synthetic-test-source", "source_type": "web_poi", "source_url": "https://example.test/pois", "license": "SYNTHETIC-TEST-ONLY", "retrieved_at": "2026-10-18T00:00:00Z", "export_path": "export.json", "synthetic": true}]}

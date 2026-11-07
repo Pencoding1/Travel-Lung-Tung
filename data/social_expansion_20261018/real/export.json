@@ -1,0 +1,458 @@
+{
+  "captures": [
+    {
+      "attempts": 1,
+      "bytes": 51051,
+      "content_type": "text/html; charset=UTF-8",
+      "elapsed_ms": 188,
+      "fetched_at": "2026-10-17T19:06:37.979429Z",
+      "final_url": "https://vietnam.travel/node/137",
+      "redirect_chain": [],
+      "sha256": "c17af074fcbbb501939e95fa8fbc1e972ce4b1920e1d9a2840023b4bb11c733b",
+      "status": 200,
+      "url": "https://vietnam.travel/node/137"
+    }
+  ],
+  "records": [
+    {
+      "address_hints": {
+        "addr:district_raw": "District 3",
+        "addr:full": "28 Vo Van Tan Street, Ward 6, District 3"
+      },
+      "address_raw": "28 Vo Van Tan Street, Ward 6, District 3",
+      "category_tags": [
+        "tourism=attraction"
+      ],
+      "coordinates": null,
+      "description": "The War Remnants Museum is a three-story museum holding countless artefacts and graphic photographs, including photographer Nick Ut’s Pulitzer Prize-winning shot, “The Terror of War.” Out-of-commission planes, tanks, bombs and helicopters decorate the courtyard. It is a sombre experience but one that leaves a lasting impression.",
+      "field_evidence": [
+        {
+          "fetched_at": "2026-10-17T19:06:37.979429Z",
+          "field": "name",
+          "locator": "section.ac-chapter[0]#chapter-1/h2",
+          "raw_capture_path": "raw/node_137__c17af074fcbb.html",
+          "raw_sha256": "c17af074fcbbb501939e95fa8fbc1e972ce4b1920e1d9a2840023b4bb11c733b",
+          "source_url": "https://vietnam.travel/node/137",
+          "value": "War Remnants Museum"
+        },
+        {
+          "fetched_at": "2026-10-17T19:06:37.979429Z",
+          "field": "address_raw",
+          "locator": "section.ac-chapter[0]#chapter-1/div.ac-body",
+          "raw_capture_path": "raw/node_137__c17af074fcbb.html",
+          "raw_sha256": "c17af074fcbbb501939e95fa8fbc1e972ce4b1920e1d9a2840023b4bb11c733b",
+          "source_url": "https://vietnam.travel/node/137",
+          "value": "28 Vo Van Tan Street, Ward 6, District 3"
+        },
+        {
+          "fetched_at": "2026-10-17T19:06:37.979429Z",
+          "field": "description",
+          "locator": "section.ac-chapter[0]#chapter-1/div.ac-body",
+          "raw_capture_path": "raw/node_137__c17af074fcbb.html",
+          "raw_sha256": "c17af074fcbbb501939e95fa8fbc1e972ce4b1920e1d9a2840023b4bb11c733b",
+          "source_url": "https://vietnam.travel/node/137",
+          "value": "The War Remnants Museum is a three-story museum holding countless artefacts and graphic photographs, including photographer Nick Ut’s Pulitzer Prize-winning shot, “The Terror of War.” Out-of-commission planes, tanks, bombs and helicopters decorate the courtyard. It is a sombre experience but one that leaves a lasting impression."
+        },
+        {
+          "fetched_at": "2026-10-17T19:06:37.979429Z",
+          "field": "opening_hours_raw",
+          "locator": "section.ac-chapter[0]#chapter-1/div.ac-body",
+          "raw_capture_path": "raw/node_137__c17af074fcbb.html",
+          "raw_sha256": "c17af074fcbbb501939e95fa8fbc1e972ce4b1920e1d9a2840023b4bb11c733b",
+          "source_url": "https://vietnam.travel/node/137",
+          "value": "7:30 a.m. - 12 p.m., 1:30 - 5 p.m. every day including holidays"
+        }
+      ],
+      "issues": [],
+      "locator": "section.ac-chapter[0]#chapter-1",
+      "minimum_valid": true,
+      "name": "War Remnants Museum",
+      "opening_hours_raw": "7:30 a.m. - 12 p.m., 1:30 - 5 p.m. every day including holidays",
+      "page_capture_path": "raw/node_137__c17af074fcbb.html",
+      "page_capture_sha256": "c17af074fcbbb501939e95fa8fbc1e972ce4b1920e1d9a2840023b4bb11c733b",
+      "page_fetched_at": "2026-10-17T19:06:37.979429Z",
+      "page_url": "https://vietnam.travel/node/137",
+      "record_id": "node/137#chapter-1",
+      "review_text": null
+    },
+    {
+      "address_hints": {
+        "addr:district_raw": "District 1",
+        "addr:full": "1 Cong Xa Paris, Ben Nghe, District 1"
+      },
+      "address_raw": "1 Cong Xa Paris, Ben Nghe, District 1",
+      "category_tags": [
+        "tourism=attraction"
+      ],
+      "coordinates": null,
+      "description": "The twin-spired Cathedral Basilica of Our Lady of the Immaculate Conception sits at the head of Dong Khoi Street, a peaceful oasis in the busy downtown area. Built entirely from materials imported from France, the construction of the cathedral lasted nearly two decades, from 1863 to 1880. FUN FACT: The alabaster statue of the Virgin Mary perched in the centre of the square is said to have wept tears on a single occasion in 2005, witnessed by crowds there at the time.",
+      "field_evidence": [
+        {
+          "fetched_at": "2026-10-17T19:06:37.979429Z",
+          "field": "name",
+          "locator": "section.ac-chapter[1]#chapter-2/h2",
+          "raw_capture_path": "raw/node_137__c17af074fcbb.html",
+          "raw_sha256": "c17af074fcbbb501939e95fa8fbc1e972ce4b1920e1d9a2840023b4bb11c733b",
+          "source_url": "https://vietnam.travel/node/137",
+          "value": "Notre Dame Cathedral"
+        },
+        {
+          "fetched_at": "2026-10-17T19:06:37.979429Z",
+          "field": "address_raw",
+          "locator": "section.ac-chapter[1]#chapter-2/div.ac-body",
+          "raw_capture_path": "raw/node_137__c17af074fcbb.html",
+          "raw_sha256": "c17af074fcbbb501939e95fa8fbc1e972ce4b1920e1d9a2840023b4bb11c733b",
+          "source_url": "https://vietnam.travel/node/137",
+          "value": "1 Cong Xa Paris, Ben Nghe, District 1"
+        },
+        {
+          "fetched_at": "2026-10-17T19:06:37.979429Z",
+          "field": "description",
+          "locator": "section.ac-chapter[1]#chapter-2/div.ac-body",
+          "raw_capture_path": "raw/node_137__c17af074fcbb.html",
+          "raw_sha256": "c17af074fcbbb501939e95fa8fbc1e972ce4b1920e1d9a2840023b4bb11c733b",
+          "source_url": "https://vietnam.travel/node/137",
+          "value": "The twin-spired Cathedral Basilica of Our Lady of the Immaculate Conception sits at the head of Dong Khoi Street, a peaceful oasis in the busy downtown area. Built entirely from materials imported from France, the construction of the cathedral lasted nearly two decades, from 1863 to 1880. FUN FACT: The alabaster statue of the Virgin Mary perched in the centre of the square is said to have wept tears on a single occasion in 2005, witnessed by crowds there at the time."
+        },
+        {
+          "fetched_at": "2026-10-17T19:06:37.979429Z",
+          "field": "opening_hours_raw",
+          "locator": "section.ac-chapter[1]#chapter-2/div.ac-body",
+          "raw_capture_path": "raw/node_137__c17af074fcbb.html",
+          "raw_sha256": "c17af074fcbbb501939e95fa8fbc1e972ce4b1920e1d9a2840023b4bb11c733b",
+          "source_url": "https://vietnam.travel/node/137",
+          "value": "7:30 a.m. - 12 p.m., 1:30 - 5 p.m. every day including holidays"
+        }
+      ],
+      "issues": [],
+      "locator": "section.ac-chapter[1]#chapter-2",
+      "minimum_valid": true,
+      "name": "Notre Dame Cathedral",
+      "opening_hours_raw": "7:30 a.m. - 12 p.m., 1:30 - 5 p.m. every day including holidays",
+      "page_capture_path": "raw/node_137__c17af074fcbb.html",
+      "page_capture_sha256": "c17af074fcbbb501939e95fa8fbc1e972ce4b1920e1d9a2840023b4bb11c733b",
+      "page_fetched_at": "2026-10-17T19:06:37.979429Z",
+      "page_url": "https://vietnam.travel/node/137",
+      "record_id": "node/137#chapter-2",
+      "review_text": null
+    },
+    {
+      "address_hints": {
+        "addr:full": "2 Cong xa Paris, Ben Nghe, District 1 My HCMC from Vietnam Tourism Board on Vimeo ."
+      },
+      "address_raw": "2 Cong xa Paris, Ben Nghe, District 1 My HCMC from Vietnam Tourism Board on Vimeo .",
+      "category_tags": [
+        "tourism=attraction"
+      ],
+      "coordinates": null,
+      "description": "Opposite the cathedral is Ho Chi Minh City’s charming general post office. Take a stroll inside, where you'll find a massive foyer flanked by rows of Victorian era wooden phone booths, historic maps on the walls, and a huge portrait of Ho Chi Minh. The architect of the building is sometimes incorrectly credited as Gustave Eiffel, however the design of the complex was based off his blueprints.",
+      "field_evidence": [
+        {
+          "fetched_at": "2026-10-17T19:06:37.979429Z",
+          "field": "name",
+          "locator": "section.ac-chapter[2]#chapter-3/h2",
+          "raw_capture_path": "raw/node_137__c17af074fcbb.html",
+          "raw_sha256": "c17af074fcbbb501939e95fa8fbc1e972ce4b1920e1d9a2840023b4bb11c733b",
+          "source_url": "https://vietnam.travel/node/137",
+          "value": "Saigon Central Post Office"
+        },
+        {
+          "fetched_at": "2026-10-17T19:06:37.979429Z",
+          "field": "address_raw",
+          "locator": "section.ac-chapter[2]#chapter-3/div.ac-body",
+          "raw_capture_path": "raw/node_137__c17af074fcbb.html",
+          "raw_sha256": "c17af074fcbbb501939e95fa8fbc1e972ce4b1920e1d9a2840023b4bb11c733b",
+          "source_url": "https://vietnam.travel/node/137",
+          "value": "2 Cong xa Paris, Ben Nghe, District 1 My HCMC from Vietnam Tourism Board on Vimeo ."
+        },
+        {
+          "fetched_at": "2026-10-17T19:06:37.979429Z",
+          "field": "description",
+          "locator": "section.ac-chapter[2]#chapter-3/div.ac-body",
+          "raw_capture_path": "raw/node_137__c17af074fcbb.html",
+          "raw_sha256": "c17af074fcbbb501939e95fa8fbc1e972ce4b1920e1d9a2840023b4bb11c733b",
+          "source_url": "https://vietnam.travel/node/137",
+          "value": "Opposite the cathedral is Ho Chi Minh City’s charming general post office. Take a stroll inside, where you'll find a massive foyer flanked by rows of Victorian era wooden phone booths, historic maps on the walls, and a huge portrait of Ho Chi Minh. The architect of the building is sometimes incorrectly credited as Gustave Eiffel, however the design of the complex was based off his blueprints."
+        },
+        {
+          "fetched_at": "2026-10-17T19:06:37.979429Z",
+          "field": "opening_hours_raw",
+          "locator": "section.ac-chapter[2]#chapter-3/div.ac-body",
+          "raw_capture_path": "raw/node_137__c17af074fcbb.html",
+          "raw_sha256": "c17af074fcbbb501939e95fa8fbc1e972ce4b1920e1d9a2840023b4bb11c733b",
+          "source_url": "https://vietnam.travel/node/137",
+          "value": "7:30 a.m. - 12 p.m., 1:30 - 5 p.m. every day including holidays"
+        }
+      ],
+      "issues": [],
+      "locator": "section.ac-chapter[2]#chapter-3",
+      "minimum_valid": true,
+      "name": "Saigon Central Post Office",
+      "opening_hours_raw": "7:30 a.m. - 12 p.m., 1:30 - 5 p.m. every day including holidays",
+      "page_capture_path": "raw/node_137__c17af074fcbb.html",
+      "page_capture_sha256": "c17af074fcbbb501939e95fa8fbc1e972ce4b1920e1d9a2840023b4bb11c733b",
+      "page_fetched_at": "2026-10-17T19:06:37.979429Z",
+      "page_url": "https://vietnam.travel/node/137",
+      "record_id": "node/137#chapter-3",
+      "review_text": null
+    },
+    {
+      "address_hints": {
+        "addr:district_raw": "District 1",
+        "addr:full": "135 Nam Ky Khoi Nghia, Ben Thanh, District 1"
+      },
+      "address_raw": "135 Nam Ky Khoi Nghia, Ben Thanh, District 1",
+      "category_tags": [
+        "tourism=attraction"
+      ],
+      "coordinates": null,
+      "description": "On the site of the former Norodom Palace sits the Reunification Palace, also known as the Independence Palace. Designed by architect, Ngô Viết Thụ, the palatial estate was the residential and administrative quarters of the President of South Vietnam. These days, visitors can walk the halls and meeting rooms, upholstered in red carpet. 💡 TIP: Don't miss the former command centre and war rooms in the basement.",
+      "field_evidence": [
+        {
+          "fetched_at": "2026-10-17T19:06:37.979429Z",
+          "field": "name",
+          "locator": "section.ac-chapter[3]#chapter-4/h2",
+          "raw_capture_path": "raw/node_137__c17af074fcbb.html",
+          "raw_sha256": "c17af074fcbbb501939e95fa8fbc1e972ce4b1920e1d9a2840023b4bb11c733b",
+          "source_url": "https://vietnam.travel/node/137",
+          "value": "The Reunification Palace"
+        },
+        {
+          "fetched_at": "2026-10-17T19:06:37.979429Z",
+          "field": "address_raw",
+          "locator": "section.ac-chapter[3]#chapter-4/div.ac-body",
+          "raw_capture_path": "raw/node_137__c17af074fcbb.html",
+          "raw_sha256": "c17af074fcbbb501939e95fa8fbc1e972ce4b1920e1d9a2840023b4bb11c733b",
+          "source_url": "https://vietnam.travel/node/137",
+          "value": "135 Nam Ky Khoi Nghia, Ben Thanh, District 1"
+        },
+        {
+          "fetched_at": "2026-10-17T19:06:37.979429Z",
+          "field": "description",
+          "locator": "section.ac-chapter[3]#chapter-4/div.ac-body",
+          "raw_capture_path": "raw/node_137__c17af074fcbb.html",
+          "raw_sha256": "c17af074fcbbb501939e95fa8fbc1e972ce4b1920e1d9a2840023b4bb11c733b",
+          "source_url": "https://vietnam.travel/node/137",
+          "value": "On the site of the former Norodom Palace sits the Reunification Palace, also known as the Independence Palace. Designed by architect, Ngô Viết Thụ, the palatial estate was the residential and administrative quarters of the President of South Vietnam. These days, visitors can walk the halls and meeting rooms, upholstered in red carpet. 💡 TIP: Don't miss the former command centre and war rooms in the basement."
+        },
+        {
+          "fetched_at": "2026-10-17T19:06:37.979429Z",
+          "field": "opening_hours_raw",
+          "locator": "section.ac-chapter[3]#chapter-4/div.ac-body",
+          "raw_capture_path": "raw/node_137__c17af074fcbb.html",
+          "raw_sha256": "c17af074fcbbb501939e95fa8fbc1e972ce4b1920e1d9a2840023b4bb11c733b",
+          "source_url": "https://vietnam.travel/node/137",
+          "value": "7:30 a.m. - 12 p.m., 1:30 - 5 p.m. every day including holidays"
+        }
+      ],
+      "issues": [],
+      "locator": "section.ac-chapter[3]#chapter-4",
+      "minimum_valid": true,
+      "name": "The Reunification Palace",
+      "opening_hours_raw": "7:30 a.m. - 12 p.m., 1:30 - 5 p.m. every day including holidays",
+      "page_capture_path": "raw/node_137__c17af074fcbb.html",
+      "page_capture_sha256": "c17af074fcbbb501939e95fa8fbc1e972ce4b1920e1d9a2840023b4bb11c733b",
+      "page_fetched_at": "2026-10-17T19:06:37.979429Z",
+      "page_url": "https://vietnam.travel/node/137",
+      "record_id": "node/137#chapter-4",
+      "review_text": null
+    },
+    {
+      "address_hints": {
+        "addr:district_raw": "District 1",
+        "addr:full": "86 Le Thanh Ton, Ben Nghe, District 1"
+      },
+      "address_raw": "86 Le Thanh Ton, Ben Nghe, District 1",
+      "category_tags": [
+        "tourism=attraction"
+      ],
+      "coordinates": null,
+      "description": "Expansive Nguyen Hue St. has become the new stomping ground for pedestrian activity in Ho Chi Minh City. Skirting the perimeter are dozens of high rises, upscale restaurants, commercial arcades and luxury boutiques. Spanning from City Hall to the Bach Dang Wharf, this walking street is perfect for an afternoon stroll and is at its liveliest at sundown. At the northernmost end of Nguyen Hue sits City Hall, the administrative post of the Ho Chi Minh City People’s Committee.",
+      "field_evidence": [
+        {
+          "fetched_at": "2026-10-17T19:06:37.979429Z",
+          "field": "name",
+          "locator": "section.ac-chapter[4]#chapter-5/h2",
+          "raw_capture_path": "raw/node_137__c17af074fcbb.html",
+          "raw_sha256": "c17af074fcbbb501939e95fa8fbc1e972ce4b1920e1d9a2840023b4bb11c733b",
+          "source_url": "https://vietnam.travel/node/137",
+          "value": "Nguyen Hue Street and City Hall"
+        },
+        {
+          "fetched_at": "2026-10-17T19:06:37.979429Z",
+          "field": "address_raw",
+          "locator": "section.ac-chapter[4]#chapter-5/div.ac-body",
+          "raw_capture_path": "raw/node_137__c17af074fcbb.html",
+          "raw_sha256": "c17af074fcbbb501939e95fa8fbc1e972ce4b1920e1d9a2840023b4bb11c733b",
+          "source_url": "https://vietnam.travel/node/137",
+          "value": "86 Le Thanh Ton, Ben Nghe, District 1"
+        },
+        {
+          "fetched_at": "2026-10-17T19:06:37.979429Z",
+          "field": "description",
+          "locator": "section.ac-chapter[4]#chapter-5/div.ac-body",
+          "raw_capture_path": "raw/node_137__c17af074fcbb.html",
+          "raw_sha256": "c17af074fcbbb501939e95fa8fbc1e972ce4b1920e1d9a2840023b4bb11c733b",
+          "source_url": "https://vietnam.travel/node/137",
+          "value": "Expansive Nguyen Hue St. has become the new stomping ground for pedestrian activity in Ho Chi Minh City. Skirting the perimeter are dozens of high rises, upscale restaurants, commercial arcades and luxury boutiques. Spanning from City Hall to the Bach Dang Wharf, this walking street is perfect for an afternoon stroll and is at its liveliest at sundown. At the northernmost end of Nguyen Hue sits City Hall, the administrative post of the Ho Chi Minh City People’s Committee."
+        }
+      ],
+      "issues": [],
+      "locator": "section.ac-chapter[4]#chapter-5",
+      "minimum_valid": true,
+      "name": "Nguyen Hue Street and City Hall",
+      "opening_hours_raw": null,
+      "page_capture_path": "raw/node_137__c17af074fcbb.html",
+      "page_capture_sha256": "c17af074fcbbb501939e95fa8fbc1e972ce4b1920e1d9a2840023b4bb11c733b",
+      "page_fetched_at": "2026-10-17T19:06:37.979429Z",
+      "page_url": "https://vietnam.travel/node/137",
+      "record_id": "node/137#chapter-5",
+      "review_text": null
+    },
+    {
+      "address_hints": {
+        "addr:district_raw": "District 1",
+        "addr:full": "32-30 Phan Boi Chau, Ben Thanh, District 1"
+      },
+      "address_raw": "32-30 Phan Boi Chau, Ben Thanh, District 1",
+      "category_tags": [
+        "tourism=attraction"
+      ],
+      "coordinates": null,
+      "description": "Ben Thanh Market in the centre of the city is a timeless marketplace built atop a reclaimed plot of land which was formerly known as Bo Ret Pond. Today, the indoor market faces Quach Thi Trang Square. Inside, a matrix of aisles sells everything from fresh produce to conical hats, weasel coffee to lacquerware. Toward the end of the hall is a maze of food stalls selling sizzling bánh xèo and freshly assembled bánh mì.",
+      "field_evidence": [
+        {
+          "fetched_at": "2026-10-17T19:06:37.979429Z",
+          "field": "name",
+          "locator": "section.ac-chapter[5]#chapter-6/h2",
+          "raw_capture_path": "raw/node_137__c17af074fcbb.html",
+          "raw_sha256": "c17af074fcbbb501939e95fa8fbc1e972ce4b1920e1d9a2840023b4bb11c733b",
+          "source_url": "https://vietnam.travel/node/137",
+          "value": "Ben Thanh Market"
+        },
+        {
+          "fetched_at": "2026-10-17T19:06:37.979429Z",
+          "field": "address_raw",
+          "locator": "section.ac-chapter[5]#chapter-6/div.ac-body",
+          "raw_capture_path": "raw/node_137__c17af074fcbb.html",
+          "raw_sha256": "c17af074fcbbb501939e95fa8fbc1e972ce4b1920e1d9a2840023b4bb11c733b",
+          "source_url": "https://vietnam.travel/node/137",
+          "value": "32-30 Phan Boi Chau, Ben Thanh, District 1"
+        },
+        {
+          "fetched_at": "2026-10-17T19:06:37.979429Z",
+          "field": "description",
+          "locator": "section.ac-chapter[5]#chapter-6/div.ac-body",
+          "raw_capture_path": "raw/node_137__c17af074fcbb.html",
+          "raw_sha256": "c17af074fcbbb501939e95fa8fbc1e972ce4b1920e1d9a2840023b4bb11c733b",
+          "source_url": "https://vietnam.travel/node/137",
+          "value": "Ben Thanh Market in the centre of the city is a timeless marketplace built atop a reclaimed plot of land which was formerly known as Bo Ret Pond. Today, the indoor market faces Quach Thi Trang Square. Inside, a matrix of aisles sells everything from fresh produce to conical hats, weasel coffee to lacquerware. Toward the end of the hall is a maze of food stalls selling sizzling bánh xèo and freshly assembled bánh mì."
+        },
+        {
+          "fetched_at": "2026-10-17T19:06:37.979429Z",
+          "field": "opening_hours_raw",
+          "locator": "section.ac-chapter[5]#chapter-6/div.ac-body",
+          "raw_capture_path": "raw/node_137__c17af074fcbb.html",
+          "raw_sha256": "c17af074fcbbb501939e95fa8fbc1e972ce4b1920e1d9a2840023b4bb11c733b",
+          "source_url": "https://vietnam.travel/node/137",
+          "value": "7:30 a.m. - 12 p.m., 1:30 - 5 p.m. every day including holidays"
+        }
+      ],
+      "issues": [],
+      "locator": "section.ac-chapter[5]#chapter-6",
+      "minimum_valid": true,
+      "name": "Ben Thanh Market",
+      "opening_hours_raw": "7:30 a.m. - 12 p.m., 1:30 - 5 p.m. every day including holidays",
+      "page_capture_path": "raw/node_137__c17af074fcbb.html",
+      "page_capture_sha256": "c17af074fcbbb501939e95fa8fbc1e972ce4b1920e1d9a2840023b4bb11c733b",
+      "page_fetched_at": "2026-10-17T19:06:37.979429Z",
+      "page_url": "https://vietnam.travel/node/137",
+      "record_id": "node/137#chapter-6",
+      "review_text": null
+    },
+    {
+      "address_hints": {
+        "addr:city_raw": "Ho Chi Minh City",
+        "addr:full": "Phu Hiep, Phu My Hung, Cu Chi, Ho Chi Minh City, Vietnam"
+      },
+      "address_raw": "Phu Hiep, Phu My Hung, Cu Chi, Ho Chi Minh City, Vietnam",
+      "category_tags": [
+        "tourism=attraction"
+      ],
+      "coordinates": null,
+      "description": "Tunnel your way back in time during your visit to the Cu Chi Tunnels. Located on the northwestern fringes of greater Ho Chi Minh City, the Cu Chi District is home to a network of over 250 kilometers used by the Viet Cong to evade American and South Vietnamese forces during the Vietnam War. Enter the tunnels at either one of two entrances, Ben Dinh, which is 35 kilometers away, and Ben Duoc, which is 70 kilometers away. Getting dirty is part of the package, so dress accordingly.",
+      "field_evidence": [
+        {
+          "fetched_at": "2026-10-17T19:06:37.979429Z",
+          "field": "name",
+          "locator": "section.ac-chapter[6]#chapter-7/h2",
+          "raw_capture_path": "raw/node_137__c17af074fcbb.html",
+          "raw_sha256": "c17af074fcbbb501939e95fa8fbc1e972ce4b1920e1d9a2840023b4bb11c733b",
+          "source_url": "https://vietnam.travel/node/137",
+          "value": "Cu Chi Tunnels"
+        },
+        {
+          "fetched_at": "2026-10-17T19:06:37.979429Z",
+          "field": "address_raw",
+          "locator": "section.ac-chapter[6]#chapter-7/div.ac-body",
+          "raw_capture_path": "raw/node_137__c17af074fcbb.html",
+          "raw_sha256": "c17af074fcbbb501939e95fa8fbc1e972ce4b1920e1d9a2840023b4bb11c733b",
+          "source_url": "https://vietnam.travel/node/137",
+          "value": "Phu Hiep, Phu My Hung, Cu Chi, Ho Chi Minh City, Vietnam"
+        },
+        {
+          "fetched_at": "2026-10-17T19:06:37.979429Z",
+          "field": "description",
+          "locator": "section.ac-chapter[6]#chapter-7/div.ac-body",
+          "raw_capture_path": "raw/node_137__c17af074fcbb.html",
+          "raw_sha256": "c17af074fcbbb501939e95fa8fbc1e972ce4b1920e1d9a2840023b4bb11c733b",
+          "source_url": "https://vietnam.travel/node/137",
+          "value": "Tunnel your way back in time during your visit to the Cu Chi Tunnels. Located on the northwestern fringes of greater Ho Chi Minh City, the Cu Chi District is home to a network of over 250 kilometers used by the Viet Cong to evade American and South Vietnamese forces during the Vietnam War. Enter the tunnels at either one of two entrances, Ben Dinh, which is 35 kilometers away, and Ben Duoc, which is 70 kilometers away. Getting dirty is part of the package, so dress accordingly."
+        },
+        {
+          "fetched_at": "2026-10-17T19:06:37.979429Z",
+          "field": "opening_hours_raw",
+          "locator": "section.ac-chapter[6]#chapter-7/div.ac-body",
+          "raw_capture_path": "raw/node_137__c17af074fcbb.html",
+          "raw_sha256": "c17af074fcbbb501939e95fa8fbc1e972ce4b1920e1d9a2840023b4bb11c733b",
+          "source_url": "https://vietnam.travel/node/137",
+          "value": "7:30 a.m. - 12 p.m., 1:30 - 5 p.m. every day including holidays"
+        }
+      ],
+      "issues": [],
+      "locator": "section.ac-chapter[6]#chapter-7",
+      "minimum_valid": true,
+      "name": "Cu Chi Tunnels",
+      "opening_hours_raw": "7:30 a.m. - 12 p.m., 1:30 - 5 p.m. every day including holidays",
+      "page_capture_path": "raw/node_137__c17af074fcbb.html",
+      "page_capture_sha256": "c17af074fcbbb501939e95fa8fbc1e972ce4b1920e1d9a2840023b4bb11c733b",
+      "page_fetched_at": "2026-10-17T19:06:37.979429Z",
+      "page_url": "https://vietnam.travel/node/137",
+      "record_id": "node/137#chapter-7",
+      "review_text": null
+    }
+  ],
+  "schema_version": 1,
+  "source": {
+    "license": "UNKNOWN",
+    "policy_evidence": [
+      {
+        "bytes": 1639,
+        "exists": true,
+        "reference": "data/social_expansion_20261018/real/policy/vietnam_travel_robots.txt",
+        "sha256": "83dcb91e8e7b8ad9ed7d65239350c586a24688a4c0d755f9e534adf4689919da"
+      },
+      {
+        "bytes": 49935,
+        "exists": true,
+        "reference": "data/social_expansion_20261018/real/policy/vietnam_travel_terms.html",
+        "sha256": "41c6dbe843aea240aef73d4b8758bf3660b262d9e3707672b4a1d82f6c8392d3"
+      }
+    ],
+    "profile": "vietnam_travel_hcmc7",
+    "reuse_status": "not_permitted",
+    "source_id": "vietnam-travel-node137",
+    "source_type": "web_poi"
+  },
+  "synthetic": false
+}
